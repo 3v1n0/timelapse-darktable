@@ -17,16 +17,11 @@ public class Main {
 	public static void main(String[] args) {
 		
 		if (args.length<3) {
-			System.out.println("Usage : args = xmpFolder rawFolder outFolder (width heigth)");
+			System.err.println("Usage : args = xmpFolder rawFolder outFolder (width heigth)");
 		}
-		// "/media/dsData/photo/photoShared/photoTimelapse/2013-08-29 Timelapse Pech David/test_timelapse/xmpRef"
-		// "/media/dsData/photo/photoShared/photoTimelapse/2013-08-29 Timelapse Pech David"
-		// "/media/dsData/photo/photoShared/photoTimelapse/2013-08-29 Timelapse Pech David/test_timelapse"
-		System.out.println("===== TLDT ======");		
+
+		System.out.println("===== timelapse-darktable ======");		
 		// inputs
-//		String xmpFolder = "/media/5841-8C01/dttl/TLDT/XMP_SOURCE";
-//		String rawFolder = "/media/dsData/photo/photoShared/photoTimelapse/2013-08-29 Timelapse Pech David";
-//		String outFolder = "/media/dsData/photo/photoShared/photoTimelapse/2013-08-29 Timelapse Pech David/test_timelapse";
 		String xmpFolder = args[0];
 		String rawFolder = args[1];
 		String outFolder = args[2];
@@ -43,9 +38,10 @@ public class Main {
 			}
 		}
 		
-		System.out.println("xmpFolder "+xmpFolder);
-		System.out.println("rawFolder "+rawFolder);
-		System.out.println("outFolder "+outFolder);
+		// display inputs configuration
+		System.out.println("rawFolder = "+rawFolder);
+		System.out.println("xmpFolder = "+xmpFolder);
+		System.out.println("outFolder = "+outFolder);
 
 		// create list of input XMP files
 		DTConfList dtConfList = new DTConfList();
@@ -55,6 +51,7 @@ public class Main {
 		DTConfList dtl = dtConfList.interpLinearAllParam(outFolder);
 		
 		// display before/after
+		System.out.println("\nParameter of interpolation (verbose)\n----------------------------------------------");
 		System.out.println("\nsource");
 		dtConfList.printAllParamTable();
 		System.out.println("\ninterp");
@@ -74,7 +71,9 @@ public class Main {
 		} catch (IOException e) {}
 
 
-		System.out.println("\nNow launch in a terminal :\n. '"+outFolder+"/"+outMasterFile+"'\n\nEnd of TLDT");
+		System.out.println("\n--------------------------------------------------------------------------");
+		System.out.println("Now launch in a terminal :\n. '"+outFolder+"/"+outMasterFile+"'");
+		System.out.println("----------------------------------------------------------------------------");
 		
 	}
 	
