@@ -49,6 +49,15 @@ public class XmpFile extends File {
 	}
 	
 	public void write(String folder,String filename){
+		//create output dir if needed
+		File outFolder = new File(folder);
+		if (!outFolder.exists()) {
+			boolean success = outFolder.mkdirs();
+			if (!success) {
+			    System.err.println("Creation of output foler failed : "+folder);
+			}
+		}
+		
 		NodeList nListWrite = this.nList;
 		// clone xmp file and values then print file
 		Document docOut = (Document) this.doc.cloneNode(true);
