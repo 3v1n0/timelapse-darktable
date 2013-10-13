@@ -2,7 +2,7 @@ package operations;
 
 import java.util.HashMap;
 
-import xmp.XmpReadDTConf;
+import xmp.XmpDTConf;
 
 public class DTConfiguration extends HashMap<String,DTOperation> implements Comparable<DTConfiguration> {
 	
@@ -14,13 +14,13 @@ public class DTConfiguration extends HashMap<String,DTOperation> implements Comp
 	
 	public Integer index;  // numbering of file (get in file name)
 	public String srcFile; // source RAW file
-	public XmpReadDTConf xmpConf;
+	public XmpDTConf xmpConf;
 	
 	public DTConfiguration(String xmpPath) {
 		super();
 
 		// read xmp file 
-		xmpConf = new XmpReadDTConf(xmpPath);
+		xmpConf = new XmpDTConf(xmpPath);
 		
 		// source File
 		srcFile = xmpConf.srcFile;
@@ -41,7 +41,7 @@ public class DTConfiguration extends HashMap<String,DTOperation> implements Comp
 		this.readAllOperations(this.xmpConf);
 	}
 	
-	public void readAllOperations(XmpReadDTConf xmpConf) {
+	public void readAllOperations(XmpDTConf xmpConf) {
 		/** Read all operations of history list **/
 		for(int i = 0; i < xmpConf.histOp.size(); i++) {
 			DTOperation op = DTOperation.readOperation(xmpConf.histOp.get(i), xmpConf.histVer.get(i), xmpConf.histEna.get(i), xmpConf.histPar.get(i), xmpConf.blopVer.get(i), xmpConf.blopPar.get(i), xmpConf.multPrio.get(i), xmpConf.multName.get(i));
@@ -66,7 +66,7 @@ public class DTConfiguration extends HashMap<String,DTOperation> implements Comp
 			this.xmpConf.histPar.set(i, xmpConfUpd);
 		}
 		this.xmpConf.srcFile = this.srcFile; // update xmpConf srcFile
-		this.xmpConf.update(outFolder); // update xmpConf in coherency
+		this.xmpConf.write(outFolder); // update xmpConf in coherency & write XMP file
 	}
 
 	public double getOpParValue(String operation,String parameter,Integer index){

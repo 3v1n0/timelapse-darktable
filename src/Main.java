@@ -1,8 +1,6 @@
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import operations.DTConfList;
@@ -39,15 +37,16 @@ public class Main {
 		}
 		
 		// display inputs configuration
-		System.out.println("rawFolder = "+rawFolder);
 		System.out.println("xmpFolder = "+xmpFolder);
+		System.out.println("rawFolder = "+rawFolder);
 		System.out.println("outFolder = "+outFolder);
+		System.out.println("");
 
 		// create list of input XMP files
 		DTConfList dtConfList = new DTConfList();
-		addXmpFromFolder(dtConfList, xmpFolder);		
+		dtConfList.addXmpFromFolder(xmpFolder);		
 		
-		// interpolation of all XMP data and generation of associated XMP
+		// Linear interpolation of all XMP data and generation of associated XMP
 		DTConfList dtl = dtConfList.interpLinearAllParam(outFolder);
 		
 		// display before/after
@@ -57,7 +56,8 @@ public class Main {
 		System.out.println("\ninterp");
 		dtl.printAllParamTable();
 		
-		// write file with corresponding commands : "darktable-cli FIC.RAW INTERP_FIC.RAW.XMP FIC.RAW.JPG"
+		// write file with corresponding rendering commands for all pictures :
+		// darktable-cli 'FIC.RAW' 'INTERP_FIC.RAW.XMP' 'FIC.RAW.JPG'"
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter(outFolder+"/"+outMasterFile));
 			Iterator<DTConfiguration> itDTL = dtl.iterator();
@@ -75,35 +75,6 @@ public class Main {
 		System.out.println("Now launch in a terminal :\n. '"+outFolder+"/"+outMasterFile+"'");
 		System.out.println("----------------------------------------------------------------------------");
 		
-	}
-	
-
-	public static void addXmpFromFolder(DTConfList dtConfList, String folderPath){
-		ArrayList<String> xmpFiles = new ArrayList<String>();
-		xmpFiles = getXmpFileInFolder(folderPath);
-		Iterator<String> it = xmpFiles.iterator();
-		while(it.hasNext()) {
-			dtConfList.addXmp(folderPath+"/"+it.next());
-		}
-	}
-	
-	public static ArrayList<String> getXmpFileInFolder(String folderPath) {
-		ArrayList<String> files = new ArrayList<String>();
-		
-		String file;
-		File folder = new File(folderPath);
-		File[] listOfFiles = folder.listFiles(); 
-
-		for (int i = 0; i < listOfFiles.length; i++) {
-			if (listOfFiles[i].isFile()) {
-				file = listOfFiles[i].getName();
-				if (file.endsWith(".xmp") || file.endsWith(".XMP")){
-					//System.out.println(file);
-					files.add(file);
-				}
-			}
-		}
-		return files;
 	}
 	
 	

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class XmpReadDTConf {
+public class XmpDTConf {
 
 	/** 
 	 * Read XMP data
@@ -23,7 +23,7 @@ public class XmpReadDTConf {
 		public Integer index;
 		public XmpFile xmpFile;
 		
-		public XmpReadDTConf(String xmpFileName) {
+		public XmpDTConf(String xmpFileName) {
 			super();
 			
 			xmpFile = new XmpFile(xmpFileName);
@@ -41,7 +41,7 @@ public class XmpReadDTConf {
 			index = Integer.parseInt(srcFile.replaceAll("(.*\\D)(\\d+)(\\D.*)", "$2"));			
 		}
 		
-		public void update(String outFolder) {
+		public void write(String outFolder) {
 			// update xmpFile from ArrayList<String> of values
 			setValuesOfNode(new String [] {"x:xmpmeta","rdf:RDF","rdf:Description","darktable:history_params", "rdf:Seq"}, "rdf:li",this.histPar);
 			setNodeAttribute(new String [] {"x:xmpmeta","rdf:RDF"}, "rdf:Description", "xmpMM:DerivedFrom",this.srcFile);

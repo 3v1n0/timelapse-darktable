@@ -1,5 +1,6 @@
 package operations;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -204,7 +205,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 				}
 			}
 		}
-		dtclInterp.updateXmpConf(outFolder); // update xmpConf in coherency
+		dtclInterp.updateXmpConf(outFolder); // update xmpConf in coherency & write XMP files
 		return dtclInterp;
 	}
 	
@@ -282,6 +283,35 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		return null;
 		
 	}
+	
+	public void addXmpFromFolder(String folderPath){
+		ArrayList<String> xmpFiles = new ArrayList<String>();
+		xmpFiles = this.getXmpFileInFolder(folderPath);
+		Iterator<String> it = xmpFiles.iterator();
+		while(it.hasNext()) {
+			this.addXmp(folderPath+"/"+it.next());
+		}
+	}
+	
+	public ArrayList<String> getXmpFileInFolder(String folderPath) {
+		ArrayList<String> files = new ArrayList<String>();
+		
+		String file;
+		File folder = new File(folderPath);
+		File[] listOfFiles = folder.listFiles(); 
+
+		for (int i = 0; i < listOfFiles.length; i++) {
+			if (listOfFiles[i].isFile()) {
+				file = listOfFiles[i].getName();
+				if (file.endsWith(".xmp") || file.endsWith(".XMP")){
+					//System.out.println(file);
+					files.add(file);
+				}
+			}
+		}
+		return files;
+	}
+	
 	
 	
 }
