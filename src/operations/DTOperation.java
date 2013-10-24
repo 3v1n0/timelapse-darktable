@@ -12,6 +12,20 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import operations.iop.Basecurve;
+import operations.iop.Clipping;
+import operations.iop.Colorzones;
+import operations.iop.Denoiseprofile;
+import operations.iop.Exposure;
+import operations.iop.Graduatednd;
+import operations.iop.Hotpixels;
+import operations.iop.Levels;
+import operations.iop.Shadhi;
+import operations.iop.Sharpen;
+import operations.iop.Temperature;
+import operations.iop.Velvia;
+import operations.iop.Vibrance;
+
 public class DTOperation extends LinkedHashMap<String,DTParameter>{
 	
 	/**
@@ -52,6 +66,7 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 		for(Class<?> classe : availableOperations) {
 			// scan all classes defined in dt/operations/iop
 			try {
+				
 				DTOperation dtOp = (DTOperation) classe.newInstance();
 				if(dtOp.name.equals(op)) {
 					// current operation name (op) matches to one class definition
@@ -91,8 +106,30 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 	
 	
 	@SuppressWarnings("unchecked")
-	// dynamic scanning of available operations (put in ./dt/operations/iop folder)
-	public static Class<? extends DTOperation> [] availableOperations = (Class<? extends DTOperation>[]) getClasses("operations.iop");	
+	// dynamic scanning of available operations (put in ./operations/iop folder)
+//	public static Class<? extends DTOperation> [] availableOperations = (Class<? extends DTOperation>[]) getClasses("operations.iop");
+	
+	// static definition
+	// TODO : update the list each time you add a class in operations/iop and then CTRL+SHIFT+O to update imports in eclipse
+	public static Class<? extends DTOperation> [] availableOperations = (Class<? extends DTOperation>[]) getClasses();
+	public static Class<?> [] getClasses() {
+		return new Class<?> [] {
+				Basecurve.class,
+				Clipping.class,
+				Colorzones.class,
+				Denoiseprofile.class,
+				Exposure.class,
+				Graduatednd.class,
+				Hotpixels.class,
+				Levels.class,
+				Shadhi.class,
+				Sharpen.class,
+				Temperature.class,
+				Velvia.class,
+				Vibrance.class,
+		};
+	}
+
 	
 	/**
 	 * Scans all classes accessible from the context class loader which belong to the given package and subpackages.
