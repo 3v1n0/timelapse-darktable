@@ -155,13 +155,14 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		return this.splineInterp(this.getIndexDoubleArray(),this.getOneParamDoubleArray(operation, parameter,paramIndex),this.genInterpIndexList());
 	}
 	
-	public double[] interpSplineOneOpParam(String operation,String parameter,int paramIndex) {
-		return this.splineInterp(this.getIndexDoubleArray(),this.getOneParamDoubleArray(operation, parameter,paramIndex),this.genInterpIndexList());
+	public double interpSplineOneOpParam(String operation,String parameter,int paramIndex, int fileIndex) {
+		return this.splineInterp(this.getIndexDoubleArray(),this.getOneParamDoubleArray(operation, parameter,paramIndex),fileIndex);
 	}
 	
-	public DTConfList interpLinearAllParam(String outFolder) {
+	public DTConfList interpAllParam(String outFolder,String method) {
+		// interpolation method available: linear | spline
 
-		// copy configuration before interpolation
+		// copy 1st configuration before interpolation
 		DTConfList dtclInterp = new DTConfList();
 		dtclInterp.add(new DTConfiguration(this.first()));
 		
@@ -180,6 +181,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 			dtc.srcFile = dtc.srcFile.replaceAll("(.*\\D)(\\d+)(\\D.*)", "$1"+s+"$3");
 			dtclInterp.add(dtc);
 		}
+		
 		// for each operation : interpolate parameters
 		// scan all operations of first element TreeSet (DTConfiguration)
 		// suppose that all files in TreeSet have the same DTConfiguration (operation/parameters)
@@ -198,8 +200,15 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 					Integer paramIndex = itVal.next();
 					for (int i = 0; i < interpFileIdx.length; i++) {
 						//loop on all elements of DTConfiguration in TreeSet
-						Integer confIdx = (int) interpFileIdx[i]; 
-						double vi = this.interpLinearOneOpParam(operation, parameter, paramIndex, confIdx);
+						Integer confIdx = (int) interpFileIdx[i];
+						double vi=0;
+						if (method=="linear") {
+							vi = this.interpLinearOneOpParam(operation, parameter, paramIndex, confIdx);
+						} else if (method=="spline") {
+							vi = this.interpSplineOneOpParam(operation, parameter, paramIndex, confIdx);
+						} else {
+							System.err.print("Method available: linear | spline");
+						}
 						dtclInterp.get(confIdx).setOpParValue(operation, parameter, paramIndex, vi);
 					}
 				}

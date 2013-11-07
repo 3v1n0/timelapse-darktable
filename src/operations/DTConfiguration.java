@@ -15,6 +15,7 @@ public class DTConfiguration extends HashMap<String,DTOperation> implements Comp
 	public Integer index;  // numbering of file (get in file name)
 	public String srcFile; // source RAW file
 	public XmpDTConf xmpConf;
+	public Double luminance;
 	
 	public DTConfiguration(String xmpPath) {
 		super();

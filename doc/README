@@ -7,5 +7,5 @@ launch main with good arguments
 follow instructions in terminal
 
 -- note :
-Syntax should be here after (but did not work for me)
-java -jar tldt_v*.jar "raw_folder" "xmp_files" "output_folder" "width" "height"   
+Syntax for exported jar
+java -jar timelapse-darktable_v*.jar "raw_folder" "xmp_files" "output_folder" "width" "height"   
