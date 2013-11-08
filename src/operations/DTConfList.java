@@ -218,6 +218,21 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		return dtclInterp;
 	}
 	
+
+	public DTConfList deflick(String outFolder) {
+		DTConfList dtclDeflick = new DTConfList();
+		Iterator<DTConfiguration> itConf = this.iterator();
+		while (itConf.hasNext()) {
+			// first: copy current DTConfList
+			DTConfiguration dtc=itConf.next();
+			dtclDeflick.add(dtc);
+			
+			// apply deflickering
+			dtc.deflick();
+		}
+		return dtclDeflick;
+	}
+	
 	public void updateXmpConf(String outFolder) {
 		Iterator<DTConfiguration> it = this.iterator();
 		while(it.hasNext()) {
@@ -319,8 +334,5 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 			}
 		}
 		return files;
-	}
-	
-	
-	
+	}	
 }

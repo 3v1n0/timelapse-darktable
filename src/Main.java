@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -163,6 +164,9 @@ public class Main {
         boolean isExportMovie = config.getBoolean("isExportMovie");
         boolean isDeflick = config.getBoolean("isDeflick");
         
+        // extra parameters
+        String outFolderDeflick = outFolder+"/deflick";
+        
         // ---- JAVA CLI inputs management : END ----
 	
 		// Let's go now !		
@@ -179,7 +183,13 @@ public class Main {
 		dtConfList.addXmpFromFolder(xmpSrc);		
 		
 		// linear|spline interpolation of all XMP data and generation of associated XMP
-		DTConfList dtl = dtConfList.interpAllParam(outFolder,interpType);
+		String tmpFolder;
+		if (isDeflick) {
+			tmpFolder = outFolderDeflick;
+		} else {
+			tmpFolder = outFolder;
+		}
+		DTConfList dtl= dtConfList.interpAllParam(tmpFolder,interpType);
 		
 		// display before/after
 		System.out.println("\nParameter of interpolation (verbose)\n----------------------------------------------");
@@ -196,7 +206,7 @@ public class Main {
 		if (isDeflick) {
 			System.out.println("\ndeflickering (each frame in JPG with darktable-cli... could be long)");
 			
-			BufferedWriter outLum = new BufferedWriter(new FileWriter(outFolder+"/"+outLuminanceFile));
+			BufferedWriter outLum = new BufferedWriter(new FileWriter(outFolderDeflick+"/"+outLuminanceFile));
 			String lum = null;
 			Iterator<DTConfiguration> itDTL = dtl.iterator();
 			while (itDTL.hasNext()) {
@@ -206,12 +216,12 @@ public class Main {
 				// w/h = 200 pix | hq = false for faster export
 				// TODO: check if user w/h should be used for better result
 				// small size (1-100pix) gives non consistent luminance
-				cmdRun = darktablecliBin+" "+imgSrc+"/"+fic+" "+outFolder+"/"+fic+".xmp "+outFolder+"/"+fic+".jpg --width 200 --height 200 --hq 0";
+				cmdRun = darktablecliBin+" "+imgSrc+"/"+fic+" "+outFolderDeflick+"/"+fic+".xmp "+outFolderDeflick+"/"+fic+".jpg --width 200 --height 200 --hq 0";
 				runCmd(cmdRun);
 				
 				// retrieve luminance
 				// convert is used, could be replaced by jmagick
-				cmdRun = convertBin+" "+outFolder+"/"+fic+".jpg"+" -scale 1x1! -format %[fx:luminance] info:";
+				cmdRun = convertBin+" "+outFolderDeflick+"/"+fic+".jpg"+" -scale 1x1! -format %[fx:luminance] info:";
 				lum = runCmdOut(cmdRun);
 				dtc.luminance = Double.valueOf(lum);
 				
@@ -221,21 +231,44 @@ public class Main {
 			outLum.close();
 			
 			// regression on luminance points with octave script
-			BufferedWriter outOctaveMaster = new BufferedWriter(new FileWriter(outFolder+"/master.m"));
+			BufferedWriter outOctaveMaster = new BufferedWriter(new FileWriter(outFolderDeflick+"/master.m"));
 			outOctaveMaster.write("#!/usr/bin/octave -qf"+"\n");
 			outOctaveMaster.write("addpath('"+octaveDeflickPath+"');"+"\n");
-			outOctaveMaster.write("deflick('"+outFolder+"/"+outLuminanceFile+"');"+"\n");
+			outOctaveMaster.write("deflick('"+outFolderDeflick+"/"+outLuminanceFile+"');"+"\n");
 			outOctaveMaster.close();
 			
 			// execute octave script
-			runCmd("octave "+outFolder+"/master.m");
+			runCmd("octave "+outFolderDeflick+"/master.m");
 			
+			// add luminanceDeflick to DTConfiguration reading _deflick.txt line by line
+			FileInputStream fstream = new FileInputStream(outFolderDeflick+"/"+outLuminanceFile.replaceAll(".txt", "_deflick.txt"));
+			DataInputStream dis = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(dis));
+			String lumDeflick;
+			Iterator<DTConfiguration> itDTL2 = dtl.iterator();
+			while (itDTL2.hasNext()) {
+				DTConfiguration dtc = itDTL2.next();
+
+				if ((lumDeflick = br.readLine()) != null)   {
+					System.out.println (lumDeflick);
+					dtc.luminanceDeflick = Double.valueOf(lumDeflick);
+				}
+				
+			}
+			// Close the input stream (reading _deflick.txt file)
+			dis.close();
+			
+			// call deflickering
+			dtl.deflick(outFolder);
+			
+
 			// TODO: while loop to set luminanceDeflick field in the DTConfiguration parameters
 			// then take into account luminanceDeflick parameter in XMP exposition filter
 			// to do so: calibrate the impact of Delta deltaE exposition filter on luminance 
 			// if not possible evaluate on the current scene this impact by calibration
 			// it will also suppose that exposition filter is used in XMP
 		}
+		
 		
 		// write file with corresponding rendering commands for all pictures :
 		// darktable-cli 'FIC.RAW' 'INTERP_FIC.RAW.XMP' 'FIC.RAW.JPG'"

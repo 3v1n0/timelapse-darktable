@@ -15,7 +15,8 @@ public class DTConfiguration extends HashMap<String,DTOperation> implements Comp
 	public Integer index;  // numbering of file (get in file name)
 	public String srcFile; // source RAW file
 	public XmpDTConf xmpConf;
-	public Double luminance;
+	public Double luminance; // initial luminance after first interpolation
+	public Double luminanceDeflick; // luminance after deflickering
 	
 	public DTConfiguration(String xmpPath) {
 		super();
@@ -94,6 +95,28 @@ public class DTConfiguration extends HashMap<String,DTOperation> implements Comp
 	@Override
 	public int compareTo(DTConfiguration arg0) {
 		return this.index.compareTo(arg0.index);
+	}
+
+	public void deflick() {
+		// change operations/iop/exposure parameter to deflick
+		double currentExpValue = getOpParValue("exposure", "exposure", 0);
+		
+		// relation between exposure and luminance
+		// (get manually with a calibration script)
+		// Let define the calibration function
+		// f: EV -> (1+EV) if EV>0 | 1/(1-EV) if EV<0
+		// lum = lum0*f(EV)  
+		
+		// Target for deflick:
+		// lumTarget = lum0*f(EVtarget)
+		
+		// elimination of lum0:
+		// lumTarget = lum*f(EVtarget)/f(EV)
+		
+		// solving the problem EVtarget = f(EV,lum,lumTarget)
+		// invf : r -> (1-r) if r>1 | 1-1/r if r<1 
+		// EVtarget = invf(f(EV)*lumTarget/lum)
+		
 	}
 	
 }
