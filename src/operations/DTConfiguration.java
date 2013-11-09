@@ -78,7 +78,7 @@ public class DTConfiguration extends HashMap<String,DTOperation> implements Comp
 			return (Double) v.get(index);
 		} catch (Exception nulException) {
 			//System.out.println("null exception: "+operation+" "+parameter);
-			System.err.println("Interpolation fail, check source XMP files for : "+operation);
+			System.err.println("getOpParValue fail, : "+operation+" "+parameter);
 			return (Double) null;
 		}
 		
@@ -97,26 +97,62 @@ public class DTConfiguration extends HashMap<String,DTOperation> implements Comp
 		return this.index.compareTo(arg0.index);
 	}
 
-	public void deflick() {
-		// change operations/iop/exposure parameter to deflick
-		double currentExpValue = getOpParValue("exposure", "exposure", 0);
+	public void deflick(String outFolder) {
+		// change operations/iop/exposure parameter to deflick (first filter => "exposure ")
+		double EV = getOpParValue("exposure ", "exposure", 0);
 		
+		// compute target EV for deflick
+		double evDeflick = computeEVtarget(EV, this.luminance, this.luminanceDeflick);
+		
+		// update XMP configuration
+		setOpParValue("exposure ", "exposure", 0, evDeflick);
+		this.updateXmpConf(outFolder);
+	}
+	
+	private static double computeEVtarget(double EV,double lum,double lumTarget){
+		double EVtarget;
 		// relation between exposure and luminance
 		// (get manually with a calibration script)
 		// Let define the calibration function
 		// f: EV -> (1+EV) if EV>0 | 1/(1-EV) if EV<0
 		// lum = lum0*f(EV)  
-		
+		//
 		// Target for deflick:
 		// lumTarget = lum0*f(EVtarget)
-		
+		//
 		// elimination of lum0:
 		// lumTarget = lum*f(EVtarget)/f(EV)
-		
 		// solving the problem EVtarget = f(EV,lum,lumTarget)
 		// invf : r -> (1-r) if r>1 | 1-1/r if r<1 
 		// EVtarget = invf(f(EV)*lumTarget/lum)
 		
+		EVtarget = evFactor(lumFactor(EV)*lumTarget/lum);
+		
+		return EVtarget;
+	}
+	
+	private static double lumFactor(double EV){
+		double lumFactor;
+		// Let define the calibration function
+		// f: EV -> (1+EV) if EV>0 | 1/(1-EV) if EV<0
+		if (EV>=0) {
+			lumFactor = 1+EV;
+		} else {
+			lumFactor = 1/(1-EV);
+		}
+		return lumFactor;
+	}
+	
+	private static double evFactor(double lumRatio){
+		double evFactor;
+		// Let define the inverse of calibration function
+		// invf : r -> (1-r) if r>1 | 1-1/r if r<1 
+		if (lumRatio>=1) {
+			evFactor = 1-lumRatio;
+		} else {
+			evFactor = 1-1/lumRatio;
+		}
+		return evFactor;
 	}
 	
 }

@@ -5,10 +5,10 @@ function deflick(luminanceTableFic)
 in_signal = load(luminanceTableFic);
 
 % filtering parameters
-N_LpFilt     = 50;     % Window size for filtering
-N_SpikeFilt = 12;     % Size of filtered spike
-dL_max       = 0.05/2; % 'normal' deltaL max (above, it is considered as a spike)
-isPlotFlag   = true;   % output a grapics with deflickering source/target curves
+N_LpFilt    = min(50,floor(length(in_signal)/2));   % Window size for filtering
+N_SpikeFilt = min(12,floor(length(in_signal)/4+1)); % Size of filtered spike
+dL_max      = max(0.05/2,3*std(in_signal));         % 'normal' deltaL max (above, it is considered as a spike)
+isPlotFlag  = true;                                 % output a grapics with deflickering source/target curves
 
 % filtering (deflickering target)
 [filt_signal] = filtLuminance(in_signal, N_LpFilt, dL_max, N_SpikeFilt, isPlotFlag);
@@ -18,7 +18,9 @@ isPlotFlag   = true;   % output a grapics with deflickering source/target curves
 printTable(fullfile(lumPath,[lumFic '_deflick' lumExt]),filt_signal);
 
 % print graphics
-print(fullfile(lumPath,[lumFic '_deflick.png']));
+if isPlotFlag  == true
+	print(fullfile(lumPath,[lumFic '_deflick.png']));
+end
 
 end
 

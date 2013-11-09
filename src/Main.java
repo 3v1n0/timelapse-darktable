@@ -9,13 +9,11 @@ import java.util.Iterator;
 
 import operations.DTConfList;
 import operations.DTConfiguration;
+import cli.Cli;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.QualifiedSwitch;
-import com.martiansoftware.jsap.UnflaggedOption;
+
+import deflick.WriteOctaveDeflickFcn;
 
 
 public class Main {
@@ -27,142 +25,33 @@ public class Main {
 	 */
 	public static void main(String[] args) throws JSAPException, IOException {
 
-		// hard-coded parameters
+		// ------ hard-coded parameters ----------
+		// Program properties
 		String progName = "timelapse-darktable";
+		String progVersion = "0.2";
+		// binaries location
 		String darktablecliBin = "/usr/bin/darktable-cli";
 		String mencoderBin = "/usr/bin/mencoder";
 		String convertBin = "/usr/bin/convert";
+		String octaveBin = "/usr/bin/octave";
+		//String octaveDeflickPath = "/home/alexandre/eclipseWorkspace/timelapse-darktable/lib/octave";
+		// default outputs
 		String outMasterFile = "generateDarktableTimelapse.sh";
-		String outLuminanceFile = "ficL.txt";
-		String octaveDeflickPath = "/home/alexandre/eclipseWorkspace/timelapse-darktable/lib/octave";
+		String outLuminanceFile = "ficL.txt";		
 		
 		// ---- JAVA CLI inputs management ----
-		JSAP jsap = new JSAP();
-        
-		// main arguments img/xmp/out
-        FlaggedOption optImgSrc = new FlaggedOption("imgSrc")
-                                .setStringParser(JSAP.STRING_PARSER)
-                                .setDefault("imgSrc") 
-                                .setRequired(true) 
-                                .setShortFlag('i') 
-                                .setLongFlag("imgSrc");
-        optImgSrc.setHelp("Image source folder (raw or jpg)");
-        jsap.registerParameter(optImgSrc);                        
+		Cli cliConf = new Cli(args);
 
-        FlaggedOption optXmpSrc = new FlaggedOption("xmpSrc")
-                                .setStringParser(JSAP.STRING_PARSER)
-                                .setDefault("xmpSrc") 
-                                .setRequired(true) 
-                                .setShortFlag('x') 
-                                .setLongFlag("xmpSrc");
-        optXmpSrc.setHelp("XMP source folder (to interpolate)");
-        jsap.registerParameter(optXmpSrc);
-        
-        FlaggedOption optOut = new FlaggedOption("out")
-                                .setStringParser(JSAP.STRING_PARSER)
-                                .setDefault("out") 
-                                .setRequired(true) 
-                                .setShortFlag('o') 
-                                .setLongFlag("out");
-        optOut.setHelp("output folder");
-        jsap.registerParameter(optOut);
-		
-		// optional height / width
-        FlaggedOption optHeight = new FlaggedOption("height")
-                                .setStringParser(JSAP.INTEGER_PARSER)
-                                .setDefault("0") 
-                                .setRequired(false) 
-                                .setShortFlag('h') 
-                                .setLongFlag("height");
-        optHeight.setHelp("Height of the exported JPG");
-        jsap.registerParameter(optHeight);
-        
-
-        FlaggedOption optWidth = new FlaggedOption("width")
-                                .setStringParser(JSAP.INTEGER_PARSER)
-                                .setDefault("0") 
-                                .setRequired(false) 
-                                .setShortFlag('w') 
-                                .setLongFlag("width");
-        optWidth.setHelp("Width of the exported JPG");
-        jsap.registerParameter(optWidth);
-        
-        // optional splie/linear interpolation
-        FlaggedOption optInterp = new FlaggedOption("interpType")
-        						.setStringParser(JSAP.STRING_PARSER)
-        						.setDefault("linear")
-        						.setRequired(false)
-        						.setShortFlag('t')
-        						.setLongFlag("interpolation-type");
-        optInterp.setHelp("Interpolation type: linear|spline");
-        jsap.registerParameter(optInterp);
-
-        
-        // optional export/movie/deflickering
-		QualifiedSwitch optIsExportJpg = (QualifiedSwitch) 
-								new QualifiedSwitch("isExportJpg")
-                                .setShortFlag('j')
-                                .setLongFlag("export-jpg");
-		optIsExportJpg.setHelp("Final JPG export is required");
-        jsap.registerParameter(optIsExportJpg);
-        
-        QualifiedSwitch optIsExportMovie = (QualifiedSwitch) 
-        						new QualifiedSwitch("isExportMovie")
-        						.setShortFlag('m')
-        						.setLongFlag("export-movie");
-        optIsExportMovie.setHelp("Timelapse movie making is required");
-        jsap.registerParameter(optIsExportMovie);
-
-        QualifiedSwitch optIsDeflick = (QualifiedSwitch) 
-        		new QualifiedSwitch("isDeflick")
-        		.setShortFlag('d')
-        		.setLongFlag("deflick");
-        optIsDeflick.setHelp("Deflikering will be applied");
-        jsap.registerParameter(optIsDeflick);
-        
-        // extra arguments
-        UnflaggedOption optRemain = new UnflaggedOption("extra")
-                                .setStringParser(JSAP.STRING_PARSER)
-                                .setDefault("")
-                                .setRequired(false)
-                                .setGreedy(true);
-        optRemain.setHelp("Extra arguments parser");
-        jsap.registerParameter(optRemain);
-        
-        // parse input args
-        JSAPResult config = jsap.parse(args);    
-        
-        // failure/help management
-        if (!config.success()) {
-            
-            System.err.println();
-
-            // print out specific error messages describing the problems
-            // with the command line, THEN print usage, THEN print full
-            // help.  This is called "beating the user with a clue stick."
-            for (java.util.Iterator errs = config.getErrorMessageIterator();
-                    errs.hasNext();) {
-                System.err.println("Error: " + errs.next());
-            }
-            
-            System.err.println();
-            System.err.println("Usage: java -jar *.jar");
-            System.err.println("        "+ jsap.getUsage());
-            System.err.println();
-            System.err.println(jsap.getHelp());
-            System.exit(1);
-        }
-        
         // JAVA CLI : inputs affectation
-        String imgSrc = config.getString("imgSrc");
-        String xmpSrc = config.getString("xmpSrc");
-        String outFolder = config.getString("out");
-        int exportWidth = config.getInt("width");
-        int exportHeight = config.getInt("height");
-        String interpType = config.getString("interpType");
-        boolean isExportJpg = config.getBoolean("isExportJpg");
-        boolean isExportMovie = config.getBoolean("isExportMovie");
-        boolean isDeflick = config.getBoolean("isDeflick");
+        String imgSrc = cliConf.config.getString("imgSrc");
+        String xmpSrc = cliConf.config.getString("xmpSrc");
+        String outFolder = cliConf.config.getString("out");
+        int exportWidth = cliConf.config.getInt("width");
+        int exportHeight = cliConf.config.getInt("height");
+        String interpType = cliConf.config.getString("interpType");
+        boolean isExportJpg = cliConf.config.getBoolean("isExportJpg");
+        boolean isExportMovie = cliConf.config.getBoolean("isExportMovie");
+        boolean isDeflick = cliConf.config.getBoolean("isDeflick");
         
         // extra parameters
         String outFolderDeflick = outFolder+"/deflick";
@@ -170,14 +59,21 @@ public class Main {
         // ---- JAVA CLI inputs management : END ----
 	
 		// Let's go now !		
-		System.out.println("===== START : "+progName+" ======");
+		System.out.println("===== START : "+progName+" v"+progVersion+" ======");
 		
 		// display inputs configuration
+		System.out.println("\ncalling parameters:");
 		System.out.println("xmpSrc = "+xmpSrc);
 		System.out.println("imgSrc = "+imgSrc);
-		System.out.println("out = "+outFolder);
+		System.out.println("outFolder = "+outFolder);
+		System.out.println("exportWidth = "+exportWidth);
+		System.out.println("exportHeight = "+exportHeight);
+		System.out.println("interpType = "+interpType);
+		System.out.println("isExportJpg = "+isExportJpg);
+		System.out.println("isExportMovie = "+isExportMovie);
+		System.out.println("isDeflick = "+isDeflick);
 		System.out.println("");
-
+		
 		// create list of input XMP files from folder
 		DTConfList dtConfList = new DTConfList();
 		dtConfList.addXmpFromFolder(xmpSrc);		
@@ -198,11 +94,9 @@ public class Main {
 		System.out.println("\ninterp");
 		dtl.printAllParamTable();
 
-		// script strings declaration
-		String cmdScript = null;
-		String cmdRun = null;
-		
-		// deflickering
+		// -------------------------------------------
+		// DEFLICKERING
+		// -------------------------------------------
 		if (isDeflick) {
 			System.out.println("\ndeflickering (each frame in JPG with darktable-cli... could be long)");
 			
@@ -213,16 +107,13 @@ public class Main {
 				DTConfiguration dtc = itDTL.next();
 				String fic = dtc.srcFile;
 
+				// Generate thumbnail to evaluate luminance
 				// w/h = 200 pix | hq = false for faster export
-				// TODO: check if user w/h should be used for better result
-				// small size (1-100pix) gives non consistent luminance
-				cmdRun = darktablecliBin+" "+imgSrc+"/"+fic+" "+outFolderDeflick+"/"+fic+".xmp "+outFolderDeflick+"/"+fic+".jpg --width 200 --height 200 --hq 0";
-				runCmd(cmdRun);
+				runCmd(darktablecliBin,imgSrc+"/"+fic,outFolderDeflick+"/"+fic+".xmp",outFolderDeflick+"/"+fic+".jpg","--width 200","--height 200","--hq 0");
 				
 				// retrieve luminance
-				// convert is used, could be replaced by jmagick
-				cmdRun = convertBin+" "+outFolderDeflick+"/"+fic+".jpg"+" -scale 1x1! -format %[fx:luminance] info:";
-				lum = runCmdOut(cmdRun);
+				// /usr/bin/convert is used, could be replaced by jmagick
+				lum = runCmdOut(convertBin,outFolderDeflick+"/"+fic+".jpg","-scale","1x1!","-format","%[fx:luminance]","info:");
 				dtc.luminance = Double.valueOf(lum);
 				
 				// write into a file for octave post-processing
@@ -230,15 +121,13 @@ public class Main {
 			}
 			outLum.close();
 			
-			// regression on luminance points with octave script
-			BufferedWriter outOctaveMaster = new BufferedWriter(new FileWriter(outFolderDeflick+"/master.m"));
-			outOctaveMaster.write("#!/usr/bin/octave -qf"+"\n");
-			outOctaveMaster.write("addpath('"+octaveDeflickPath+"');"+"\n");
-			outOctaveMaster.write("deflick('"+outFolderDeflick+"/"+outLuminanceFile+"');"+"\n");
-			outOctaveMaster.close();
+			// regression on luminance points with octave script (write the "master" script)
 			
-			// execute octave script
-			runCmd("octave "+outFolderDeflick+"/master.m");
+			// write octave scripts in outFolder/deflick
+			new WriteOctaveDeflickFcn(outFolderDeflick,outLuminanceFile);
+
+			// execute octave script : filtering luminance values
+			runCmd(octaveBin,outFolderDeflick+"/master.m");
 			
 			// add luminanceDeflick to DTConfiguration reading _deflick.txt line by line
 			FileInputStream fstream = new FileInputStream(outFolderDeflick+"/"+outLuminanceFile.replaceAll(".txt", "_deflick.txt"));
@@ -261,50 +150,49 @@ public class Main {
 			// call deflickering
 			dtl.deflick(outFolder);
 			
-
-			// TODO: while loop to set luminanceDeflick field in the DTConfiguration parameters
-			// then take into account luminanceDeflick parameter in XMP exposition filter
-			// to do so: calibrate the impact of Delta deltaE exposition filter on luminance 
-			// if not possible evaluate on the current scene this impact by calibration
-			// it will also suppose that exposition filter is used in XMP
 		}
 		
-		
+		// -------------------------------------------
+		// EXPORT JPG
+		// -------------------------------------------
 		// write file with corresponding rendering commands for all pictures :
 		// darktable-cli 'FIC.RAW' 'INTERP_FIC.RAW.XMP' 'FIC.RAW.JPG'"
 		if (isExportJpg) {
 			System.out.println("\nexporting each frame in JPG with darktable-cli...");
 			System.out.println("This could be long, I can suggest you to take a coffee !");
+		} else {
+			System.out.println("\nScript to generate each JPG in batch could be found here:");
+			System.out.println(outFolder+"/"+outMasterFile);
 		}
 
+		// script
+		String cmdScript = null;
 		BufferedWriter outScript = new BufferedWriter(new FileWriter(outFolder+"/"+outMasterFile));
 		Iterator<DTConfiguration> itDTL = dtl.iterator();
 		while (itDTL.hasNext()) {
 			DTConfiguration dtc = itDTL.next();
 			String fic = dtc.srcFile;
-
-			// for fic in `ls $xmpSrc`;do src=${fic%.*} ; echo $src; darktable-cli $rawSrc/$src $outFolder/$src.jpg; done
-			cmdScript = darktablecliBin+" '"+imgSrc+"/"+fic+"' '"+outFolder+"/"+fic+".xmp' '"+outFolder+"/"+fic+".jpg' --width "+exportWidth+" --height "+exportHeight;
-			cmdRun = darktablecliBin+" "+imgSrc+"/"+fic+" "+outFolder+"/"+fic+".xmp "+outFolder+"/"+fic+".jpg --width "+exportWidth+" --height "+exportHeight;
-
+			
 			// add line to the script file
+			cmdScript = darktablecliBin+" '"+imgSrc+"/"+fic+"' '"+outFolder+"/"+fic+".xmp' '"+outFolder+"/"+fic+".jpg' --width "+exportWidth+" --height "+exportHeight;
 			outScript.write(cmdScript+"\n");
 
 			if (isExportJpg) {
 				// generate directly the output JPG
-				runCmd(cmdRun);	
+				runCmd(darktablecliBin,imgSrc+"/"+fic,outFolder+"/"+fic+".xmp",outFolder+"/"+fic+".jpg","--width "+exportWidth,"--height "+exportHeight);	
 			}
 		}
 		outScript.close();
 
 		
-		// movie timelapse generation
+		// ---------------------------------
+		// MOVIE GENERATION
+		// ---------------------------------
 		if (isExportMovie) {
 			if (isExportJpg) {
 				// generation of the video using mencoder @ 25 fps
 				System.out.println("\ngenerating timelapse video with mencoder...");
-				cmdRun=mencoderBin+" mf://"+outFolder+"/*.[jJ][pP][gG] -nosound -ovc lavc -lavcopts vcodec=mjpeg -mf fps=25 -o "+outFolder+"/video.avi";
-				runCmd(cmdRun);
+				runCmd(mencoderBin,"mf://"+outFolder+"/*.[jJ][pP][gG]","-nosound","-ovc","lavc","-lavcopts","vcodec=mjpeg","-mf","fps=25","-o",outFolder+"/video.avi");
 				System.out.println("\nYou can look at your timelapse right now here!\n"+outFolder+"/video.avi");
 			} else {
 				System.out.println("\nVideo not generated, to do so --export-jpg1|-j option should be added to the comman line in addition to --export-movie1|-m...");
@@ -312,24 +200,31 @@ public class Main {
 		}
 		
 		
-		
 		// program ending
 		System.out.println("===== END : "+progName+" ======");
 		
 	}
 	
-	public static void runCmd(String cmdString){
+	
+	// --------------------------------------------
+	// SUPPORT FUNCTIONS
+	// --------------------------------------------
+	public static void runCmd(String... cmdString){
 		runCmdOut(cmdString);
 	}
 	
-	public static String runCmdOut(String cmdString){
+	public static String runCmdOut(String... cmdString){
+		// execute command and output last command output
 
 		String sout = null;
 		String s = null;
 		try {
-			// run the Unix "ps -ef" command
-			// using the Runtime exec method:
-			System.out.println(cmdString);
+			// run an Unix command using the Runtime exec method:
+			for (int i = 0; i < cmdString.length; i++) {
+				System.out.print(cmdString[i]+" ");
+			}
+			System.out.print("\n");
+			
 			Process p = Runtime.getRuntime().exec(cmdString);
 			
 			BufferedReader stdInput = new BufferedReader(new 
@@ -339,7 +234,6 @@ public class Main {
 					InputStreamReader(p.getErrorStream()));
 
 			// read the output from the command
-			// System.out.println("Here is the standard output of the command:\n");
 			while ((s = stdInput.readLine()) != null) {
 				System.out.println(s);
 				sout = s;

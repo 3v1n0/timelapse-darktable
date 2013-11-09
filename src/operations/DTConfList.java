@@ -202,12 +202,12 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 						//loop on all elements of DTConfiguration in TreeSet
 						Integer confIdx = (int) interpFileIdx[i];
 						double vi=0;
-						if (method=="linear") {
+						if (method.equalsIgnoreCase("linear")) {
 							vi = this.interpLinearOneOpParam(operation, parameter, paramIndex, confIdx);
-						} else if (method=="spline") {
+						} else if (method.equalsIgnoreCase("spline")) {
 							vi = this.interpSplineOneOpParam(operation, parameter, paramIndex, confIdx);
 						} else {
-							System.err.print("Method available: linear | spline");
+							System.err.println("Method "+method+" not supported. Available: linear | spline");
 						}
 						dtclInterp.get(confIdx).setOpParValue(operation, parameter, paramIndex, vi);
 					}
@@ -228,7 +228,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 			dtclDeflick.add(dtc);
 			
 			// apply deflickering
-			dtc.deflick();
+			dtc.deflick(outFolder);
 		}
 		return dtclDeflick;
 	}
