@@ -12,6 +12,7 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import operations.iop.Atrous;
 import operations.iop.Basecurve;
 import operations.iop.Clipping;
 import operations.iop.Colorzones;
@@ -114,6 +115,7 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 	public static Class<? extends DTOperation> [] availableOperations = (Class<? extends DTOperation>[]) getClasses();
 	public static Class<?> [] getClasses() {
 		return new Class<?> [] {
+				Atrous.class,
 				Basecurve.class,
 				Clipping.class,
 				Colorzones.class,
