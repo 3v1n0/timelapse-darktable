@@ -219,7 +219,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 	}
 	
 
-	public DTConfList deflick(String outFolder) {
+	public DTConfList deflick(String outFolder, PolynomialSplineFunction calibLumDeltaEV) {
 		DTConfList dtclDeflick = new DTConfList();
 		Iterator<DTConfiguration> itConf = this.iterator();
 		while (itConf.hasNext()) {
@@ -228,7 +228,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 			dtclDeflick.add(dtc);
 			
 			// apply deflickering
-			dtc.deflick(outFolder);
+			dtc.deflick(outFolder, calibLumDeltaEV);
 		}
 		return dtclDeflick;
 	}

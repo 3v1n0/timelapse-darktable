@@ -2,6 +2,8 @@ package operations;
 
 import java.util.HashMap;
 
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+
 import xmp.XmpDTConf;
 
 public class DTConfiguration extends HashMap<String,DTOperation> implements Comparable<DTConfiguration> {
@@ -97,18 +99,20 @@ public class DTConfiguration extends HashMap<String,DTOperation> implements Comp
 		return this.index.compareTo(arg0.index);
 	}
 
-	public void deflick(String outFolder) {
+	public void deflick(String outFolder, PolynomialSplineFunction calibLumDeltaEV) {
 		// change operations/iop/exposure parameter to deflick (first filter => "exposure ")
 		double EV = getOpParValue("exposure ", "exposure", 0);
 		
 		// compute target EV for deflick
-		double evDeflick = computeEVtarget(EV, this.luminance, this.luminanceDeflick);
-		
+		//double evDeflick = computeEVtarget(EV, this.luminance, this.luminanceDeflick);
+		double evDeflick = calibLumDeltaEV.value((this.luminanceDeflick/this.luminance-1.0d));
+				
 		// update XMP configuration
-		setOpParValue("exposure ", "exposure", 0, evDeflick);
+		setOpParValue("exposure ", "exposure", 0, EV+evDeflick);
 		this.updateXmpConf(outFolder);
 	}
 	
+	@SuppressWarnings("unused")
 	private static double computeEVtarget(double EV,double lum,double lumTarget){
 		double EVtarget;
 		// relation between exposure and luminance

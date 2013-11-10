@@ -7,8 +7,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+
 import operations.DTConfList;
 import operations.DTConfiguration;
+import operations.DTValue;
 import cli.Cli;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -109,7 +113,7 @@ public class Main {
 
 				// Generate thumbnail to evaluate luminance
 				// w/h = 200 pix | hq = false for faster export
-				runCmd(darktablecliBin,imgSrc+"/"+fic,outFolderDeflick+"/"+fic+".xmp",outFolderDeflick+"/"+fic+".jpg","--width 200","--height 200","--hq 0");
+				runCmd(darktablecliBin,imgSrc+"/"+fic,outFolderDeflick+"/"+fic+".xmp",outFolderDeflick+"/"+fic+".jpg","--width 1920","--height 1920","--hq 0");
 				
 				// retrieve luminance
 				// /usr/bin/convert is used, could be replaced by jmagick
@@ -147,8 +151,45 @@ public class Main {
 			// Close the input stream (reading _deflick.txt file)
 			dis.close();
 			
+			// calibration EV <=> luminance 
+			double[] evCalib = {-4,-3,-2,-1,-0.5,0,0.5,1,2,3,4};
+			int evCalibZeroIdx = 5; // index of EV = 0 in the calibration table evCalib
+			double[] lumCalib = new double[evCalib.length];
+			double[] deltaLumCalib = new double[evCalib.length];
+			DTConfiguration dtc = dtl.first();
+			String fic = dtc.srcFile;
+			String outFolderCalib = outFolderDeflick+"/calib";
+			double evFirst = getOpParValue(dtc,"exposure ", "exposure", 0);
+			for (int i = 0; i < evCalib.length; i++) {
+				// change operations/iop/exposure parameter to calibrate luminance sensitivity
+				
+				// update XMP configuration with calibration value +/- current exposure value
+				setOpParValue(dtc,"exposure ", "exposure", 0, evFirst+evCalib[i]);
+				dtc.updateXmpConf(outFolderCalib);
+				// generate JPG
+				runCmd(darktablecliBin,imgSrc+"/"+fic,outFolderCalib+"/"+fic+".xmp",outFolderCalib+"/"+fic+"_"+i+".jpg","--width "+exportWidth,"--height "+exportHeight);
+				// retrieve luminance
+				lumCalib[i] = Double.valueOf(runCmdOut(convertBin,outFolderCalib+"/"+fic+"_"+i+".jpg","-scale","1x1!","-format","%[fx:luminance]","info:"));
+			}
+			setOpParValue(dtc,"exposure ", "exposure", 0, evFirst); // reset value
+			dtc.updateXmpConf(outFolderCalib);
+			
+			// write calibration curve
+			BufferedWriter fileCalibCurve = new BufferedWriter(new FileWriter(outFolderCalib+"/calib.txt"));
+			fileCalibCurve.write("deltaEV"+" "+"deltaLum\n");
+			for (int i = 0; i < evCalib.length; i++) {
+				// compute deltaLum/lum0 evCalib[2]=0 => ref
+				deltaLumCalib[i] = (lumCalib[i]/lumCalib[evCalibZeroIdx] - 1.0d);
+				fileCalibCurve.write(evCalib[i]+" "+deltaLumCalib[i]+"\n");
+			}
+			fileCalibCurve.close();
+			
+			// calibration curve : LinearInterpolator (5 points: -2 -1 0 +1 +2 EV)
+			LinearInterpolator li = new LinearInterpolator();
+			PolynomialSplineFunction calibLumDeltaEV = li.interpolate(deltaLumCalib, evCalib);
+			
 			// call deflickering
-			dtl.deflick(outFolder);
+			dtl.deflick(outFolder,calibLumDeltaEV);
 			
 		}
 		
@@ -254,6 +295,27 @@ public class Main {
 		}
 		return sout;
 	}
+	
+	public static double getOpParValue(DTConfiguration dtc, String operation,String parameter,Integer index){
+		// return operation / parameter / value[idx]
+		try{
+			DTValue v = (DTValue) dtc.get(operation).get(parameter).get("value");
+			return (Double) v.get(index);
+		} catch (Exception nulException) {
+			//System.out.println("null exception: "+operation+" "+parameter);
+			System.err.println("getOpParValue fail, : "+operation+" "+parameter);
+			return (Double) null;
+		}
+		
+	}
+	
+	public static void setOpParValue(DTConfiguration dtc, String operation,String parameter,Integer index,double value){
+		// set operation / parameter / value[idx]
+		DTValue v = (DTValue) dtc.get(operation).get(parameter).get("value");
+		v.put(index,value);
+		dtc.get(operation).get(parameter).put("value",v);
+	}
+	
 }
 
 
