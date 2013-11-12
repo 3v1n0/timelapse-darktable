@@ -3,22 +3,58 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class WriteOctaveDeflickFcn {
-
-	public WriteOctaveDeflickFcn(String outFolderDeflick,String outLuminanceFile) throws IOException {
+public class OctaveDeflickFcn {
+	
+	// parameters of octave scripts
+	public int lpFiltMinNum;
+	public int spikeFiltMinNum;
+	public double deltaLumThdMax;
+	public String outFolderDeflick;
+	public String outLuminanceFile;
+	public String masterFileName;
+	public String deflickFcnName;
+	
+	public OctaveDeflickFcn(String outFolderDeflick,String outLuminanceFile) {
+		super();
+		// default parameters
+		this.lpFiltMinNum = 50;
+		this.spikeFiltMinNum = 12;
+		this.deltaLumThdMax = 0.02;
+		// files config
+		this.outFolderDeflick = outFolderDeflick;
+		this.outLuminanceFile = outLuminanceFile;
+		// write files
+		this.masterFileName = "master.m";
+		this.deflickFcnName = "deflick";
+	}
+	
+	public void setLpFiltMinNum(int lpFiltMinNum) {
+		this.lpFiltMinNum = lpFiltMinNum;
+	}
+	
+	public void setSpikeFiltMinNum(int spikeFiltMinNum) {
+		this.spikeFiltMinNum = spikeFiltMinNum;
+	}
+	
+	public void setDeltaLumThdMax(double deltaLumThdMax) {
+		this.deltaLumThdMax = deltaLumThdMax;
+	}
+	
+	public void writeFiles() throws IOException {
 
 		// regression on luminance points with octave script (write the "master" script)
-		BufferedWriter outOctaveMaster = new BufferedWriter(new FileWriter(outFolderDeflick+"/master.m"));
+		BufferedWriter outOctaveMaster = new BufferedWriter(new FileWriter(this.outFolderDeflick+"/"+this.masterFileName));
 		outOctaveMaster.write("#!/usr/bin/octave -qf"+"\n");
 		outOctaveMaster.write("addpath('"+outFolderDeflick+"');"+"\n");
-		outOctaveMaster.write("deflick('"+outFolderDeflick+"/"+outLuminanceFile+"');"+"\n");
+		outOctaveMaster.write(this.deflickFcnName+"('"+outFolderDeflick+"/"+outLuminanceFile+"');"+"\n");
 		outOctaveMaster.close();
 
 		// write the octave function into a file in the output folder
 		// copy/paste octave script and find/replace
 		// first \n in \\n
 		// then regexp : ^(.*)\n   by  "$1\\n"+\n
-		String deflickFcn = "function deflick(luminanceTableFic)"+
+		// change hard-coded parameter in ..."+this.paramName+"...
+		String deflickFcnCore = "function "+this.deflickFcnName+"(luminanceTableFic)"+
 				"% compute deflickering parameters from luminance table\n"+
 				"\n"+
 				"% retrieve source luminance table\n"+
@@ -32,9 +68,9 @@ public class WriteOctaveDeflickFcn {
 				"stdLum = std(avgSignal-in_signal);\n"+
 				"\n"+
 				"% advanced filtering parameters\n"+
-				"N_LpFilt    = min(50,floor(length(in_signal)/2));   % Window size for filtering\n"+
-				"N_SpikeFilt = min(12,floor(length(in_signal)/4+1)); % Size of filtered spike\n"+
-				"dL_max      = max(0.02,1.5*stdLum);           % 'normal' deltaL max (above, it is considered as a spike)\n"+
+				"N_LpFilt    = min("+this.lpFiltMinNum+",floor(length(in_signal)/2));   % Window size for filtering\n"+
+				"N_SpikeFilt = min("+this.spikeFiltMinNum+",floor(length(in_signal)/4+1)); % Size of filtered spike\n"+
+				"dL_max      = max("+this.deltaLumThdMax+",1.5*stdLum);           % 'normal' deltaL max (above, it is considered as a spike)\n"+
 				"isPlotFlag  = true;                                 % output a grapics with deflickering source/target curves\n"+
 				"\n"+
 				"% filtering (deflickering target)\n"+
@@ -129,9 +165,11 @@ public class WriteOctaveDeflickFcn {
 				"end\n"+
 				"fclose(fid);";
 		
-		BufferedWriter outDeflickFcn = new BufferedWriter(new FileWriter(outFolderDeflick+"/deflick.m"));
-		outDeflickFcn.write(deflickFcn);
+		BufferedWriter outDeflickFcn = new BufferedWriter(new FileWriter(outFolderDeflick+"/"+this.deflickFcnName+".m"));
+		outDeflickFcn.write(deflickFcnCore);
 		outDeflickFcn.close();
+		
+		System.out.println("Deflickering files written...");
 				
 	}
 }

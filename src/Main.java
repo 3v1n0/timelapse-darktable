@@ -7,17 +7,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 
-import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-
 import operations.DTConfList;
 import operations.DTConfiguration;
 import operations.DTValue;
+
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+
 import cli.Cli;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import deflick.WriteOctaveDeflickFcn;
+import deflick.OctaveDeflickFcn;
 
 
 public class Main {
@@ -128,10 +129,11 @@ public class Main {
 			// regression on luminance points with octave script (write the "master" script)
 			
 			// write octave scripts in outFolder/deflick
-			new WriteOctaveDeflickFcn(outFolderDeflick,outLuminanceFile);
+			OctaveDeflickFcn odf = new OctaveDeflickFcn(outFolderDeflick,outLuminanceFile);
+			odf.writeFiles(); // write octave scripts
 
 			// execute octave script : filtering luminance values
-			runCmd(octaveBin,outFolderDeflick+"/master.m");
+			runCmd(octaveBin,odf.outFolderDeflick+"/"+odf.masterFileName);
 			
 			// add luminanceDeflick to DTConfiguration reading _deflick.txt line by line
 			FileInputStream fstream = new FileInputStream(outFolderDeflick+"/"+outLuminanceFile.replaceAll(".txt", "_deflick.txt"));
