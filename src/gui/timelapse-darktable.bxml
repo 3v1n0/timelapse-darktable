@@ -1,0 +1,76 @@
+<Window title="Timelapse-darktable" maximized="true"
+	xmlns="org.apache.pivot.wtk" xmlns:content="org.apache.pivot.wtk.content"
+	xmlns:bxml="http://pivot.apache.org/bxml" xmlns:boundedrange="org.apache.pivot.tutorials.boundedrange"
+	width="300" height="100">
+	<BoxPane orientation="vertical" styles="{padding:4, fill:true}">
+		<Border title=" timelapse-darktable " styles="{padding:20}">
+			<BoxPane orientation="vertical">
+				<Label
+					text="Timelapse-darktable will generate your timelapse in 3 clicks." />
+				<Label
+					text="NB: The whole processus requires a lot of CPU time, be patient..." />
+			</BoxPane>
+		</Border>
+		<TabPane selectedIndex="0" styles="{tabOrientation:'horizontal'}">
+			<Border styles="{padding:20}">
+				<TabPane.tabData>
+					<content:ButtonData text="Assistant" />
+				</TabPane.tabData>
+				<BoxPane orientation="vertical" styles="{spacing:16, fill:true}">
+					<Label text="timelapse-darktable assistant" />
+					<Border title="Input" styles="{padding:20}">
+						<BoxPane orientation="vertical" styles="{spacing:16}">
+							<BoxPane orientation="horizontal" styles="{padding:6, spacing:8, fill:true}">
+								<Label text="Keyframes XMP Folder" />
+								<TextInput textSize="40" bxml:id="txtXmpSrc" />
+								<PushButton bxml:id="buttonBrowseXmpSrc" buttonData="Browse" />
+							</BoxPane>
+							<BoxPane orientation="horizontal" styles="{padding:6, spacing:8, fill:true}">
+								<Label text="Source images Folder" />
+								<TextInput textSize="41" bxml:id="txtImgSrc" />
+								<PushButton bxml:id="buttonBrowseImgSrc" buttonData="Browse" />
+							</BoxPane>
+						</BoxPane>
+						
+					</Border>
+					<Border title="Output" styles="{padding:20}">
+						<BoxPane orientation="vertical" styles="{spacing:16}">
+							<BoxPane orientation="horizontal" styles="{padding:6, spacing:8, fill:true}">
+								<Label text="Output Folder" />
+								<TextInput textSize="44" bxml:id="txtOutFolder" />
+								<PushButton bxml:id="buttonBrowseOut" buttonData="Browse" />
+							</BoxPane>
+							<BoxPane styles="{padding:4, verticalAlignment:'center'}">
+								<Checkbox buttonData="Deflickering" bxml:id="isDeflick" />
+							</BoxPane>
+						</BoxPane>
+					</Border>
+					<PushButton bxml:id="buttonGenerateTimelapse"
+						buttonData="Generate timelapse"/>
+				</BoxPane>
+			</Border>
+			<Border styles="{padding:10}">
+				<TabPane.tabData>
+					<content:ButtonData text="Interpolation" />
+				</TabPane.tabData>
+				<BoxPane orientation="vertical" styles="{spacing:16}">
+
+					<Checkbox buttonData="Export JPG" bxml:id="isExportJpg" />
+					<Checkbox buttonData="Export movie" bxml:id="isExportMovie"
+						enabled="false" />
+				</BoxPane>
+			</Border>
+			<Border styles="{padding:10}">
+				<TabPane.tabData>
+					<content:ButtonData text="Deflickering" />
+				</TabPane.tabData>
+				<BoxPane>
+					<Slider bxml:id="sliderDeflick" range="{start:0, end:300}" value="50" />
+					<Label bxml:id="labelDeflick" />
+				</BoxPane>
+
+			</Border>
+		</TabPane>
+	</BoxPane>
+</Window>
+
