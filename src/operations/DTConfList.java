@@ -205,7 +205,13 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 						if (method.equalsIgnoreCase("linear")) {
 							vi = this.interpLinearOneOpParam(operation, parameter, paramIndex, confIdx);
 						} else if (method.equalsIgnoreCase("spline")) {
-							vi = this.interpSplineOneOpParam(operation, parameter, paramIndex, confIdx);
+							if (this.size()>2) {
+								vi = this.interpSplineOneOpParam(operation, parameter, paramIndex, confIdx);
+							} else {
+								System.err.println("Only 2 XMP keyframes:\nlinear interpolation is used instead of spline");
+								vi = this.interpLinearOneOpParam(operation, parameter, paramIndex, confIdx);
+							}
+							
 						} else {
 							System.err.println("Method "+method+" not supported. Available: linear | spline");
 						}

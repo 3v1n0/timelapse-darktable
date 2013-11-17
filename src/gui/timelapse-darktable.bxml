@@ -41,14 +41,18 @@
 						</BoxPane>
 					</Border>
 					<Border title="Parameters" styles="{padding:20}">
-						<BoxPane orientation="horizontal" styles="{spacing:16}">
-							<BoxPane orientation="horizontal"
-								styles="{padding:4, verticalAlignment:'center'}">
-								<Checkbox buttonData="Deflickering" bxml:id="isDeflick" />
-							</BoxPane>
-							<Checkbox buttonData="Export JPG" bxml:id="isExportJpg" />
-							<Checkbox buttonData="Export movie" bxml:id="isExportMovie"
+						<BoxPane orientation="horizontal"
+							styles="{spacing:16, verticalAlignment:'center'}">
+							<Checkbox buttonData="Deflickering" bxml:id="isDeflick" selected="true"/>
+							<Checkbox buttonData="Export JPG" bxml:id="isExportJpg" selected="true"/>
+							<Label text="Width" />
+							<TextInput textSize="5" bxml:id="txtWidth" text="0"
 								enabled="false" />
+							<Label text="Heigth" />
+							<TextInput textSize="5" bxml:id="txtHeigth" text="0"
+								enabled="false" />
+							<Checkbox buttonData="Export movie" bxml:id="isExportMovie"
+								enabled="true" selected="true"/>
 						</BoxPane>
 					</Border>
 					<PushButton bxml:id="buttonGenerateTimelapse"
@@ -61,6 +65,19 @@
 				</TabPane.tabData>
 				<BoxPane orientation="vertical" styles="{spacing:16,fill:true}">
 					<Border title="advanced controls for interpolation" styles="{padding:20}">
+						<BoxPane orientation="vertical">
+							<BoxPane orientation="horizontal"
+								styles="{padding:4, verticalAlignment:'center'}">
+								<bxml:define>
+									<ButtonGroup bxml:id="rbInterpType" />
+								</bxml:define>
+								<Label text="Interpolation method" />
+								<RadioButton bxml:id="rbLinear" buttonData="linear"
+									buttonGroup="$rbInterpType" selected="true" />
+								<RadioButton bxml:id="rbSpline" buttonData="spline"
+									buttonGroup="$rbInterpType" />
+							</BoxPane>
+						</BoxPane>
 						<BoxPane orientation="horizontal"
 							styles="{padding:4, verticalAlignment:'center'}">
 							<Label text="Advanced controls will be there" enabled="false" />
@@ -71,7 +88,8 @@
 						<BoxPane orientation="vertical"
 							styles="{padding:4, verticalAlignment:'center', horizontalAlignment:'center'}">
 							<Label text="under construction..." enabled="false" />
-							<Label text="navigation table of frames and keyframes filters settings"
+							<Label
+								text="navigation table of frames and keyframes filters settings"
 								enabled="false" />
 						</BoxPane>
 					</Border>
