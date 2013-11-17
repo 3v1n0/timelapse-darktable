@@ -31,44 +31,76 @@
 								<PushButton bxml:id="buttonBrowseImgSrc" buttonData="Browse" />
 							</BoxPane>
 						</BoxPane>
-						
+
 					</Border>
 					<Border title="Output" styles="{padding:20}">
-						<BoxPane orientation="vertical" styles="{spacing:16}">
-							<BoxPane orientation="horizontal" styles="{padding:6, spacing:8, fill:true}">
-								<Label text="Output Folder" />
-								<TextInput textSize="44" bxml:id="txtOutFolder" />
-								<PushButton bxml:id="buttonBrowseOut" buttonData="Browse" />
-							</BoxPane>
-							<BoxPane styles="{padding:4, verticalAlignment:'center'}">
+						<BoxPane orientation="horizontal" styles="{padding:6, spacing:8, fill:true}">
+							<Label text="Output Folder" />
+							<TextInput textSize="44" bxml:id="txtOutFolder" />
+							<PushButton bxml:id="buttonBrowseOut" buttonData="Browse" />
+						</BoxPane>
+					</Border>
+					<Border title="Parameters" styles="{padding:20}">
+						<BoxPane orientation="horizontal" styles="{spacing:16}">
+							<BoxPane orientation="horizontal"
+								styles="{padding:4, verticalAlignment:'center'}">
 								<Checkbox buttonData="Deflickering" bxml:id="isDeflick" />
 							</BoxPane>
+							<Checkbox buttonData="Export JPG" bxml:id="isExportJpg" />
+							<Checkbox buttonData="Export movie" bxml:id="isExportMovie"
+								enabled="false" />
 						</BoxPane>
 					</Border>
 					<PushButton bxml:id="buttonGenerateTimelapse"
-						buttonData="Generate timelapse"/>
+						buttonData="Generate timelapse" />
 				</BoxPane>
 			</Border>
 			<Border styles="{padding:10}">
 				<TabPane.tabData>
 					<content:ButtonData text="Interpolation" />
 				</TabPane.tabData>
-				<BoxPane orientation="vertical" styles="{spacing:16}">
-
-					<Checkbox buttonData="Export JPG" bxml:id="isExportJpg" />
-					<Checkbox buttonData="Export movie" bxml:id="isExportMovie"
-						enabled="false" />
+				<BoxPane orientation="vertical" styles="{spacing:16,fill:true}">
+					<Border title="advanced controls for interpolation" styles="{padding:20}">
+						<BoxPane orientation="horizontal"
+							styles="{padding:4, verticalAlignment:'center'}">
+							<Label text="Advanced controls will be there" enabled="false" />
+							<Label text="+ a button to re-generate XMPs" enabled="false" />
+						</BoxPane>
+					</Border>
+					<Border preferredWidth="480" preferredHeight="360">
+						<BoxPane orientation="vertical"
+							styles="{padding:4, verticalAlignment:'center', horizontalAlignment:'center'}">
+							<Label text="under construction..." enabled="false" />
+							<Label text="navigation table of frames and keyframes filters settings"
+								enabled="false" />
+						</BoxPane>
+					</Border>
 				</BoxPane>
 			</Border>
 			<Border styles="{padding:10}">
 				<TabPane.tabData>
 					<content:ButtonData text="Deflickering" />
 				</TabPane.tabData>
-				<BoxPane>
-					<Slider bxml:id="sliderDeflick" range="{start:0, end:300}" value="50" />
-					<Label bxml:id="labelDeflick" />
+				<BoxPane orientation="vertical" styles="{spacing:16,fill:true}">
+					<Border title="advanced controls for deflickering" styles="{padding:20}">
+						<BoxPane orientation="horizontal"
+							styles="{padding:4, verticalAlignment:'center'}">
+							<Slider bxml:id="sliderDeflick" range="{start:0, end:300}"
+								value="50" />
+							<Label text="filter on" />
+							<Label bxml:id="labelDeflick" />
+							<Label text="images" />
+						</BoxPane>
+					</Border>
+					<Border preferredWidth="480" preferredHeight="360">
+						<BoxPane orientation="vertical"
+							styles="{padding:4, verticalAlignment:'center', horizontalAlignment:'center'}">
+							<Label text="under construction..." enabled="false" />
+							<Label text="display of deflickering curves will be there"
+								enabled="false" />
+						</BoxPane>
+					</Border>
 				</BoxPane>
-
 			</Border>
 		</TabPane>
 	</BoxPane>

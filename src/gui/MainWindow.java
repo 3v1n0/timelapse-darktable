@@ -2,6 +2,8 @@ package gui;
 
 import java.io.File;
 
+import operations.DTConfiguration;
+
 import org.apache.pivot.beans.BXMLSerializer;
 import org.apache.pivot.collections.Map;
 import org.apache.pivot.collections.Sequence;
@@ -42,7 +44,7 @@ public class MainWindow implements Application {
 	// deflick
 	private Slider sliderDeflick = null;
 	private Label labelDeflick = null;
-
+	
 	@Override
 	public void resume() throws Exception {
 	}
@@ -139,10 +141,9 @@ public class MainWindow implements Application {
 		buttonBrowseOut.getButtonPressListeners().add(new ButtonPressListener() {
 			@Override
 			public void buttonPressed(Button button) {
-
 				final FileBrowserSheet fileBrowserSheet =
 						new FileBrowserSheet(FileBrowserSheet.Mode.SAVE_TO);
-				
+
 				if(txtOutFolder != null && txtOutFolder.getText().length() > 0 &&
 						txtOutFolder.getText().indexOf("\\") >0  ){
 					try{
@@ -166,7 +167,7 @@ public class MainWindow implements Application {
 							}
 						} 
 					}
-					});
+				});
 				}
 			});
 		
@@ -184,7 +185,6 @@ public class MainWindow implements Application {
 			    }
 			    
 				// launch Main
-				
 				Alert.alert(MessageType.INFO, "Timelapse generated: " + txtOutFolder.getText(), window);
 				
 			}
@@ -217,14 +217,7 @@ public class MainWindow implements Application {
 			}
 		});		
 		updateLabelDeflick();
-		
-		// Output current parameters
-		System.out.println(sliderDeflick.getValue());
-		
-		
-		
-		
-		
+				
 		window.open(display);
 	}
 	
@@ -236,7 +229,7 @@ public class MainWindow implements Application {
 	private void updateMovieCheckbox() {
 		// Movie export enabled only if JPG is selected
 		cbIsExportMovie.setEnabled(cbIsExportJpg.isSelected());
-		// Movie not selected if JPG is not
+		// Movie reset if JPG is not selected
 		if (!cbIsExportJpg.isSelected()){
 			cbIsExportMovie.setSelected(false);
 		}

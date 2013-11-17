@@ -10,7 +10,6 @@ public class TimelapseDarktableGUI {
 	 */
 	public static void main(String[] args) {
 		DesktopApplicationContext.main(MainWindow.class, args);
-
 	}
 
 }
