@@ -76,6 +76,8 @@
 									buttonGroup="$rbInterpType" selected="true" />
 								<RadioButton bxml:id="rbSpline" buttonData="spline"
 									buttonGroup="$rbInterpType" />
+								<PushButton bxml:id="buttonInterpolateXmp"
+									buttonData="Interpolate XMP from key-frames" />
 							</BoxPane>
 						</BoxPane>
 						<BoxPane orientation="horizontal"
@@ -103,7 +105,7 @@
 					<Border title="advanced controls for deflickering" styles="{padding:20}">
 						<BoxPane orientation="horizontal"
 							styles="{padding:4, verticalAlignment:'center'}">
-							<Slider bxml:id="sliderDeflick" range="{start:0, end:300}"
+							<Slider bxml:id="sliderDeflick" range="{start:1, end:300}"
 								value="50" />
 							<Label text="filter on" />
 							<Label bxml:id="labelDeflick" />

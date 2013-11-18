@@ -9,14 +9,39 @@ import com.martiansoftware.jsap.UnflaggedOption;
 
 public class Cli {
 	
-	public JSAP jsap = new JSAP();
-	public JSAPResult config;
+	private JSAP jsap = new JSAP();
+	private JSAPResult config;
+	
+	// Config parameters
+	public String imgSrc;
+	public String xmpSrc;
+	public String outFolder;
+	public int exportWidth;
+	public int exportHeight;
+	public String interpType;
+	public boolean isExportJpg;
+	public boolean isExportMovie;
+	public boolean isDeflick;
+	public int deflickLpFiltMinNum;
 	
 
 	public Cli(String[] args) throws JSAPException {
 		super();
 		this.defineOptions(); // update jsap
 		this.parseOptions(args); // update config
+
+		// JAVA CLI : inputs affectation
+		this.imgSrc = config.getString("imgSrc");
+		this.xmpSrc = config.getString("xmpSrc");
+		this.outFolder = config.getString("out");
+		this.exportWidth = config.getInt("width");
+		this.exportHeight = config.getInt("height");
+		this.interpType = config.getString("interpType");
+		this.isExportJpg = config.getBoolean("isExportJpg");
+		this.isExportMovie = config.getBoolean("isExportMovie");
+		this.isDeflick = config.getBoolean("isDeflick");
+		this.deflickLpFiltMinNum = config.getInt("deflickLpFiltMinNum");
+		
 	}
 
 	
@@ -104,6 +129,15 @@ public class Cli {
 	    		.setLongFlag("deflick");
 	    optIsDeflick.setHelp("Deflikering will be applied");
 	    this.jsap.registerParameter(optIsDeflick);
+
+	    FlaggedOption optDeflickLPMin = new FlaggedOption("deflickLpFiltMinNum")
+	    		.setStringParser(JSAP.INTEGER_PARSER)
+	    		.setDefault("50") 
+	    		.setRequired(false) 
+	    		.setShortFlag('L') 
+	    		.setLongFlag("deflick-lpFiltMinNum");
+	    optDeflickLPMin.setHelp("Deflickering Low-Pass filter images number");
+	    this.jsap.registerParameter(optDeflickLPMin);
 	    
 	    // extra arguments
 	    UnflaggedOption optRemain = new UnflaggedOption("extra")

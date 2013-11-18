@@ -19,12 +19,11 @@ public class Main {
 		if (args.length==0) {
 			new LaunchGUI();
 		} else {
-			new TLDTCore(args);
+			TLDTCore core=new TLDTCore(args);
+			core.generateTimelapse();			
 		}
-		
-		
 	}
-
+	
 }
 
 
