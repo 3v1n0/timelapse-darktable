@@ -2,13 +2,16 @@ package gui;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 
 import org.apache.pivot.beans.BXMLSerializer;
 import org.apache.pivot.collections.Map;
 import org.apache.pivot.collections.Sequence;
-import org.apache.pivot.util.Vote;
+import org.apache.pivot.util.concurrent.TaskExecutionException;
 import org.apache.pivot.wtk.Alert;
 import org.apache.pivot.wtk.Application;
+import org.apache.pivot.wtk.ApplicationContext;
 import org.apache.pivot.wtk.Button;
 import org.apache.pivot.wtk.ButtonGroup;
 import org.apache.pivot.wtk.ButtonPressListener;
@@ -16,6 +19,7 @@ import org.apache.pivot.wtk.ButtonStateListener;
 import org.apache.pivot.wtk.Checkbox;
 import org.apache.pivot.wtk.Display;
 import org.apache.pivot.wtk.FileBrowserSheet;
+import org.apache.pivot.wtk.ImageView;
 import org.apache.pivot.wtk.Label;
 import org.apache.pivot.wtk.MessageType;
 import org.apache.pivot.wtk.PushButton;
@@ -23,9 +27,10 @@ import org.apache.pivot.wtk.Sheet;
 import org.apache.pivot.wtk.SheetCloseListener;
 import org.apache.pivot.wtk.Slider;
 import org.apache.pivot.wtk.SliderValueListener;
+import org.apache.pivot.wtk.TextArea;
 import org.apache.pivot.wtk.TextInput;
-import org.apache.pivot.wtk.TextInputContentListener;
 import org.apache.pivot.wtk.Window;
+import org.apache.pivot.wtk.media.Image;
 
 import com.martiansoftware.jsap.JSAPException;
 
@@ -41,23 +46,30 @@ public class TLDTWindow implements Application {
 	private Button buttonBrowseXmpSrc = null;
 	private Button buttonBrowseImgSrc = null;
 	private Button buttonBrowseOut = null;
+	private Button buttonLoadKeyframes = null;
 	private Button buttonGenerateTimelapse = null;
-
-	// params
+	// general
 	private Checkbox cbIsDeflick = null;
 	private Checkbox cbIsExportJpg = null;
 	private Checkbox cbIsExportMovie = null;
 	private TextInput txtWidth = null;
 	private TextInput txtHeigth = null;
-
 	// interpolation
 	private ButtonGroup rbInterpType = null;
 	private Button buttonInterpolateXmp = null;
-
+	private TextArea taXmpInterp = null;
+	private Label labelInterpXmpState = null;
 	// deflick
 	private Slider sliderDeflick = null;
 	private Label labelDeflick = null;
-	private Button buttonDeflickFilter = null;
+	private Button buttonDeflickRefresh = null;
+	private ImageView imgDeflick = null;
+
+	// internal state
+	private TLDTCore core;
+	private boolean isInitDone = false;
+	private boolean isInterpolationDone = false;
+
 
 	@Override
 	public void resume() throws Exception {
@@ -82,6 +94,7 @@ public class TLDTWindow implements Application {
 		buttonBrowseXmpSrc = (PushButton) bxmlSerializer.getNamespace().get("buttonBrowseXmpSrc");
 		buttonBrowseImgSrc = (PushButton) bxmlSerializer.getNamespace().get("buttonBrowseImgSrc");
 		buttonBrowseOut = (PushButton) bxmlSerializer.getNamespace().get("buttonBrowseOut");
+		buttonLoadKeyframes = (Button) bxmlSerializer.getNamespace().get("buttonLoadKeyframes");
 		buttonGenerateTimelapse = (Button) bxmlSerializer.getNamespace().get("buttonGenerateTimelapse");
 		cbIsDeflick = (Checkbox) bxmlSerializer.getNamespace().get("isDeflick");
 		cbIsExportJpg = (Checkbox) bxmlSerializer.getNamespace().get("isExportJpg");
@@ -90,9 +103,12 @@ public class TLDTWindow implements Application {
 		cbIsExportMovie = (Checkbox) bxmlSerializer.getNamespace().get("isExportMovie");
 		rbInterpType = (ButtonGroup) bxmlSerializer.getNamespace().get("rbInterpType");
 		buttonInterpolateXmp = (Button) bxmlSerializer.getNamespace().get("buttonInterpolateXmp");
+		labelInterpXmpState = (Label) bxmlSerializer.getNamespace().get("labelInterpXmpState");
 		labelDeflick = (Label) bxmlSerializer.getNamespace().get("labelDeflick");
 		sliderDeflick = (Slider) bxmlSerializer.getNamespace().get("sliderDeflick");
-
+		taXmpInterp = (TextArea) bxmlSerializer.getNamespace().get("taXmpInterp");
+		buttonDeflickRefresh = (Button) bxmlSerializer.getNamespace().get("buttonDeflickRefresh");
+		imgDeflick = (ImageView) bxmlSerializer.getNamespace().get("imgDeflick");
 
 		buttonBrowseXmpSrc.getButtonPressListeners().add(new ButtonPressListener() {
 			@Override
@@ -114,42 +130,56 @@ public class TLDTWindow implements Application {
 				browseFile(txtOutFolder,window);
 			}
 		});
-		
-		buttonGenerateTimelapse.getButtonPressListeners().add(new ButtonPressListener() {
 
+		buttonLoadKeyframes.getButtonPressListeners().add(new ButtonPressListener() {
 			@Override
 			public void buttonPressed(Button arg0) {
-
-				// launch MainScript
+				// load keyframes
 				boolean isOk = checkInputs();
 				if (isOk) {
+					loadXmpKeyframes();
+				}
+			}
+		});
+
+		buttonGenerateTimelapse.getButtonPressListeners().add(new ButtonPressListener() {
+			@Override
+			public void buttonPressed(Button arg0) {
+				// launch MainScript
+				if (isInitDone) {
 					generateTimelapse();
 					Alert.alert(MessageType.INFO, "Timelapse generated: " + txtOutFolder.getText(), window);
+				} else {
+					Alert.alert(MessageType.WARNING, "First fill inputs in this assistant panel and load keyframes", window);
 				}
 			}
 		});
 
 		buttonInterpolateXmp.getButtonPressListeners().add(new ButtonPressListener() {
-
 			@Override
 			public void buttonPressed(Button arg0) {
-				//
-				//				if(txtXmpSrc.getText() == null || txtXmpSrc.getText().length() == 0
-				//						|| txtImgSrc.getText() == null || txtImgSrc.getText().length() == 0
-				//						|| txtOutFolder.getText() == null || txtOutFolder.getText().length() == 0){
-				//					Alert.alert(MessageType.ERROR, "Please insert 3 locations (2 inputs, 1 output).", window);
-				//					return;
-				//				}
-
-				// launch MainScript
-				System.out.println("button pressed");
-				interpolateXmp();
-				Alert.alert(MessageType.INFO, 
-						rbInterpType.getSelection().getButtonData()+" interpolatation done", window);
-
+				// launch interpolation
+				if (isInitDone) {
+					interpolateXmp();
+				} else {
+					Alert.alert(MessageType.WARNING, "First fill inputs in this assistant panel and load keyframes", window);
+				}
 			}
-
 		});
+
+
+		buttonDeflickRefresh.getButtonPressListeners().add(new ButtonPressListener() {
+			@Override
+			public void buttonPressed(Button arg0) {
+				if (isInitDone && isInterpolationDone) {
+					// launch deflick initialisation
+					deflickRefresh();
+				} else {
+					Alert.alert(MessageType.WARNING, "1. fill inputs in this assistant panel\n2.load keyframes\3.Interpolate XMP", window);
+				}
+			}
+		});
+
 
 		cbIsExportJpg.getButtonStateListeners().add(new ButtonStateListener() {
 			@Override
@@ -175,8 +205,8 @@ public class TLDTWindow implements Application {
 		if(txtXmpSrc.getText() == null || txtXmpSrc.getText().length() == 0
 				|| txtImgSrc.getText() == null || txtImgSrc.getText().length() == 0
 				|| txtOutFolder.getText() == null || txtOutFolder.getText().length() == 0){
-			Alert.alert(MessageType.INFO, 
-				"Complete all folder paths first", window);
+			Alert.alert(MessageType.WARNING, 
+					"Complete all folder paths first", window);
 		} else {
 			isOk = true;
 		}
@@ -184,7 +214,7 @@ public class TLDTWindow implements Application {
 	}
 
 	protected void browseFile(final TextInput txt, Window win) {
-		
+
 		final FileBrowserSheet fileBrowserSheet =
 				new FileBrowserSheet(FileBrowserSheet.Mode.SAVE_TO);
 
@@ -212,7 +242,7 @@ public class TLDTWindow implements Application {
 				} 
 			}
 		});
-		
+
 	}
 
 	@Override
@@ -231,35 +261,60 @@ public class TLDTWindow implements Application {
 
 	}
 
+	private void loadXmpKeyframes(){
+		// instantiate TLDTCore with CLI arguments
+		try {
+			this.core = new TLDTCore(genCliOptions());
+			this.isInitDone = true;
+			this.isInterpolationDone = false;
+		} catch (JSAPException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void generateTimelapse(){
+		try {
+			this.core.generateTimelapse();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void interpolateXmp() {
+		this.labelInterpXmpState.setText("interpolating...");
+		this.core.interpolateXmp();
+		ArrayList<String> allParamList = core.dtConfListInterp.getAllParamList();
+		String textXmpInterp = "";
+		for (int i = 0; i < allParamList.size(); i++) {
+			textXmpInterp=textXmpInterp+allParamList.get(i)+"\n";
+		}
+		this.taXmpInterp.setText(textXmpInterp);
+		this.labelInterpXmpState.setText("interpolation done");
+		this.isInterpolationDone = true;
+	}
+
 	private void updateLabelDeflick() {
 		labelDeflick.setText(Integer.toString(sliderDeflick.getValue()));
 	}
 
-	private void generateTimelapse(){
-		// launch TLDTCore with CLI arguments
+	private void deflickRefresh(){
+		// call deflickering intialisation and filter
 		try {
-			TLDTCore core = new TLDTCore(genCliOptions());
-			core.generateTimelapse();
-		} catch (JSAPException e) {
-			e.printStackTrace();
+			this.core.deflickLpFiltMinNum = sliderDeflick.getValue();
+			this.core.deflickWriteLuminance();
+			this.core.deflickWriteFilter();
+			URL imageURL = new URL("file://"+this.core.outFolderDeflick+"/"+this.core.outLuminanceFile.replaceAll(".txt", "_deflick.png"));
+			// Update the image
+			imgDeflick.setImage(imageURL); // work the first time but not for refreshing
+
+			//imgDeflick.repaint();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-
-	private void interpolateXmp() {
-		// launch TLDTCore and interpolate only
-		try {
-			TLDTCore core = new TLDTCore(genCliOptions());
-			core.interpolateXmp();
-		} catch (JSAPException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-	}
 
 	private String[] genCliOptions() {
 		int maxSize = 40;

@@ -13,6 +13,7 @@ public class OctaveDeflickFcn {
 	public String outLuminanceFile;
 	public String masterFileName;
 	public String deflickFcnName;
+	public String imgSizeXY;
 	
 	public OctaveDeflickFcn(String outFolderDeflick,String outLuminanceFile) {
 		super();
@@ -20,6 +21,7 @@ public class OctaveDeflickFcn {
 		this.lpFiltMinNum = 50;
 		this.spikeFiltMinNum = 12;
 		this.deltaLumThdMax = 0.02;
+		this.imgSizeXY = "640,320";
 		// files config
 		this.outFolderDeflick = outFolderDeflick;
 		this.outLuminanceFile = outLuminanceFile;
@@ -82,7 +84,7 @@ public class OctaveDeflickFcn {
 				"\n"+
 				"% print graphics\n"+
 				"if isPlotFlag  == true\n"+
-				"	print(fullfile(lumPath,[lumFic '_deflick.png']));\n"+
+				"	print(fullfile(lumPath,[lumFic '_deflick.png']),'-S"+this.imgSizeXY+"');\n"+
 				"end\n"+
 				"\n"+
 				"end\n"+
@@ -122,7 +124,7 @@ public class OctaveDeflickFcn {
 				"% PLOT\n"+
 				"% ----\n"+
 				"if isPlotFlag\n"+
-				"    figure,\n"+
+				"    figure('Visible','off'),\n"+
 				"    plot(in_time,in_signal,'bx-') % input signal\n"+
 				"    hold on\n"+
 				"    grid on\n"+

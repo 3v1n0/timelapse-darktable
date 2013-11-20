@@ -18,8 +18,9 @@
 				</TabPane.tabData>
 				<BoxPane orientation="vertical" styles="{spacing:16, fill:true}">
 					<Label text="timelapse-darktable assistant" />
-					<Border title="Input" styles="{padding:20}">
-						<BoxPane orientation="vertical" styles="{spacing:16}">
+					<Border title="1. Fill information" styles="{padding:20}">
+						<BoxPane orientation="vertical" styles="{spacing:16, fill:true}">
+							<Separator heading="Inputs" />
 							<BoxPane orientation="horizontal" styles="{padding:6, spacing:8, fill:true}">
 								<Label text="Keyframes XMP Folder" />
 								<TextInput textSize="40" bxml:id="txtXmpSrc" />
@@ -32,31 +33,36 @@
 							</BoxPane>
 						</BoxPane>
 
-					</Border>
-					<Border title="Output" styles="{padding:20}">
+						<Separator heading="Outputs" />
 						<BoxPane orientation="horizontal" styles="{padding:6, spacing:8, fill:true}">
 							<Label text="Output Folder" />
 							<TextInput textSize="44" bxml:id="txtOutFolder" />
 							<PushButton bxml:id="buttonBrowseOut" buttonData="Browse" />
 						</BoxPane>
-					</Border>
-					<Border title="Parameters" styles="{padding:20}">
+						<Separator heading="Parameters" />
 						<BoxPane orientation="horizontal"
 							styles="{spacing:16, verticalAlignment:'center'}">
-							<Checkbox buttonData="Deflickering" bxml:id="isDeflick" selected="true"/>
-							<Checkbox buttonData="Export JPG" bxml:id="isExportJpg" selected="true"/>
+							<Checkbox buttonData="Deflickering" bxml:id="isDeflick"
+								selected="true" />
+							<Checkbox buttonData="Export JPG" bxml:id="isExportJpg"
+								selected="true" />
 							<Label text="Width" />
 							<TextInput textSize="5" bxml:id="txtWidth" text="0"
-								enabled="false" />
+								enabled="true" />
 							<Label text="Heigth" />
 							<TextInput textSize="5" bxml:id="txtHeigth" text="0"
-								enabled="false" />
+								enabled="true" />
 							<Checkbox buttonData="Export movie" bxml:id="isExportMovie"
-								enabled="true" selected="true"/>
+								enabled="true" selected="true" />
 						</BoxPane>
 					</Border>
-					<PushButton bxml:id="buttonGenerateTimelapse"
-						buttonData="Generate timelapse" />
+					<Border title="2. Generate your timelapse" styles="{padding:20}">
+						<BoxPane orientation="vertical" styles="{spacing:16, fill:true}">
+							<PushButton bxml:id="buttonLoadKeyframes" buttonData="Load keyframes..." />
+							<PushButton bxml:id="buttonGenerateTimelapse"
+								buttonData="...generate timelapse" />
+						</BoxPane>
+					</Border>
 				</BoxPane>
 			</Border>
 			<Border styles="{padding:10}">
@@ -78,22 +84,16 @@
 									buttonGroup="$rbInterpType" />
 								<PushButton bxml:id="buttonInterpolateXmp"
 									buttonData="Interpolate XMP from key-frames" />
+								<Label  bxml:id="labelInterpXmpState"></Label>
 							</BoxPane>
-						</BoxPane>
-						<BoxPane orientation="horizontal"
-							styles="{padding:4, verticalAlignment:'center'}">
-							<Label text="Advanced controls will be there" enabled="false" />
-							<Label text="+ a button to re-generate XMPs" enabled="false" />
 						</BoxPane>
 					</Border>
 					<Border preferredWidth="480" preferredHeight="360">
-						<BoxPane orientation="vertical"
-							styles="{padding:4, verticalAlignment:'center', horizontalAlignment:'center'}">
-							<Label text="under construction..." enabled="false" />
-							<Label
-								text="navigation table of frames and keyframes filters settings"
+						<ScrollPane horizontalScrollBarPolicy="fill_to_capacity"
+							verticalScrollBarPolicy="fill_to_capacity">
+							<TextArea bxml:id="taXmpInterp" text="interpolate XMP to update this area"
 								enabled="false" />
-						</BoxPane>
+						</ScrollPane>
 					</Border>
 				</BoxPane>
 			</Border>
@@ -110,14 +110,14 @@
 							<Label text="filter on" />
 							<Label bxml:id="labelDeflick" />
 							<Label text="images" />
+							<PushButton bxml:id="buttonDeflickRefresh"
+									buttonData="Refresh deflickering" />
 						</BoxPane>
 					</Border>
-					<Border preferredWidth="480" preferredHeight="360">
-						<BoxPane orientation="vertical"
-							styles="{padding:4, verticalAlignment:'center', horizontalAlignment:'center'}">
-							<Label text="under construction..." enabled="false" />
-							<Label text="display of deflickering curves will be there"
-								enabled="false" />
+					<Border styles="{padding:6}">
+						<BoxPane orientation="vertical"  preferredWidth="640" preferredHeight="320"
+							styles="{padding:4, verticalAlignment:'center', horizontalAlignment:'center',fill:true}">
+							<ImageView bxml:id="imgDeflick"/>
 						</BoxPane>
 					</Border>
 				</BoxPane>

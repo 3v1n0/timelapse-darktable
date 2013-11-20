@@ -3,6 +3,7 @@ package core;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -35,6 +36,7 @@ public class TLDTCore {
 	// default outputs
 	public String outMasterFile = "generateDarktableTimelapse.sh";
 	public String outLuminanceFile = "ficL.txt";
+	public boolean deflickRecompLum = false;
 	// ------ parameters from CLI -------------
 	public String imgSrc;
 	public String xmpSrc;
@@ -46,14 +48,14 @@ public class TLDTCore {
 	public boolean isExportMovie;
 	public boolean isDeflick;
 	public int deflickLpFiltMinNum;
-	
+
 	// local variables
 	public DTConfList dtConfListKeys;
 	public DTConfList dtConfListInterp;
 
 	// extra parameters
 	public String outFolderDeflick;
-	
+
 	// intrinsic timelapse property
 	public PolynomialSplineFunction calibLumDeltaEV;
 
@@ -63,7 +65,7 @@ public class TLDTCore {
 	public TLDTCore(String[] args) throws JSAPException, IOException{
 
 		// INITIALISATION OF PROGRAM
-		
+
 		// ---- JAVA CLI inputs management ----
 		Cli cliConf = new Cli(args);
 
@@ -79,7 +81,7 @@ public class TLDTCore {
 		this.isExportMovie = cliConf.isExportMovie;
 		this.isDeflick = cliConf.isDeflick;
 		this.deflickLpFiltMinNum = cliConf.deflickLpFiltMinNum;
-		
+
 
 		// Let's go now !		
 		System.out.println("===== START : "+progName+" v"+progVersion+" ======");
@@ -100,12 +102,12 @@ public class TLDTCore {
 		// create list of input XMP files from folder
 		this.dtConfListKeys = new DTConfList();
 		dtConfListKeys.addXmpFromFolder(this.xmpSrc);
-		
+
 		// create list of interpolated XMP (empty)
 		this.dtConfListInterp = new DTConfList();
-		
+
 	}
-	
+
 	public void generateTimelapse() throws IOException{
 		this.interpolateXmp();
 		this.printBothConfList();
@@ -113,7 +115,7 @@ public class TLDTCore {
 		this.exportJpg();
 		this.exportMovie();
 	}
-	
+
 	public void interpolateXmp() {
 
 		// linear|spline interpolation of all XMP data and generation of associated XMP
@@ -125,7 +127,7 @@ public class TLDTCore {
 		}
 		this.dtConfListInterp= this.dtConfListKeys.interpAllParam(tmpFolder,this.interpType);
 	}
-	
+
 	public void printBothConfList() {
 		// display before/after
 		System.out.println("\nParameter of interpolation (verbose)\n----------------------------------------------");
@@ -134,7 +136,7 @@ public class TLDTCore {
 		System.out.println("\ninterp");
 		this.dtConfListInterp.printAllParamTable();
 	}
-	
+
 	public void deflick() throws IOException { 
 		// -------------------------------------------
 		// DEFLICKERING
@@ -149,35 +151,61 @@ public class TLDTCore {
 			this.dtConfListInterp.deflick(this.outFolder,this.calibLumDeltaEV);
 		}
 	}
-	
-	private void deflickWriteLuminance() throws IOException {
-		
-		// Compute raw luminance from interpolation XMP
-		
-		BufferedWriter outLum = new BufferedWriter(new FileWriter(this.outFolderDeflick+"/"+this.outLuminanceFile));
-		String lum = null;
-		Iterator<DTConfiguration> itDTL = this.dtConfListInterp.iterator();
-		while (itDTL.hasNext()) {
-			DTConfiguration dtc = itDTL.next();
-			String fic = dtc.srcFile;
 
-			// Generate thumbnail to evaluate luminance
-			// hq = false for faster export
-			runCmd(this.darktablecliBin,this.imgSrc+"/"+fic,this.outFolderDeflick+"/"+fic+".xmp",this.outFolderDeflick+"/"+fic+".jpg","--width 1920","--height 1920","--hq 0");
+	public void deflickWriteLuminance() throws IOException {
 
-			// retrieve luminance
-			// /usr/bin/convert is used, could be replaced by imagej in newer version to prevent dependancies
-			lum = runCmdOut(this.convertBin,this.outFolderDeflick+"/"+fic+".jpg","-scale","1x1!","-format","%[fx:luminance]","info:");
-			dtc.luminance = Double.valueOf(lum);
+		 String lumFileName = this.outFolderDeflick+"/"+this.outLuminanceFile;
+		 boolean isLumFileExist = (new File(lumFileName)).exists();
+		 
+		if (this.deflickRecompLum || !isLumFileExist){
 
-			// write into a file for octave post-processing
-			outLum.write(lum+"\n");
+			// Compute raw luminance from interpolation XMP
+			// and write luminance file
+			BufferedWriter outLum = new BufferedWriter(new FileWriter(lumFileName));
+			String lum = null;
+			Iterator<DTConfiguration> itDTL = this.dtConfListInterp.iterator();
+			while (itDTL.hasNext()) {
+				DTConfiguration dtc = itDTL.next();
+				String fic = dtc.srcFile;
+
+				// Generate thumbnail to evaluate luminance
+				// hq = false for faster export
+				runCmd(this.darktablecliBin,this.imgSrc+"/"+fic,this.outFolderDeflick+"/"+fic+".xmp",this.outFolderDeflick+"/"+fic+".jpg","--width 1920","--height 1920","--hq 0");
+
+				// retrieve luminance
+				// /usr/bin/convert is used, could be replaced by imagej in newer version to prevent dependancies
+				lum = runCmdOut(this.convertBin,this.outFolderDeflick+"/"+fic+".jpg","-scale","1x1!","-format","%[fx:luminance]","info:");
+				dtc.luminance = Double.valueOf(lum);
+
+				// write into a file for octave post-processing
+				outLum.write(lum+"\n");
+			}
+			outLum.close();
+		} else {
+			// load existing luminance file
+			FileInputStream fstream = new FileInputStream(lumFileName);
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String lum = null;
+			
+			Iterator<DTConfiguration> itDTL = this.dtConfListInterp.iterator();
+			while (itDTL.hasNext()) {
+				DTConfiguration dtc = itDTL.next();
+				// retrieve luminance
+				try {
+				lum = br.readLine(); // read line by line
+				dtc.luminance = Double.valueOf(lum);
+				} catch (Exception e) {
+					System.err.println("luminance file for deflickering do not have the same size as current XMP list");
+				}
+			}
+			in.close();		
+			
 		}
-		outLum.close();
-		
+
 	}
 
-	private void deflickWriteFilter() throws IOException {
+	public void deflickWriteFilter() throws IOException {
 		// regression on luminance points with octave script (write the "master" script)
 
 		// write octave scripts in outFolder/deflick
@@ -249,7 +277,7 @@ public class TLDTCore {
 		PolynomialSplineFunction calibLumDeltaEV = li.interpolate(deltaLumCalib, evCalib);
 
 		return calibLumDeltaEV;
-		
+
 	}
 
 	public void exportJpg() throws IOException{
@@ -291,9 +319,9 @@ public class TLDTCore {
 		}
 		outScript.close();
 	}
-	
+
 	void exportMovie(){
-		
+
 		// ---------------------------------
 		// MOVIE GENERATION
 		// ---------------------------------
@@ -358,26 +386,4 @@ public class TLDTCore {
 		}
 		return sout;
 	}
-
-/*
-	public static double getOpParValue(DTConfiguration dtc, String operation,String parameter,Integer index){
-		// return operation / parameter / value[idx]
-		try{
-			DTValue v = (DTValue) dtc.get(operation).get(parameter).get("value");
-			return (Double) v.get(index);
-		} catch (Exception nulException) {
-			//System.out.println("null exception: "+operation+" "+parameter);
-			System.err.println("getOpParValue fail, : "+operation+" "+parameter);
-			return (Double) null;
-		}
-
-	}
-
-	public static void setOpParValue(DTConfiguration dtc, String operation,String parameter,Integer index,double value){
-		// set operation / parameter / value[idx]
-		DTValue v = (DTValue) dtc.get(operation).get(parameter).get("value");
-		v.put(index,value);
-		dtc.get(operation).get(parameter).put("value",v);
-	}
-*/
 }
