@@ -8,10 +8,8 @@ import java.util.ArrayList;
 import org.apache.pivot.beans.BXMLSerializer;
 import org.apache.pivot.collections.Map;
 import org.apache.pivot.collections.Sequence;
-import org.apache.pivot.util.concurrent.TaskExecutionException;
 import org.apache.pivot.wtk.Alert;
 import org.apache.pivot.wtk.Application;
-import org.apache.pivot.wtk.ApplicationContext;
 import org.apache.pivot.wtk.Button;
 import org.apache.pivot.wtk.ButtonGroup;
 import org.apache.pivot.wtk.ButtonPressListener;
@@ -30,7 +28,6 @@ import org.apache.pivot.wtk.SliderValueListener;
 import org.apache.pivot.wtk.TextArea;
 import org.apache.pivot.wtk.TextInput;
 import org.apache.pivot.wtk.Window;
-import org.apache.pivot.wtk.media.Image;
 
 import com.martiansoftware.jsap.JSAPException;
 
@@ -69,6 +66,7 @@ public class TLDTWindow implements Application {
 	private TLDTCore core;
 	private boolean isInitDone = false;
 	private boolean isInterpolationDone = false;
+	private String browserStartFolder = null;
 
 
 	@Override
@@ -148,9 +146,9 @@ public class TLDTWindow implements Application {
 				// launch MainScript
 				if (isInitDone) {
 					generateTimelapse();
-					Alert.alert(MessageType.INFO, "Timelapse generated: " + txtOutFolder.getText(), window);
+					Alert.alert(MessageType.INFO, "Timelapse generated in " + txtOutFolder.getText(), window);
 				} else {
-					Alert.alert(MessageType.WARNING, "First fill inputs in this assistant panel and load keyframes", window);
+					Alert.alert(MessageType.WARNING, "1.Fill inputs and outputs\n2.load keyframes", window);
 				}
 			}
 		});
@@ -162,7 +160,7 @@ public class TLDTWindow implements Application {
 				if (isInitDone) {
 					interpolateXmp();
 				} else {
-					Alert.alert(MessageType.WARNING, "First fill inputs in this assistant panel and load keyframes", window);
+					Alert.alert(MessageType.WARNING, "1.Fill inputs and outputs\n2.load keyframes", window);
 				}
 			}
 		});
@@ -175,7 +173,7 @@ public class TLDTWindow implements Application {
 					// launch deflick initialisation
 					deflickRefresh();
 				} else {
-					Alert.alert(MessageType.WARNING, "1. fill inputs in this assistant panel\n2.load keyframes\3.Interpolate XMP", window);
+					Alert.alert(MessageType.WARNING, "1.fill inputs in this assistant panel\n2.load keyframes\n3.Interpolate XMP in the Interpolation panel", window);
 				}
 			}
 		});
@@ -217,19 +215,22 @@ public class TLDTWindow implements Application {
 
 		final FileBrowserSheet fileBrowserSheet =
 				new FileBrowserSheet(FileBrowserSheet.Mode.SAVE_TO);
-
+		String text="/home/";
 		if(txt != null && txt.getText().length() > 0 &&
-				txt.getText().indexOf("\\") >0  ){
-			try{
-				String text = txt.getText();
-				int index = text.lastIndexOf("\\");
-				fileBrowserSheet.setRootDirectory(
-						new File(text.substring(0,index)));
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-		};
+				txt.getText().lastIndexOf("/") >0  ){
+			text = txt.getText();
+		} else if (this.browserStartFolder!= null) {
+			text = this.browserStartFolder;
+		}
+		try{
+			int index = text.lastIndexOf("/");
+			fileBrowserSheet.setRootDirectory(
+					new File(text.substring(0,index)));
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		fileBrowserSheet.open(win, new SheetCloseListener() {
 			@Override
 			public void sheetClosed(Sheet sheet) {
@@ -238,11 +239,17 @@ public class TLDTWindow implements Application {
 					if(selectedFiles.getLength() > 0){
 						String fileName = selectedFiles.get(0).getAbsoluteFile().toString();
 						txt.setText(fileName);
+						setBrowserStartFolder(fileName);
 					}
 				} 
 			}
 		});
+		
 
+	}
+
+	protected void setBrowserStartFolder(String fileName) {
+		this.browserStartFolder = fileName;		
 	}
 
 	@Override

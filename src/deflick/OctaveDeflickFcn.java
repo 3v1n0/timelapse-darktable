@@ -21,7 +21,8 @@ public class OctaveDeflickFcn {
 		this.lpFiltMinNum = 50;
 		this.spikeFiltMinNum = 12;
 		this.deltaLumThdMax = 0.02;
-		this.imgSizeXY = "640,320";
+		this.imgSizeXY = "640,460"; // for GUI, resize not working...
+		//this.imgSizeXY = "750,550";
 		// files config
 		this.outFolderDeflick = outFolderDeflick;
 		this.outLuminanceFile = outLuminanceFile;
@@ -131,6 +132,7 @@ public class OctaveDeflickFcn {
 				"    plot(filtSpikes_signal,'g--') % spikes removed\n"+
 				"    plot(in_time,filt_signal,'r-') % final filtered signal\n"+
 				"    title('signal and filtered signal')\n"+
+				"    xlim(in_time([1 end]))\n"+
 				"    xlabel('frame index')\n"+
 				"    ylabel('luminance')\n"+
 				"    legend('input','w/o spikes','filtered')\n"+

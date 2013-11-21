@@ -3,10 +3,12 @@
 	xmlns:bxml="http://pivot.apache.org/bxml" xmlns:boundedrange="org.apache.pivot.tutorials.boundedrange"
 	width="300" height="100">
 	<BoxPane orientation="vertical" styles="{padding:4, fill:true}">
-		<Border title=" timelapse-darktable " styles="{padding:20}">
+		<Border title=" timelapse-darktable " styles="{padding:5}">
 			<BoxPane orientation="vertical">
 				<Label
-					text="Timelapse-darktable will generate your timelapse in 3 clicks." />
+					text="Timelapse-darktable will generate your high-quality time lapse easily" />
+				<Label
+					text="( these packages should be installed: darktable, octave, imagemagick, mencoder )" />
 				<Label
 					text="NB: The whole processus requires a lot of CPU time, be patient..." />
 			</BoxPane>
@@ -115,7 +117,7 @@
 						</BoxPane>
 					</Border>
 					<Border styles="{padding:6}">
-						<BoxPane orientation="vertical"  preferredWidth="640" preferredHeight="320"
+						<BoxPane orientation="vertical"  preferredWidth="640" preferredHeight="460"
 							styles="{padding:4, verticalAlignment:'center', horizontalAlignment:'center',fill:true}">
 							<ImageView bxml:id="imgDeflick"/>
 						</BoxPane>
