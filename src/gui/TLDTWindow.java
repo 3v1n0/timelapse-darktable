@@ -29,6 +29,8 @@ import org.apache.pivot.wtk.TextArea;
 import org.apache.pivot.wtk.TextInput;
 import org.apache.pivot.wtk.Window;
 
+import utils.FileOp;
+
 import com.martiansoftware.jsap.JSAPException;
 
 import core.TLDTCore;
@@ -312,9 +314,14 @@ public class TLDTWindow implements Application {
 			this.core.deflickLpFiltMinNum = sliderDeflick.getValue();
 			this.core.deflickWriteLuminance();
 			this.core.deflickWriteFilter();
-			URL imageURL = new URL("file://"+this.core.outFolderDeflick+"/"+this.core.outLuminanceFile.replaceAll(".txt", "_deflick.png"));
 			// Update the image
-			imgDeflick.setImage(imageURL); // work the first time but not for refreshing
+			String imgPath = this.core.outFolderDeflick+"/"+this.core.outLuminanceFile.replaceAll(".txt", "_deflick.svg");
+			String imgPathNew = imgPath.replaceAll(".svg", this.core.deflickLpFiltMinNum+".svg");
+			FileOp.copyFile(imgPath, imgPathNew);
+			//imgDeflick.setImage(imgPath+"old");
+			//imgDeflick.setImage(imgPath);
+			imgDeflick.setImage(new URL("file://"+imgPathNew)); // work the first time but not for refreshing
+			
 
 			//imgDeflick.repaint();
 		} catch (IOException e) {

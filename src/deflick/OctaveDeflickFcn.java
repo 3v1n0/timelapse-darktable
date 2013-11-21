@@ -85,7 +85,7 @@ public class OctaveDeflickFcn {
 				"\n"+
 				"% print graphics\n"+
 				"if isPlotFlag  == true\n"+
-				"	print(fullfile(lumPath,[lumFic '_deflick.png']),'-S"+this.imgSizeXY+"');\n"+
+				"	print(fullfile(lumPath,[lumFic '_deflick.svg']),'-S"+this.imgSizeXY+"');\n"+
 				"end\n"+
 				"\n"+
 				"end\n"+
@@ -131,7 +131,7 @@ public class OctaveDeflickFcn {
 				"    grid on\n"+
 				"    plot(filtSpikes_signal,'g--') % spikes removed\n"+
 				"    plot(in_time,filt_signal,'r-') % final filtered signal\n"+
-				"    title('signal and filtered signal')\n"+
+				"    title(['signal and filtered signal LP=' num2str(N_LpFilt)])\n"+
 				"    xlim(in_time([1 end]))\n"+
 				"    xlabel('frame index')\n"+
 				"    ylabel('luminance')\n"+
