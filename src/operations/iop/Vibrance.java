@@ -14,7 +14,9 @@ public class Vibrance extends DTOperation {
 		super("vibrance");
 		this.put("amount",new DTParameter("float",1,null));
 	}
+	
 }
+// DT_MODULE(2)
 //typedef struct dt_iop_vibrance_params_t
 //{
 //  float amount;

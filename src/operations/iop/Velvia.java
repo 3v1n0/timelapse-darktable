@@ -12,8 +12,17 @@ public class Velvia extends DTOperation {
 
 	public Velvia() {
 		super("velvia");
-		this.put("strength",new DTParameter("float",1,null));
-		this.put("bias",new DTParameter("float",1,null));
+		if (this.version.equals("1")) {
+			this.put("saturation",new DTParameter("float",1,null));
+			this.put("vibrance",new DTParameter("float",1,null));
+			this.put("luminance",new DTParameter("float",1,null));
+			this.put("clarity",new DTParameter("float",1,null));
+		} else if (this.version.equals("2")) {
+			this.put("strength",new DTParameter("float",1,null));
+			this.put("bias",new DTParameter("float",1,null));			
+		} else {
+			this.printVersionError();
+		}
 	}
 }
 //typedef struct dt_iop_velvia_params_t

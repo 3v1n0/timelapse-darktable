@@ -14,6 +14,7 @@ import java.util.zip.ZipInputStream;
 
 import operations.iop.Atrous;
 import operations.iop.Basecurve;
+import operations.iop.Cacorrect;
 import operations.iop.Clipping;
 import operations.iop.Colorzones;
 import operations.iop.Denoiseprofile;
@@ -26,6 +27,7 @@ import operations.iop.Sharpen;
 import operations.iop.Temperature;
 import operations.iop.Velvia;
 import operations.iop.Vibrance;
+import operations.iop.Vignette;
 
 public class DTOperation extends LinkedHashMap<String,DTParameter>{
 	
@@ -105,6 +107,10 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 		return null;
 	}
 	
+	public void printVersionError() {
+		System.err.println("operation:"+this.name+" version:"+this.version+" not yet supported... contact project member or update sources");
+	}
+	
 	
 	@SuppressWarnings("unchecked")
 	// dynamic scanning of available operations (put in ./operations/iop folder)
@@ -117,6 +123,8 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 		return new Class<?> [] {
 				Atrous.class,
 				Basecurve.class,
+				Cacorrect.class,
+				// Clahe.class,
 				Clipping.class,
 				Colorzones.class,
 				Denoiseprofile.class,
@@ -129,6 +137,7 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 				Temperature.class,
 				Velvia.class,
 				Vibrance.class,
+				Vignette.class,
 		};
 	}
 

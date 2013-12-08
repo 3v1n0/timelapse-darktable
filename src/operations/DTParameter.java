@@ -10,12 +10,14 @@ public class DTParameter extends LinkedHashMap<String,Object> {
 	private static final long serialVersionUID = -8964653384534158760L;
 	
 	int length;
+	int wordSize;
 
 	public DTParameter(String type,int length,DTValue value) {
 		super();
 		this.put("type", type);
 		this.put("value", value);
 		this.length = length;
+		this.wordSize = 8;		
 	}
 	
 	/**
@@ -24,11 +26,11 @@ public class DTParameter extends LinkedHashMap<String,Object> {
 	public String read(String param) {
 		/* Retrieve specifed number of Bytes
 		 * code in hexa : 2 char = 1 Byte */
-		String paramString = param.substring(0, 8*this.length);
+		String paramString = param.substring(0, this.wordSize*this.length);
 		// get value, specified in OPXxx.java types
 		this.getValue(this.get("type"),paramString);
 		// update param String, removing part already read
-		return param.substring(8*this.length, param.length());
+		return param.substring(this.wordSize*this.length, param.length());
 	}
 	
 	public void getValue(Object object, String s){
@@ -39,7 +41,7 @@ public class DTParameter extends LinkedHashMap<String,Object> {
 			// inverts order of the 8 char word, 2 by 2 char : DDCCBBAA => AABBCCDD (little/big endian ?)
 			s = remain.substring(6,8) + remain.substring(4,6) + remain.substring(2,4) + remain.substring(0,2);
 			remain = remain.substring(8, remain.length());
-			if (object.equals("float")){
+			if (object.equals("float")) {
 				// Interpret hexa value as Float
 				Integer intValue = Long.valueOf(s,16).intValue();
 				value.put(i,(double) Float.intBitsToFloat(intValue));
@@ -47,6 +49,9 @@ public class DTParameter extends LinkedHashMap<String,Object> {
 				// Interpret hexa value as Integer
 				Integer intValue = Integer.valueOf(s,16).intValue();
 				value.put(i,(double) intValue);
+			} else {
+				System.err.println(object+" not yet implemented in DTParameter: contact developer");
+				// "double" to implement (clahe)
 			}
 		}
 		this.put("value",value);
