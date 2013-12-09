@@ -9,13 +9,25 @@ public class Colorzones extends DTOperation {
 	 */
 	private static final long serialVersionUID = -8173842643135545850L;
 
-	// TODO : manage history version (last version : 3*8, first 3*6)
 	public Colorzones() {
 		super("colorzones");
-		this.put("channel",new DTParameter("int",1,null));
-		this.put("equalizer_x",new DTParameter("float",3*8,null));
-		this.put("equalizer_y",new DTParameter("float",3*8,null));
-//		this.put("strength",new DTParameter("float",1,null));
+		if (this.version.equals("1")) {
+			int DT_IOP_COLORZONES1_BANDS=6;
+			this.put("channel",new DTParameter("int",1,null));
+			this.put("equalizer_x",new DTParameter("float",3*DT_IOP_COLORZONES1_BANDS,null));
+			this.put("equalizer_y",new DTParameter("float",3*DT_IOP_COLORZONES1_BANDS,null));
+		} else if (this.version.equals("2")) {
+			int DT_IOP_COLORZONES_BANDS=8;
+			this.put("channel",new DTParameter("int",1,null));
+			this.put("equalizer_x",new DTParameter("float",3*DT_IOP_COLORZONES_BANDS,null));
+			this.put("equalizer_y",new DTParameter("float",3*DT_IOP_COLORZONES_BANDS,null));
+		} else {
+			int DT_IOP_COLORZONES_BANDS=8;
+			this.put("channel",new DTParameter("int",1,null));
+			this.put("equalizer_x",new DTParameter("float",3*DT_IOP_COLORZONES_BANDS,null));
+			this.put("equalizer_y",new DTParameter("float",3*DT_IOP_COLORZONES_BANDS,null));
+			this.put("strength",new DTParameter("float",1,null));	
+		}
 	}
 }
 
@@ -42,3 +54,4 @@ public class Colorzones extends DTOperation {
 //  float equalizer_x[3][DT_IOP_COLORZONES1_BANDS], equalizer_y[3][DT_IOP_COLORZONES1_BANDS];
 //}
 //dt_iop_colorzones_params1_t;
+

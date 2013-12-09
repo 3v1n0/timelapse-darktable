@@ -12,19 +12,32 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import operations.iop.Anlfyeni;
 import operations.iop.Atrous;
 import operations.iop.Basecurve;
+import operations.iop.Bilat;
+import operations.iop.Bloom;
 import operations.iop.Cacorrect;
+import operations.iop.Channelmixer;
+import operations.iop.Clahe;
 import operations.iop.Clipping;
 import operations.iop.Colorzones;
 import operations.iop.Denoiseprofile;
 import operations.iop.Exposure;
+import operations.iop.Gamma;
 import operations.iop.Graduatednd;
 import operations.iop.Hotpixels;
+import operations.iop.Lens;
 import operations.iop.Levels;
+import operations.iop.Monochrome;
+import operations.iop.Nlmeans;
+import operations.iop.Rawdenoise;
 import operations.iop.Shadhi;
 import operations.iop.Sharpen;
+import operations.iop.Splittoning;
+import operations.iop.Spots;
 import operations.iop.Temperature;
+import operations.iop.Tonecurve;
 import operations.iop.Velvia;
 import operations.iop.Vibrance;
 import operations.iop.Vignette;
@@ -121,20 +134,32 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 	public static Class<? extends DTOperation> [] availableOperations = (Class<? extends DTOperation>[]) getClasses();
 	public static Class<?> [] getClasses() {
 		return new Class<?> [] {
+				Anlfyeni.class,
 				Atrous.class,
 				Basecurve.class,
+				Bilat.class,
+				Bloom.class,
 				Cacorrect.class,
-				// Clahe.class,
+				Channelmixer.class,
+				Clahe.class,
 				Clipping.class,
 				Colorzones.class,
 				Denoiseprofile.class,
 				Exposure.class,
+				Gamma.class,
 				Graduatednd.class,
 				Hotpixels.class,
+				Lens.class,
 				Levels.class,
+				Monochrome.class,
+				Nlmeans.class,
+				Rawdenoise.class,
 				Shadhi.class,
 				Sharpen.class,
+				Splittoning.class,
+				Spots.class,
 				Temperature.class,
+				Tonecurve.class,
 				Velvia.class,
 				Vibrance.class,
 				Vignette.class,

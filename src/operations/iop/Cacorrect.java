@@ -12,12 +12,7 @@ public class Cacorrect extends DTOperation {
 
 	public Cacorrect() {
 		super("cacorrect");
-		if (this.version.equals("1")) {
-			this.put("keep",new DTParameter("int",1,null));
-		}
-		else {
-			this.printVersionError();
-		}
+		this.put("keep",new DTParameter("int",1,null));
 	}
 	
 }
