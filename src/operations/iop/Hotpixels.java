@@ -11,7 +11,7 @@ public class Hotpixels extends DTOperation {
 	private static final long serialVersionUID = -1852564851363812265L;
 
 	public Hotpixels() {
-		super("hotpixels");
+		super("hotpixels",false);
 		this.put("strength",new DTParameter("float",1,null));
 		this.put("threshold",new DTParameter("float",1,null));
 		this.put("markfixed",new DTParameter("boolean",1,null));

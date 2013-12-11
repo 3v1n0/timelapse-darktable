@@ -10,7 +10,7 @@ public class Graduatednd extends DTOperation {
 	 */
 	private static final long serialVersionUID = 1669798107487955526L;
 	public Graduatednd() {
-		super("graduatednd");
+		super("graduatednd",true);
 		this.put("density",new DTParameter("float",1,null));
 		this.put("compression",new DTParameter("float",1,null));
 		this.put("rotation",new DTParameter("float",1,null));

@@ -11,18 +11,18 @@ public class Nlmeans extends DTOperation {
 	private static final long serialVersionUID = -3969080623012834663L;
 
 	public Nlmeans() {
-		super("nlmeans");
-		if (this.version.equals("1")) {
-			this.put("luma",new DTParameter("float",1,null));
-			this.put("chroma",new DTParameter("float",1,null));
-		}
-		else {
+		super("nlmeans",true);
+//		if (this.version.equals("1")) {
+//			this.put("luma",new DTParameter("float",1,null));
+//			this.put("chroma",new DTParameter("float",1,null));
+//		}
+		
 			// from v2
 			this.put("radius",new DTParameter("float",1,null));
 			this.put("strength",new DTParameter("float",1,null));
 			this.put("luma",new DTParameter("float",1,null));
 			this.put("chroma",new DTParameter("float",1,null));
-		}
+		
 	}
 	
 }

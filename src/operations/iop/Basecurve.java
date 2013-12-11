@@ -11,7 +11,7 @@ public class Basecurve extends DTOperation {
 	private static final long serialVersionUID = 5459335021716901200L;
 
 	public Basecurve() {
-		super("basecurve");
+		super("basecurve",false);
 		this.put("basecurve",new DTParameter("float",3*2*20,null));
 		this.put("basecurve_nodes",new DTParameter("int",3,null));
 		this.put("basecurve_type",new DTParameter("int",3,null));

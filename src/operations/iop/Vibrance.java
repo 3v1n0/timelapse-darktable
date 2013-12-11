@@ -11,7 +11,7 @@ public class Vibrance extends DTOperation {
 	private static final long serialVersionUID = -4614199116892197214L;
 
 	public Vibrance() {
-		super("vibrance");
+		super("vibrance",true);
 		this.put("amount",new DTParameter("float",1,null));
 	}
 	

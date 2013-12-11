@@ -11,12 +11,12 @@ public class Denoiseprofile extends DTOperation {
 	private static final long serialVersionUID = -7789719201477231540L;
 
 	public Denoiseprofile() {
-		super("denoiseprofile");
+		super("denoiseprofile",true);
 		this.put("radius",new DTParameter("float",1,null));
 		this.put("strength",new DTParameter("float",1,null));
 		this.put("a",new DTParameter("float",3,null));
 		this.put("b",new DTParameter("float",3,null));
-		this.put("mode",new DTParameter("int",1,null));
+		this.put("mode",new DTParameter("int",1,null,false));
 	}
 }
 

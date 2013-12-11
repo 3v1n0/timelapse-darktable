@@ -11,7 +11,7 @@ public class Bilat extends DTOperation {
 	private static final long serialVersionUID = 3139986542759292214L;
 
 	public Bilat() {
-		super("bilat");
+		super("bilat",true);
 		this.put("sigma_r",new DTParameter("float",1,null));
 		this.put("sigma_s",new DTParameter("float",1,null));
 		this.put("detail",new DTParameter("float",1,null));

@@ -11,7 +11,7 @@ public class Monochrome extends DTOperation {
 	private static final long serialVersionUID = -396908062301212363L;
 
 	public Monochrome() {
-		super("monochrome");
+		super("monochrome",true);
 		this.put("a",new DTParameter("float",1,null));
 		this.put("b",new DTParameter("float",1,null));
 		this.put("size",new DTParameter("float",1,null));

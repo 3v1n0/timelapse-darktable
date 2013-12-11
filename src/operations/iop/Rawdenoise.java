@@ -11,7 +11,7 @@ public class Rawdenoise extends DTOperation {
 	private static final long serialVersionUID = 3132986542759292214L;
 
 	public Rawdenoise() {
-		super("rawdenoise");
+		super("rawdenoise",true);
 		this.put("threshold",new DTParameter("float",1,null));
 	}
 }

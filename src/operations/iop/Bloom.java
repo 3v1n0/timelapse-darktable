@@ -11,7 +11,7 @@ public class Bloom extends DTOperation {
 	private static final long serialVersionUID = 3139986542759292214L;
 
 	public Bloom() {
-		super("bloom");
+		super("bloom",true);
 		this.put("size",new DTParameter("float",1,null));
 		this.put("threshold",new DTParameter("float",1,null));
 		this.put("strength",new DTParameter("float",1,null));

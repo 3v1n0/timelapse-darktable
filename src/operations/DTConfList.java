@@ -18,11 +18,11 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 	public DTConfList() {
 		super();
 	}
-	
+
 	public void addXmp(String xmpFile){
 		this.add(new DTConfiguration(xmpFile));
 	}
-	
+
 	public ArrayList<String> getSrcFileList() {
 		// return the srcFile (DTConfiguration.srcFile) list 
 		ArrayList<String> srcList = new ArrayList<String>();
@@ -32,7 +32,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		}
 		return srcList;
 	}
-	
+
 	public ArrayList<Number> getIndexList() {
 		// return the list of indices in an array list
 		ArrayList<Number> indexList = new ArrayList<Number>();
@@ -43,12 +43,12 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		}
 		return indexList;
 	}
-	
+
 	public double[] getIndexDoubleArray() {
 		// return the list of indices (DTConfiguration.index) in double[]
 		return this.todoubleArray(this.getIndexList());
 	}
-	
+
 	public ArrayList<Number> getOneParamList(String operation,String parameter,Integer index) {
 		// return one operation/parameter values in a list
 		ArrayList<Number> parList = new ArrayList<Number>();
@@ -58,7 +58,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		}
 		return parList;
 	}
-	
+
 	public double[] getOneParamDoubleArray(String operation,String parameter,Integer index) {
 		// return one operation/parameter all values in a matrix of double[]
 		return this.todoubleArray(this.getOneParamList(operation, parameter,index));
@@ -75,16 +75,16 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		}
 		return doubleArray;
 	}
-	
+
 	public double[] todoubleArray(ArrayList<Number> numList){
 		// return a double[] from a list composed of scalars
 		double[] doubleArray = new double[numList.size()]; 
 		for (int i = 0; i < numList.size(); i++) {
-				doubleArray[i] = numList.get(i).doubleValue();
+			doubleArray[i] = numList.get(i).doubleValue();
 		}
 		return doubleArray;
 	}
-	
+
 	public int[] tointArray(ArrayList<Number> numList){
 		// return an int[] from a list composed of scalars
 		int[] intArray = new int[numList.size()]; 
@@ -93,7 +93,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		}
 		return intArray;
 	}
-	
+
 	public double[] genInterpIndexList() {
 		// return the list of indices from (min file index) to (max file index) with a step of 1
 		// increasing list of indices :
@@ -106,7 +106,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		// if indSrc=[5 9 11] then xi = [5 6 7 8 9 10 11] 
 		return xi;
 	}
-	
+
 	public double[] linearInterp(double[] x,double[] y,double[] xi) {
 		// return linear interpolation of (x,y) on xi
 		double [] yi = new double[xi.length];
@@ -115,7 +115,20 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		}
 		return yi;
 	}
-	
+
+	public double zohInterp(double[] indexDoubleArray,	double[] oneParamDoubleArray, int fileIndex) {
+		// zero order hold interpolation
+		int i=0;
+		int iMax=(indexDoubleArray.length-1);
+		while (indexDoubleArray[i]<=fileIndex && i<iMax) {
+			i+=1;
+		}
+		if (fileIndex>=indexDoubleArray[i]) {
+			i=i+1;
+		}
+		return oneParamDoubleArray[i-1];
+	}
+
 	public double linearInterp(double[] x,double[] y,double xi) {
 		// return linear interpolation of (x,y) on xi
 		LinearInterpolator li = new LinearInterpolator();
@@ -123,7 +136,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		double yi=psf.value(xi); 
 		return yi;
 	}
-	
+
 	public double[] splineInterp(double[] x,double[] y,double[] xi) {
 		// return "free" cubic spline interpolation of (x,y) on xi
 		double [] yi = new double[xi.length];
@@ -132,7 +145,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		}
 		return yi;
 	}
-	
+
 	public double splineInterp(double[] x,double[] y,double xi) {
 		// return "free" cubic spline interpolation of (x,y) on xi
 		SplineInterpolator si = new SplineInterpolator(); 
@@ -140,12 +153,16 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		double yi=psf.value(xi); 
 		return yi;
 	}
-	
+
 	public double[] interpLinearOneOpParamAllIndices(String operation,String parameter,int paramIndex) {
 		// just for test 
 		return this.linearInterp(this.getIndexDoubleArray(),this.getOneParamDoubleArray(operation, parameter,paramIndex),this.genInterpIndexList());
 	}
-	
+
+	public double interpZohOneOpParam(String operation,String parameter,int paramIndex, int fileIndex) {
+		return this.zohInterp(this.getIndexDoubleArray(),this.getOneParamDoubleArray(operation, parameter,paramIndex),fileIndex);
+	}
+
 	public double interpLinearOneOpParam(String operation,String parameter,int paramIndex, int fileIndex) {
 		return this.linearInterp(this.getIndexDoubleArray(),this.getOneParamDoubleArray(operation, parameter,paramIndex),fileIndex);
 	}
@@ -154,18 +171,18 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		// just for test 
 		return this.splineInterp(this.getIndexDoubleArray(),this.getOneParamDoubleArray(operation, parameter,paramIndex),this.genInterpIndexList());
 	}
-	
+
 	public double interpSplineOneOpParam(String operation,String parameter,int paramIndex, int fileIndex) {
 		return this.splineInterp(this.getIndexDoubleArray(),this.getOneParamDoubleArray(operation, parameter,paramIndex),fileIndex);
 	}
-	
+
 	public DTConfList interpAllParam(String outFolder,String method) {
 		// interpolation method available: linear | spline
 
 		// copy 1st configuration before interpolation
 		DTConfList dtclInterp = new DTConfList();
 		dtclInterp.add(new DTConfiguration(this.first()));
-		
+
 		double[] interpFileIdx = this.genInterpIndexList();
 		for (int i = 0; i < interpFileIdx.length; i++) {
 			DTConfiguration dtc = new DTConfiguration(this.first());
@@ -176,12 +193,11 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 			while (s.length()<4) {
 				//complete with 0 to have 4 digits
 				s="0"+s;
-				
 			}
 			dtc.srcFile = dtc.srcFile.replaceAll("(.*\\D)(\\d+)(\\D.*)", "$1"+s+"$3");
 			dtclInterp.add(dtc);
 		}
-		
+
 		// for each operation : interpolate parameters
 		// scan all operations of first element TreeSet (DTConfiguration)
 		// suppose that all files in TreeSet have the same DTConfiguration (operation/parameters)
@@ -195,25 +211,31 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 				String parameter = itPar.next();
 				DTValue dtv = (DTValue) this.first().get(operation).get(parameter).get("value");
 				Iterator<Integer> itVal = dtv.keySet().iterator();
+				//TODO: correct interpolation... not working now ! :-(
 				while(itVal.hasNext()) {
 					//loop on all DTValue in LinkedHashMap
 					Integer paramIndex = itVal.next();
 					for (int i = 0; i < interpFileIdx.length; i++) {
-						//loop on all elements of DTConfiguration in TreeSet
+						// lowest level reached: interpolate values
 						Integer confIdx = (int) interpFileIdx[i];
 						double vi=0;
-						if (method.equalsIgnoreCase("linear")) {
-							vi = this.interpLinearOneOpParam(operation, parameter, paramIndex, confIdx);
-						} else if (method.equalsIgnoreCase("spline")) {
-							if (this.size()>2) {
-								vi = this.interpSplineOneOpParam(operation, parameter, paramIndex, confIdx);
-							} else {
-								System.err.println("Only 2 XMP keyframes:\nlinear interpolation is used instead of spline");
+						boolean isInterpolatable = (this.first().get(operation).isInterpolatable && this.first().get(operation).get(parameter).isInterpolatable);
+						if (isInterpolatable) {
+							if (method.equalsIgnoreCase("linear")) {
 								vi = this.interpLinearOneOpParam(operation, parameter, paramIndex, confIdx);
+							} else if (method.equalsIgnoreCase("spline")) {
+								if (this.size()>2) {
+									vi = this.interpSplineOneOpParam(operation, parameter, paramIndex, confIdx);
+								} else {
+									System.err.println("Only 2 XMP keyframes:\nlinear interpolation is used instead of spline");
+									vi = this.interpLinearOneOpParam(operation, parameter, paramIndex, confIdx);
+								}
+							} else {
+								System.err.println("Method "+method+" not supported. Available: linear | spline");
 							}
-							
 						} else {
-							System.err.println("Method "+method+" not supported. Available: linear | spline");
+							// zero order hold
+							vi = this.interpZohOneOpParam(operation, parameter, paramIndex, confIdx);
 						}
 						dtclInterp.get(confIdx).setOpParValue(operation, parameter, paramIndex, vi);
 					}
@@ -223,7 +245,7 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		dtclInterp.updateXmpConf(outFolder); // update xmpConf in coherency & write XMP files
 		return dtclInterp;
 	}
-	
+
 
 	public DTConfList deflick(String outFolder, PolynomialSplineFunction calibLumDeltaEV) {
 		DTConfList dtclDeflick = new DTConfList();
@@ -232,13 +254,13 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 			// first: copy current DTConfList
 			DTConfiguration dtc=itConf.next();
 			dtclDeflick.add(dtc);
-			
+
 			// apply deflickering
 			dtc.deflick(outFolder, calibLumDeltaEV);
 		}
 		return dtclDeflick;
 	}
-	
+
 	public void updateXmpConf(String outFolder) {
 		Iterator<DTConfiguration> it = this.iterator();
 		while(it.hasNext()) {
@@ -246,13 +268,13 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 			it.next().updateXmpConf(outFolder); // update xmpConf from DTOperation parameters
 		}			
 	}
-	
+
 	/**
 	 * print on screen all operations/parameters/values of the current DTConfList
 	 */
 	public ArrayList<String> getAllParamList() {
 		ArrayList<String> allParamList = new ArrayList<String>();
-		
+
 		boolean firstLine = true;
 		Iterator<DTConfiguration> itDt = this.iterator(); 
 		while (itDt.hasNext()) {
@@ -302,15 +324,15 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 		}
 		return allParamList;
 	}
-	
+
 	public void printAllParamTable() {
 		ArrayList<String> allParamList = this.getAllParamList();
 		for (int i = 0; i < allParamList.size(); i++) {
 			System.out.println(allParamList.get(i));
 		}
 	}
-	
-	
+
+
 	public DTConfiguration get(Integer index){
 		// return configuration corresponding to index
 		Iterator<DTConfiguration> itIndex = this.iterator();
@@ -322,9 +344,9 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 			}
 		}
 		return null;
-		
+
 	}
-	
+
 	public void addXmpFromFolder(String folderPath){
 		ArrayList<String> xmpFiles = new ArrayList<String>();
 		xmpFiles = this.getXmpFileInFolder(folderPath);
@@ -333,10 +355,10 @@ public class DTConfList extends TreeSet<DTConfiguration>  {
 			this.addXmp(folderPath+"/"+it.next());
 		}
 	}
-	
+
 	public ArrayList<String> getXmpFileInFolder(String folderPath) {
 		ArrayList<String> files = new ArrayList<String>();
-		
+
 		String file;
 		File folder = new File(folderPath);
 		File[] listOfFiles = folder.listFiles(); 

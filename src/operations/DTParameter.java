@@ -11,15 +11,21 @@ public class DTParameter extends LinkedHashMap<String,Object> {
 	
 	int length;
 	int wordSize;
+	boolean isInterpolatable;
 
-	public DTParameter(String type,int length,DTValue value) {
+	public DTParameter(String type,int length,DTValue value,boolean isInterpolatable) {
 		super();
 		this.put("type", type);
 		this.put("value", value);
 		this.length = length;
-		this.wordSize = 8;		
+		this.wordSize = 8;
+		this.isInterpolatable = isInterpolatable;
 	}
 	
+	public DTParameter(String type,int length,DTValue value) {
+		new DTParameter(type, length, value,true);
+	}
+		
 	/**
 	 * @param : String in XMP file describing parameterisation
 	 */
@@ -41,7 +47,7 @@ public class DTParameter extends LinkedHashMap<String,Object> {
 			// inverts order of the 8 char word, 2 by 2 char : DDCCBBAA => AABBCCDD (little/big endian ?)
 			s = remain.substring(6,8) + remain.substring(4,6) + remain.substring(2,4) + remain.substring(0,2);
 			remain = remain.substring(8, remain.length());
-			if (object.equals("float")) {
+			if (object.equals("float")|| object.equals("double")) {
 				// Interpret hexa value as Float
 				Integer intValue = Long.valueOf(s,16).intValue();
 				value.put(i,(double) Float.intBitsToFloat(intValue));

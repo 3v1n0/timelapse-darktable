@@ -42,7 +42,7 @@ import operations.iop.Velvia;
 import operations.iop.Vibrance;
 import operations.iop.Vignette;
 
-public class DTOperation extends LinkedHashMap<String,DTParameter>{
+public class DTOperation extends LinkedHashMap<String,DTParameter> {
 	
 	/**
 	 * Generic class defining DTOperation
@@ -52,17 +52,24 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 	 */
 	private static final long serialVersionUID = 8821139471068698706L;
 
-	public String name;          /** dt_iop name (e.g. "exposure") */
+	public String name;          /** dt_iop name (e.g. "exposure ") */
 	public String version;       /** version of iop */
 	public Boolean enabled;      /** enable flag */
 	public String blendVersion;  /** version of blendop */
 	public String blendParams;   /** parameterization of blendop => to be updated with OPType */
 	public String multiPriority; /** multi_priority property (for duplicated iop), (default = 0) */
 	public String multiName;     /** multi_name property (default empty string) */
+	public boolean isInterpolatable; /** interpolation is possible for this operation **/
 	
-	public DTOperation(String name) {
+	public DTOperation(String name,boolean isInterpolatable) {
 		super();
 		this.name = name;
+		this.isInterpolatable = isInterpolatable;
+		this.version = "0";
+	}
+	
+	public DTOperation(String name) {
+		new DTOperation(name,true);
 	}
 
 	/**
@@ -80,7 +87,7 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 	 */
 	public static DTOperation readOperation(String op, String ver, String ena, String par, String blendver, String blendpar , String multiprio, String multiname ) {
 		for(Class<?> classe : availableOperations) {
-			// scan all classes defined in dt/operations/iop
+			// scan all classes defined in operations/iop
 			try {
 				
 				DTOperation dtOp = (DTOperation) classe.newInstance();
@@ -94,6 +101,9 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 						dtOp.enabled = true;
 					}
 					dtOp.version = ver;
+					if (dtOp instanceof Versionable) {
+						dtOp.updateVersion(dtOp.version);
+					}
 					// initialise object corresponding to current operation parameters (defined in dt/operation/iop/"Operation".java)
 					Set<String> opParamNames = dtOp.keySet();
 					for(String param : opParamNames) {
@@ -120,6 +130,9 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 		return null;
 	}
 	
+	private void updateVersion(String version) {
+	}
+
 	public void printVersionError() {
 		System.err.println("operation:"+this.name+" version:"+this.version+" not yet supported... contact project member or update sources");
 	}
@@ -246,6 +259,6 @@ public class DTOperation extends LinkedHashMap<String,DTParameter>{
 		}
 		return params;
 	}
-	
+
 	
 }

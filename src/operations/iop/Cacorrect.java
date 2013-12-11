@@ -11,7 +11,7 @@ public class Cacorrect extends DTOperation {
 	private static final long serialVersionUID = -3969080623012834663L;
 
 	public Cacorrect() {
-		super("cacorrect");
+		super("cacorrect",false);
 		this.put("keep",new DTParameter("int",1,null));
 	}
 	

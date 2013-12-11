@@ -209,7 +209,7 @@ public class TLDTCore {
 		// regression on luminance points with octave script (write the "master" script)
 
 		// write octave scripts in outFolder/deflick
-		OctaveDeflickFcn odf = new OctaveDeflickFcn(this.outFolderDeflick,this.outLuminanceFile);
+		OctaveDeflickFcn odf = new OctaveDeflickFcn(this.outFolderDeflick,this.outLuminanceFile,this.octaveBin);
 		odf.setLpFiltMinNum(this.deflickLpFiltMinNum);
 		odf.writeFiles(); // write octave scripts
 

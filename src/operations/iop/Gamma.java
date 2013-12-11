@@ -11,7 +11,7 @@ public class Gamma extends DTOperation {
 	private static final long serialVersionUID = -4702179032766205794L;
 
 	public Gamma() {
-		super("gamma");
+		super("gamma",true);
 		this.put("gamma",new DTParameter("float",1,null));
 		this.put("linear",new DTParameter("float",1,null));
 	}

@@ -11,7 +11,7 @@ public class Lens extends DTOperation {
 	private static final long serialVersionUID = 3139886542759292214L;
 
 	public Lens() {
-		super("lens");
+		super("lens",false);
 		this.put("modify_flags",new DTParameter("int",1,null));
 		this.put("inverse",new DTParameter("int",1,null));
 		this.put("scale",new DTParameter("float",1,null));

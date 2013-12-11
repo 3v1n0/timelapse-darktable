@@ -14,8 +14,9 @@ public class OctaveDeflickFcn {
 	public String masterFileName;
 	public String deflickFcnName;
 	public String imgSizeXY;
+	private String octaveBin;
 	
-	public OctaveDeflickFcn(String outFolderDeflick,String outLuminanceFile) {
+	public OctaveDeflickFcn(String outFolderDeflick,String outLuminanceFile, String octaveBin) {
 		super();
 		// default parameters
 		this.lpFiltMinNum = 50;
@@ -29,6 +30,7 @@ public class OctaveDeflickFcn {
 		// write files
 		this.masterFileName = "master.m";
 		this.deflickFcnName = "deflick";
+		this.octaveBin = octaveBin;
 	}
 	
 	public void setLpFiltMinNum(int lpFiltMinNum) {
@@ -47,7 +49,7 @@ public class OctaveDeflickFcn {
 
 		// regression on luminance points with octave script (write the "master" script)
 		BufferedWriter outOctaveMaster = new BufferedWriter(new FileWriter(this.outFolderDeflick+"/"+this.masterFileName));
-		outOctaveMaster.write("#!/usr/bin/octave -qf"+"\n");
+		outOctaveMaster.write("#!"+this.octaveBin+" -qf"+"\n");
 		outOctaveMaster.write("addpath('"+outFolderDeflick+"');"+"\n");
 		outOctaveMaster.write(this.deflickFcnName+"('"+outFolderDeflick+"/"+outLuminanceFile+"');"+"\n");
 		outOctaveMaster.close();
@@ -57,7 +59,7 @@ public class OctaveDeflickFcn {
 		// first \n in \\n
 		// then regexp : ^(.*)\n   by  "$1\\n"+\n
 		// change hard-coded parameter in ..."+this.paramName+"...
-		String deflickFcnCore = "function "+this.deflickFcnName+"(luminanceTableFic)"+
+		String deflickFcnCore = "function "+this.deflickFcnName+"(luminanceTableFic)\n"+
 				"% compute deflickering parameters from luminance table\n"+
 				"\n"+
 				"% retrieve source luminance table\n"+
@@ -158,7 +160,7 @@ public class OctaveDeflickFcn {
 				"	% keyboard;\n"+
 				"	out_avg(iL) = sum(in_raw(winIdx).*weight(:)/weigthTot);\n"+
 				"end\n"+
-				"\n"+
+				"end\n"+
 				"\n"+
 				"function printTable(filename,values)\n"+
 				"% print in a text file\n"+
@@ -167,7 +169,8 @@ public class OctaveDeflickFcn {
 				"for iVal=1:length(values)\n"+
 				"	fprintf(fid,'%.6f\\n',values(iVal));\n"+
 				"end\n"+
-				"fclose(fid);";
+				"fclose(fid);\n"+
+				"end\n";
 		
 		BufferedWriter outDeflickFcn = new BufferedWriter(new FileWriter(outFolderDeflick+"/"+this.deflickFcnName+".m"));
 		outDeflickFcn.write(deflickFcnCore);

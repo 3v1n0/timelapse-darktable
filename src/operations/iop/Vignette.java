@@ -11,8 +11,26 @@ public class Vignette extends DTOperation {
 	private static final long serialVersionUID = -4614199112042197214L;
 
 	public Vignette() {
-		super("vignette");
-		if (this.version.equals("3")) {
+		super("vignette",true);
+//		if (this.version.equals("1")) {
+//			this.put("scale",new DTParameter("double",1,null));
+//			this.put("falloff_scale",new DTParameter("double",1,null));
+//			this.put("strength",new DTParameter("double",1,null));
+//			this.put("bsratio",new DTParameter("double",1,null));
+//			this.put("uniformity",new DTParameter("double",1,null));
+//			this.put("invert_falloff",new DTParameter("boolean",1,null));
+//			this.put("invert_saturation",new DTParameter("boolean",1,null));
+//			this.put("center",new DTParameter("float",2,null));
+//		} else if (this.version.equals("2")) {
+//			this.put("scale",new DTParameter("float",1,null));
+//			this.put("falloff_scale",new DTParameter("float",1,null));
+//			this.put("brightness",new DTParameter("float",1,null));
+//			this.put("saturation",new DTParameter("float",1,null));
+//			this.put("center",new DTParameter("float",2,null));
+//			this.put("autoratio",new DTParameter("int",1,null));
+//			this.put("whratio",new DTParameter("float",1,null));
+//			this.put("shape",new DTParameter("float",1,null));
+//		}
 			this.put("scale",new DTParameter("float",1,null));
 			this.put("falloff_scale",new DTParameter("float",1,null));
 			this.put("brightness",new DTParameter("float",1,null));
@@ -22,13 +40,7 @@ public class Vignette extends DTOperation {
 			this.put("whratio",new DTParameter("float",1,null));
 			this.put("shape",new DTParameter("float",1,null));
 			this.put("dithering",new DTParameter("int",1,null));
-		}
-		else {
-			this.printVersionError();
-		}
-		// version 1 & 2 to be implemented...
 	}
-	
 }
 
 // DT_MODULE(3)

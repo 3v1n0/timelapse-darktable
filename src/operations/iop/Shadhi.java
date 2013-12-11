@@ -11,8 +11,8 @@ public class Shadhi extends DTOperation {
 	private static final long serialVersionUID = -6380779433056726371L;
 
 	public Shadhi() {
-		super("shadhi");
-		this.put("order",new DTParameter("int",1,null));
+		super("shadhi",true);
+		this.put("order",new DTParameter("int",1,null,false));
 		this.put("radius",new DTParameter("float",1,null));
 		this.put("shadows",new DTParameter("float",1,null));
 		this.put("reserved1",new DTParameter("float",1,null));

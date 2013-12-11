@@ -11,9 +11,9 @@ public class Levels extends DTOperation {
 	private static final long serialVersionUID = 3139986542759292214L;
 
 	public Levels() {
-		super("levels");
+		super("levels",true);
 		this.put("levels",new DTParameter("float",3,null));
-		this.put("levels_preset",new DTParameter("int",1,null));
+		this.put("levels_preset",new DTParameter("int",1,null,false));
 	}
 }
 //typedef struct dt_iop_levels_params_t

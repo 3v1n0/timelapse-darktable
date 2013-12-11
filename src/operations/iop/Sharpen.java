@@ -11,7 +11,7 @@ public class Sharpen extends DTOperation {
 	private static final long serialVersionUID = -3052531236077147121L;
 
 	public Sharpen() {
-		super("sharpen");
+		super("sharpen",true);
 		this.put("radius",new DTParameter("float",1,null));
 		this.put("amount",new DTParameter("float",1,null));
 		this.put("threshold",new DTParameter("float",1,null));

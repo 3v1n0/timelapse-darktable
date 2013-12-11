@@ -11,7 +11,7 @@ public class Temperature extends DTOperation {
 	private static final long serialVersionUID = 337000576097680999L;
 
 	public Temperature() {
-		super("temperature");
+		super("temperature",true);
 		this.put("temp_out",new DTParameter("float",1,null));
 		this.put("coeffs",new DTParameter("float",3,null));
 	}

@@ -11,7 +11,7 @@ public class Channelmixer extends DTOperation {
 	private static final long serialVersionUID = 3139986542759292214L;
 
 	public Channelmixer() {
-		super("channelmixer");
+		super("channelmixer",true);
 		int CHANNEL_SIZE=7;
 		this.put("red",new DTParameter("float",CHANNEL_SIZE,null));
 		this.put("green",new DTParameter("float",CHANNEL_SIZE,null));

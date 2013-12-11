@@ -11,7 +11,7 @@ public class Splittoning extends DTOperation {
 	private static final long serialVersionUID = 3132986542759292214L;
 
 	public Splittoning() {
-		super("splittoning");
+		super("splittoning",true);
 		this.put("shadow_hue",new DTParameter("float",1,null));
 		this.put("shadow_saturation",new DTParameter("float",1,null));
 		this.put("highlight_hue",new DTParameter("float",1,null));

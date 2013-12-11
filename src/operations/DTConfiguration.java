@@ -80,7 +80,7 @@ public class DTConfiguration extends HashMap<String,DTOperation> implements Comp
 			return (Double) v.get(index);
 		} catch (Exception nulException) {
 			//System.out.println("null exception: "+operation+" "+parameter);
-			System.err.println("getOpParValue fail, : "+operation+" "+parameter);
+			System.err.println("getOpParValue failed on "+this.srcFile+" for "+operation+" / "+parameter);
 			return (Double) null;
 		}
 		

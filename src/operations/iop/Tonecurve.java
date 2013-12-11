@@ -11,19 +11,19 @@ public class Tonecurve extends DTOperation {
 	private static final long serialVersionUID = 3132986542759292214L;
 
 	public Tonecurve() {
-		super("tonecurve");
-		if (this.version.equals("1")) {
-			this.put("tonecurve_x",new DTParameter("float",6,null));
-			this.put("tonecurve_y",new DTParameter("float",6,null));
-			this.put("tonecurve_preset",new DTParameter("int",1,null));
-		} else {
+		super("tonecurve",true);
+//		if (this.version.equals("1")) {
+//			this.put("tonecurve_x",new DTParameter("float",6,null));
+//			this.put("tonecurve_y",new DTParameter("float",6,null));
+//			this.put("tonecurve_preset",new DTParameter("int",1,null,false));
+//		} 
 			int DT_IOP_TONECURVE_MAXNODES=20;
 			this.put("tonecurve",new DTParameter("float",3*2*DT_IOP_TONECURVE_MAXNODES,null));
 			this.put("tonecurve_nodes",new DTParameter("int",3,null));
 			this.put("tonecurve_type",new DTParameter("int",3,null));	
 			this.put("tonecurve_autoscale_ab",new DTParameter("int",1,null));
-			this.put("tonecurve_preset",new DTParameter("int",1,null));
-		}
+			this.put("tonecurve_preset",new DTParameter("int",1,null,false));
+		
 	}
 }
 
