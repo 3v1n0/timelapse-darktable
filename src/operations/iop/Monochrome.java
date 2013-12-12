@@ -12,6 +12,10 @@ public class Monochrome extends DTOperation {
 
 	public Monochrome() {
 		super("monochrome",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("a",new DTParameter("float",1,null));
 		this.put("b",new DTParameter("float",1,null));
 		this.put("size",new DTParameter("float",1,null));

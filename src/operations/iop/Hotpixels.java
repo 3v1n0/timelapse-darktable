@@ -12,6 +12,10 @@ public class Hotpixels extends DTOperation {
 
 	public Hotpixels() {
 		super("hotpixels",false);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("strength",new DTParameter("float",1,null));
 		this.put("threshold",new DTParameter("float",1,null));
 		this.put("markfixed",new DTParameter("boolean",1,null));

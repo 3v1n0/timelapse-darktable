@@ -12,10 +12,13 @@ public class Atrous extends DTOperation {
 	// TODO : manage history version (last version : 3*8, first 3*6)
 	public Atrous() {
 		super("atrous",false);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("octaves",new DTParameter("int",1,null,false)); // not interpolatable
 		this.put("x",new DTParameter("float",5*6,null));
-		this.put("y",new DTParameter("float",5*6,null));
-//		this.put("strength",new DTParameter("float",1,null));
+		this.put("y",new DTParameter("float",5*6,null));		
 	}
 }
 //

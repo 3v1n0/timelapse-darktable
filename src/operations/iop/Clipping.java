@@ -12,59 +12,39 @@ public class Clipping extends DTOperation {
 
 	public Clipping() {
 		super("clipping",true);
-		this.put("angle",new DTParameter("float",1,null));
-		this.put("cx",new DTParameter("float",1,null));
-		this.put("cy",new DTParameter("float",1,null));
-		this.put("cw",new DTParameter("float",1,null));
-		this.put("ch",new DTParameter("float",1,null));
-		this.put("k_h",new DTParameter("float",1,null));
-		this.put("k_v",new DTParameter("float",1,null));
-		this.put("kxa",new DTParameter("float",1,null));
-		this.put("kya",new DTParameter("float",1,null));
-		this.put("kxb",new DTParameter("float",1,null));
-		this.put("kyb",new DTParameter("float",1,null));
-		this.put("kxc",new DTParameter("float",1,null));
-		this.put("kyc",new DTParameter("float",1,null));
-		this.put("kxd",new DTParameter("float",1,null));
-		this.put("kyd",new DTParameter("float",1,null));
-		this.put("k_type",new DTParameter("int",1,null));
-		this.put("k_sym",new DTParameter("int",1,null));
-		this.put("k_apply",new DTParameter("int",1,null));
-		this.put("crop_auto",new DTParameter("int",1,null));
-		this.put("ratio_n",new DTParameter("int",1,null));
-		this.put("ratio_d",new DTParameter("int",1,null));
 	}
 
-	void updateVersion(String version) {
-//		if (this.version.equals("2")||this.version.equals("3")) {
-//			this.put("angle",new DTParameter("float",1,null));
-//			this.put("cx",new DTParameter("float",1,null));
-//			this.put("cy",new DTParameter("float",1,null));
-//			this.put("cw",new DTParameter("float",1,null));
-//			this.put("ch",new DTParameter("float",1,null));
-//			this.put("k_h",new DTParameter("float",1,null));
-//			this.put("k_v",new DTParameter("float",1,null));
-//		} else if (this.version.equals("3")) {
-//			this.put("angle",new DTParameter("float",1,null));
-//			this.put("cx",new DTParameter("float",1,null));
-//			this.put("cy",new DTParameter("float",1,null));
-//			this.put("cw",new DTParameter("float",1,null));
-//			this.put("ch",new DTParameter("float",1,null));
-//			this.put("k_h",new DTParameter("float",1,null));
-//			this.put("k_v",new DTParameter("float",1,null));
-//			this.put("kxa",new DTParameter("float",1,null));
-//			this.put("kya",new DTParameter("float",1,null));
-//			this.put("kxb",new DTParameter("float",1,null));
-//			this.put("kyb",new DTParameter("float",1,null));
-//			this.put("kxc",new DTParameter("float",1,null));
-//			this.put("kyc",new DTParameter("float",1,null));
-//			this.put("kxd",new DTParameter("float",1,null));
-//			this.put("kyd",new DTParameter("float",1,null));
-//			this.put("k_type",new DTParameter("int",1,null));
-//			this.put("k_sym",new DTParameter("int",1,null));
-//			this.put("k_apply",new DTParameter("int",1,null));
-//			this.put("crop_auto",new DTParameter("int",1,null));
-//		} 
+	@Override
+	public void addParam() {
+		if (this.version.equals("2")||this.version.equals("3")) {
+			this.put("angle",new DTParameter("float",1,null));
+			this.put("cx",new DTParameter("float",1,null));
+			this.put("cy",new DTParameter("float",1,null));
+			this.put("cw",new DTParameter("float",1,null));
+			this.put("ch",new DTParameter("float",1,null));
+			this.put("k_h",new DTParameter("float",1,null));
+			this.put("k_v",new DTParameter("float",1,null));
+		} else if (this.version.equals("3")) {
+			this.put("angle",new DTParameter("float",1,null));
+			this.put("cx",new DTParameter("float",1,null));
+			this.put("cy",new DTParameter("float",1,null));
+			this.put("cw",new DTParameter("float",1,null));
+			this.put("ch",new DTParameter("float",1,null));
+			this.put("k_h",new DTParameter("float",1,null));
+			this.put("k_v",new DTParameter("float",1,null));
+			this.put("kxa",new DTParameter("float",1,null));
+			this.put("kya",new DTParameter("float",1,null));
+			this.put("kxb",new DTParameter("float",1,null));
+			this.put("kyb",new DTParameter("float",1,null));
+			this.put("kxc",new DTParameter("float",1,null));
+			this.put("kyc",new DTParameter("float",1,null));
+			this.put("kxd",new DTParameter("float",1,null));
+			this.put("kyd",new DTParameter("float",1,null));
+			this.put("k_type",new DTParameter("int",1,null));
+			this.put("k_sym",new DTParameter("int",1,null));
+			this.put("k_apply",new DTParameter("int",1,null));
+			this.put("crop_auto",new DTParameter("int",1,null));
+		} else {
 			this.put("angle",new DTParameter("float",1,null));
 			this.put("cx",new DTParameter("float",1,null));
 			this.put("cy",new DTParameter("float",1,null));
@@ -86,7 +66,7 @@ public class Clipping extends DTOperation {
 			this.put("crop_auto",new DTParameter("int",1,null));
 			this.put("ratio_n",new DTParameter("int",1,null));
 			this.put("ratio_d",new DTParameter("int",1,null));
-		
+		}
 	}
 }
 

@@ -12,11 +12,15 @@ public class Denoiseprofile extends DTOperation {
 
 	public Denoiseprofile() {
 		super("denoiseprofile",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("radius",new DTParameter("float",1,null));
 		this.put("strength",new DTParameter("float",1,null));
 		this.put("a",new DTParameter("float",3,null));
 		this.put("b",new DTParameter("float",3,null));
-		this.put("mode",new DTParameter("int",1,null,false));
+		this.put("mode",new DTParameter("int",1,null,false));		
 	}
 }
 

@@ -2,9 +2,8 @@ package operations.iop;
 
 import operations.DTOperation;
 import operations.DTParameter;
-import operations.Versionable;
 
-public class Exposure extends DTOperation implements Versionable {
+public class Exposure extends DTOperation {
 
 	/**
 	 * exposure definition
@@ -13,14 +12,13 @@ public class Exposure extends DTOperation implements Versionable {
 
 	public Exposure() {
 		super("exposure",true);
-		this.put("black",new DTParameter("float",1,null));
-		this.put("exposure",new DTParameter("float",1,null));
-		this.put("gain",new DTParameter("float",1,null));
 	}
 
 	@Override
-	public void updateVersion(String version) {
-		System.out.println("success");
+	public void addParam() {
+		this.put("black",new DTParameter("float",1,null));
+		this.put("exposure",new DTParameter("float",1,null));
+		this.put("gain",new DTParameter("float",1,null));
 	}
 	
 }

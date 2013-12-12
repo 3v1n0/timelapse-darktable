@@ -116,13 +116,13 @@ public class OctaveDeflickFcn {
 				"notRejIdx = find(abs(avgSignal-in_signal)<dL_max);\n"+
 				"if length(notRejIdx)<2\n"+
 				" % keep 1st and last index\n"+
-				" notRejIdx = unique([1 notRejIdx(:)' length(notRejIdx)]);\n"+
+				" notRejIdx = unique([1 notRejIdx(:)' Ntot]);\n"+
 				"end\n"+
 				"% delete spikes and replace them by linear interpolated values\n"+
 				"filtSpikes_signal=interp1(in_time(notRejIdx),in_signal(notRejIdx),in_time,'linear','extrap');\n"+
 				"\n"+
 				"% final window-averaging \n"+
-				"filt_signal = windowAverage(in_signal,N_LpFilt);\n"+
+				"filt_signal = windowAverage(filtSpikes_signal,N_LpFilt);\n"+
 				"\n"+
 				"% PLOT\n"+
 				"% ----\n"+
@@ -145,9 +145,10 @@ public class OctaveDeflickFcn {
 				"function out_avg = windowAverage(in_raw,winHalfSize)\n"+
 				"\n"+
 				"% compute the average of the signal on the window size\n"+
+				"in_raw=in_raw(:); % vector reshape\n"+
 				"Ntot=length(in_raw);\n"+
 				"% window and weights before/after current sample\n"+
-				"weightGen=abs([1./[-winHalfSize:-1] 1 1./[1:winHalfSize]].^0.5);\n"+
+				"weightGen=abs([1./[-winHalfSize:-1] 1 1./[1:winHalfSize]].^0.5)';\n"+
 				"winGen=(-winHalfSize):(winHalfSize);\n"+
 				"% apply filter on a sliding window\n"+
 				"out_avg=zeros(size(in_raw));\n"+

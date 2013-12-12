@@ -11,15 +11,20 @@ public class Velvia extends DTOperation {
 	private static final long serialVersionUID = 4772494720136859836L;
 
 	public Velvia() {
-		super("velvia",true);
-		//		if (this.version.equals("1")) {
-		//			this.put("saturation",new DTParameter("float",1,null));
-		//			this.put("vibrance",new DTParameter("float",1,null));
-		//			this.put("luminance",new DTParameter("float",1,null));
-		//			this.put("clarity",new DTParameter("float",1,null));
-		//		}
-		this.put("strength",new DTParameter("float",1,null));
-		this.put("bias",new DTParameter("float",1,null));		
+		super("velvia",true);	
+	}
+
+	@Override
+	public void addParam() {
+		if (this.version.equals("1")) {
+			this.put("saturation",new DTParameter("float",1,null));
+			this.put("vibrance",new DTParameter("float",1,null));
+			this.put("luminance",new DTParameter("float",1,null));
+			this.put("clarity",new DTParameter("float",1,null));
+		} else {
+			this.put("strength",new DTParameter("float",1,null));
+			this.put("bias",new DTParameter("float",1,null));
+		}
 	}
 }
 //typedef struct dt_iop_velvia_params_t

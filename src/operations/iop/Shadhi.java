@@ -12,6 +12,10 @@ public class Shadhi extends DTOperation {
 
 	public Shadhi() {
 		super("shadhi",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("order",new DTParameter("int",1,null,false));
 		this.put("radius",new DTParameter("float",1,null));
 		this.put("shadows",new DTParameter("float",1,null));

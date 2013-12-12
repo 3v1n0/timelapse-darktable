@@ -12,6 +12,10 @@ public class Lens extends DTOperation {
 
 	public Lens() {
 		super("lens",false);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("modify_flags",new DTParameter("int",1,null));
 		this.put("inverse",new DTParameter("int",1,null));
 		this.put("scale",new DTParameter("float",1,null));

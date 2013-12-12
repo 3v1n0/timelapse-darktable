@@ -12,12 +12,14 @@ public class Anlfyeni extends DTOperation {
 
 	public Anlfyeni() {
 		super("anlfyeni",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("alpha",new DTParameter("float",1,null));
 		this.put("scale",new DTParameter("float",1,null));
-		this.put("strength",new DTParameter("float",1,null));
+		this.put("strength",new DTParameter("float",1,null));		
 	}
-	
-	void updateVersion(String version) {}
 }
 //typedef struct dt_iop_anlfyeni_params_t
 //{

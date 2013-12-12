@@ -12,6 +12,10 @@ public class Cacorrect extends DTOperation {
 
 	public Cacorrect() {
 		super("cacorrect",false);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("keep",new DTParameter("int",1,null));
 	}
 	

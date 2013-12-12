@@ -12,6 +12,10 @@ public class Splittoning extends DTOperation {
 
 	public Splittoning() {
 		super("splittoning",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("shadow_hue",new DTParameter("float",1,null));
 		this.put("shadow_saturation",new DTParameter("float",1,null));
 		this.put("highlight_hue",new DTParameter("float",1,null));

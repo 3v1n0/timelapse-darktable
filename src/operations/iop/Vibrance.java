@@ -12,6 +12,10 @@ public class Vibrance extends DTOperation {
 
 	public Vibrance() {
 		super("vibrance",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("amount",new DTParameter("float",1,null));
 	}
 	

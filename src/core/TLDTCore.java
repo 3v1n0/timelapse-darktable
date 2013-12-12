@@ -27,7 +27,7 @@ public class TLDTCore {
 	// Program properties
 	// ------ hard-coded parameters ----------
 	public String progName = "timelapse-darktable";
-	public String progVersion = "0.3";
+	public String progVersion = "0.4a";
 	// binaries location
 	public String darktablecliBin = runCmdOut("which","darktable-cli");
 	public String mencoderBin = runCmdOut("which","mencoder");

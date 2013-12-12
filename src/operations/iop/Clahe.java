@@ -12,6 +12,10 @@ public class Clahe extends DTOperation {
 
 	public Clahe() {
 		super("clahe",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("radius",new DTParameter("double",1,null));
 		this.put("slope",new DTParameter("double",1,null));
 	}	

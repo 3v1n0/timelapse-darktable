@@ -12,19 +12,20 @@ public class Nlmeans extends DTOperation {
 
 	public Nlmeans() {
 		super("nlmeans",true);
-//		if (this.version.equals("1")) {
-//			this.put("luma",new DTParameter("float",1,null));
-//			this.put("chroma",new DTParameter("float",1,null));
-//		}
-		
-			// from v2
+	}
+
+	@Override
+	public void addParam() {
+		if (this.version.equals("1")) {
+			this.put("luma",new DTParameter("float",1,null));
+			this.put("chroma",new DTParameter("float",1,null));
+		} else {
 			this.put("radius",new DTParameter("float",1,null));
 			this.put("strength",new DTParameter("float",1,null));
 			this.put("luma",new DTParameter("float",1,null));
 			this.put("chroma",new DTParameter("float",1,null));
-		
-	}
-	
+		}
+	}	
 }
 
 //typedef struct dt_iop_nlmeans_params_v1_t

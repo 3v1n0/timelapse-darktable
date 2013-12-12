@@ -12,25 +12,29 @@ public class Vignette extends DTOperation {
 
 	public Vignette() {
 		super("vignette",true);
-//		if (this.version.equals("1")) {
-//			this.put("scale",new DTParameter("double",1,null));
-//			this.put("falloff_scale",new DTParameter("double",1,null));
-//			this.put("strength",new DTParameter("double",1,null));
-//			this.put("bsratio",new DTParameter("double",1,null));
-//			this.put("uniformity",new DTParameter("double",1,null));
-//			this.put("invert_falloff",new DTParameter("boolean",1,null));
-//			this.put("invert_saturation",new DTParameter("boolean",1,null));
-//			this.put("center",new DTParameter("float",2,null));
-//		} else if (this.version.equals("2")) {
-//			this.put("scale",new DTParameter("float",1,null));
-//			this.put("falloff_scale",new DTParameter("float",1,null));
-//			this.put("brightness",new DTParameter("float",1,null));
-//			this.put("saturation",new DTParameter("float",1,null));
-//			this.put("center",new DTParameter("float",2,null));
-//			this.put("autoratio",new DTParameter("int",1,null));
-//			this.put("whratio",new DTParameter("float",1,null));
-//			this.put("shape",new DTParameter("float",1,null));
-//		}
+	}
+
+	@Override
+	public void addParam() {
+		if (this.version.equals("1")) {
+			this.put("scale",new DTParameter("double",1,null));
+			this.put("falloff_scale",new DTParameter("double",1,null));
+			this.put("strength",new DTParameter("double",1,null));
+			this.put("bsratio",new DTParameter("double",1,null));
+			this.put("uniformity",new DTParameter("double",1,null));
+			this.put("invert_falloff",new DTParameter("boolean",1,null));
+			this.put("invert_saturation",new DTParameter("boolean",1,null));
+			this.put("center",new DTParameter("float",2,null));
+		} else if (this.version.equals("2")) {
+			this.put("scale",new DTParameter("float",1,null));
+			this.put("falloff_scale",new DTParameter("float",1,null));
+			this.put("brightness",new DTParameter("float",1,null));
+			this.put("saturation",new DTParameter("float",1,null));
+			this.put("center",new DTParameter("float",2,null));
+			this.put("autoratio",new DTParameter("int",1,null));
+			this.put("whratio",new DTParameter("float",1,null));
+			this.put("shape",new DTParameter("float",1,null));
+		} else {
 			this.put("scale",new DTParameter("float",1,null));
 			this.put("falloff_scale",new DTParameter("float",1,null));
 			this.put("brightness",new DTParameter("float",1,null));
@@ -40,6 +44,8 @@ public class Vignette extends DTOperation {
 			this.put("whratio",new DTParameter("float",1,null));
 			this.put("shape",new DTParameter("float",1,null));
 			this.put("dithering",new DTParameter("int",1,null));
+		}
+		
 	}
 }
 

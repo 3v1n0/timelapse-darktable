@@ -42,7 +42,7 @@ import operations.iop.Velvia;
 import operations.iop.Vibrance;
 import operations.iop.Vignette;
 
-public class DTOperation extends LinkedHashMap<String,DTParameter> {
+public abstract class DTOperation extends LinkedHashMap<String,DTParameter> {
 	
 	/**
 	 * Generic class defining DTOperation
@@ -69,7 +69,7 @@ public class DTOperation extends LinkedHashMap<String,DTParameter> {
 	}
 	
 	public DTOperation(String name) {
-		new DTOperation(name,true);
+		this(name,true);
 	}
 
 	/**
@@ -100,10 +100,11 @@ public class DTOperation extends LinkedHashMap<String,DTParameter> {
 					} else {
 						dtOp.enabled = true;
 					}
+					
+					// update parameters definition according to DT_MODULE version
 					dtOp.version = ver;
-					if (dtOp instanceof Versionable) {
-						dtOp.updateVersion(dtOp.version);
-					}
+					dtOp.addParam();
+					
 					// initialise object corresponding to current operation parameters (defined in dt/operation/iop/"Operation".java)
 					Set<String> opParamNames = dtOp.keySet();
 					for(String param : opParamNames) {
@@ -130,8 +131,7 @@ public class DTOperation extends LinkedHashMap<String,DTParameter> {
 		return null;
 	}
 	
-	private void updateVersion(String version) {
-	}
+	public abstract void addParam();
 
 	public void printVersionError() {
 		System.err.println("operation:"+this.name+" version:"+this.version+" not yet supported... contact project member or update sources");

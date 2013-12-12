@@ -12,6 +12,10 @@ public class Rawdenoise extends DTOperation {
 
 	public Rawdenoise() {
 		super("rawdenoise",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("threshold",new DTParameter("float",1,null));
 	}
 }

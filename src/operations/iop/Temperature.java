@@ -12,6 +12,10 @@ public class Temperature extends DTOperation {
 
 	public Temperature() {
 		super("temperature",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("temp_out",new DTParameter("float",1,null));
 		this.put("coeffs",new DTParameter("float",3,null));
 	}

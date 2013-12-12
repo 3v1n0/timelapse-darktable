@@ -12,6 +12,10 @@ public class Levels extends DTOperation {
 
 	public Levels() {
 		super("levels",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("levels",new DTParameter("float",3,null));
 		this.put("levels_preset",new DTParameter("int",1,null,false));
 	}

@@ -12,6 +12,10 @@ public class Gamma extends DTOperation {
 
 	public Gamma() {
 		super("gamma",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("gamma",new DTParameter("float",1,null));
 		this.put("linear",new DTParameter("float",1,null));
 	}

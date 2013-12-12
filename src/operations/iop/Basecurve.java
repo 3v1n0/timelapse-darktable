@@ -12,9 +12,13 @@ public class Basecurve extends DTOperation {
 
 	public Basecurve() {
 		super("basecurve",false);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("basecurve",new DTParameter("float",3*2*20,null));
 		this.put("basecurve_nodes",new DTParameter("int",3,null));
-		this.put("basecurve_type",new DTParameter("int",3,null));
+		this.put("basecurve_type",new DTParameter("int",3,null));		
 	}
 }
 /*

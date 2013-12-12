@@ -12,9 +12,13 @@ public class Bilat extends DTOperation {
 
 	public Bilat() {
 		super("bilat",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("sigma_r",new DTParameter("float",1,null));
 		this.put("sigma_s",new DTParameter("float",1,null));
-		this.put("detail",new DTParameter("float",1,null));
+		this.put("detail",new DTParameter("float",1,null));		
 	}
 }
 //typedef struct dt_iop_bilat_params_t

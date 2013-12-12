@@ -12,10 +12,14 @@ public class Channelmixer extends DTOperation {
 
 	public Channelmixer() {
 		super("channelmixer",true);
+	}
+
+	@Override
+	public void addParam() {
 		int CHANNEL_SIZE=7;
 		this.put("red",new DTParameter("float",CHANNEL_SIZE,null));
 		this.put("green",new DTParameter("float",CHANNEL_SIZE,null));
-		this.put("blue",new DTParameter("float",CHANNEL_SIZE,null));
+		this.put("blue",new DTParameter("float",CHANNEL_SIZE,null));		
 	}
 }
 //typedef struct dt_iop_channelmixer_params_t

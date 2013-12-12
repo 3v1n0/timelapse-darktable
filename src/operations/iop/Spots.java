@@ -12,6 +12,10 @@ public class Spots extends DTOperation {
 
 	public Spots() {
 		super("spots",false);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("num_spots",new DTParameter("float",1,null));
 		this.put("spot",new DTParameter("float",32*5,null));
 	}

@@ -23,9 +23,10 @@ public class DTParameter extends LinkedHashMap<String,Object> {
 	}
 	
 	public DTParameter(String type,int length,DTValue value) {
-		new DTParameter(type, length, value,true);
+		this(type, length, value,true);
 	}
 		
+
 	/**
 	 * @param : String in XMP file describing parameterisation
 	 */

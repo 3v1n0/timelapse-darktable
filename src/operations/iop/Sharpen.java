@@ -12,6 +12,10 @@ public class Sharpen extends DTOperation {
 
 	public Sharpen() {
 		super("sharpen",true);
+	}
+
+	@Override
+	public void addParam() {
 		this.put("radius",new DTParameter("float",1,null));
 		this.put("amount",new DTParameter("float",1,null));
 		this.put("threshold",new DTParameter("float",1,null));

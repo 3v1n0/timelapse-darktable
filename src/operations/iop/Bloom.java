@@ -16,6 +16,13 @@ public class Bloom extends DTOperation {
 		this.put("threshold",new DTParameter("float",1,null));
 		this.put("strength",new DTParameter("float",1,null));
 	}
+
+	@Override
+	public void addParam() {
+		this.put("size",new DTParameter("float",1,null));
+		this.put("threshold",new DTParameter("float",1,null));
+		this.put("strength",new DTParameter("float",1,null));
+	}
 }
 //typedef struct dt_iop_bloom_data_t
 //{
