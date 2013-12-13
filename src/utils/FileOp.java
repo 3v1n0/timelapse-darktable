@@ -9,12 +9,12 @@ import java.io.OutputStream;
 
 public class FileOp {
 
-	public FileOp(){
-		super();	 
+	public FileOp() {
+		super();
 	}
-	
+
 	public static void copyFile(String source, String dest) throws IOException {
-		copyFile(new File(source),new File(dest));
+		copyFile(new File(source), new File(dest));
 	}
 
 	public static void copyFile(File source, File dest) throws IOException {

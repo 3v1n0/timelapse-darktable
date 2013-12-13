@@ -42,57 +42,75 @@ import operations.iop.Velvia;
 import operations.iop.Vibrance;
 import operations.iop.Vignette;
 
-public abstract class DTOperation extends LinkedHashMap<String,DTParameter> {
-	
+public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
+
 	/**
-	 * Generic class defining DTOperation
-	 * DTOperation is the generic name to define darktable filters
-	 * such as exposure, levels, temperature...
-	 * and its properties for a given image settings
+	 * Generic class defining DTOperation DTOperation is the generic name to
+	 * define darktable filters such as exposure, levels, temperature... and its
+	 * properties for a given image settings
 	 */
 	private static final long serialVersionUID = 8821139471068698706L;
 
-	public String name;          /** dt_iop name (e.g. "exposure ") */
-	public String version;       /** version of iop */
-	public Boolean enabled;      /** enable flag */
-	public String blendVersion;  /** version of blendop */
-	public String blendParams;   /** parameterization of blendop => to be updated with OPType */
-	public String multiPriority; /** multi_priority property (for duplicated iop), (default = 0) */
-	public String multiName;     /** multi_name property (default empty string) */
-	public boolean isInterpolatable; /** interpolation is possible for this operation **/
-	
-	public DTOperation(String name,boolean isInterpolatable) {
+	public String name;
+	/** dt_iop name (e.g. "exposure ") */
+	public String version;
+	/** version of iop */
+	public Boolean enabled;
+	/** enable flag */
+	public String blendVersion;
+	/** version of blendop */
+	public String blendParams;
+	/** parameterization of blendop => to be updated with OPType */
+	public String multiPriority;
+	/** multi_priority property (for duplicated iop), (default = 0) */
+	public String multiName;
+	/** multi_name property (default empty string) */
+	public boolean isInterpolatable;
+
+	/** interpolation is possible for this operation **/
+
+	public DTOperation(String name, boolean isInterpolatable) {
 		super();
 		this.name = name;
 		this.isInterpolatable = isInterpolatable;
 		this.version = "0";
 	}
-	
+
 	public DTOperation(String name) {
-		this(name,true);
+		this(name, true);
 	}
 
 	/**
-	 * readOperation reads all parameters (gets all values) of a known filter (in dt/operations/iop)
-	 * and updates its properties (enable, multi, etc...)
-	 * @param op  : iop/filter (e.g. clipping)
-	 * @param ver : version    (e.g. 1) // not used for now, could be used for support of new/older DT releases
-	 * @param ena : enabled flag
-	 * @param par : parameter read in XML (e.g. "12df42ddf23df2fd")
-	 * @param blendver 
-	 * @param blendpar // TODO read blendparam => inspired from iop
+	 * readOperation reads all parameters (gets all values) of a known filter
+	 * (in dt/operations/iop) and updates its properties (enable, multi, etc...)
+	 * 
+	 * @param op
+	 *            : iop/filter (e.g. clipping)
+	 * @param ver
+	 *            : version (e.g. 1) // not used for now, could be used for
+	 *            support of new/older DT releases
+	 * @param ena
+	 *            : enabled flag
+	 * @param par
+	 *            : parameter read in XML (e.g. "12df42ddf23df2fd")
+	 * @param blendver
+	 * @param blendpar
+	 *            // TODO read blendparam => inspired from iop
 	 * @param multiprio
 	 * @param multiname
 	 * @return
 	 */
-	public static DTOperation readOperation(String op, String ver, String ena, String par, String blendver, String blendpar , String multiprio, String multiname ) {
-		for(Class<?> classe : availableOperations) {
+	public static DTOperation readOperation(String op, String ver, String ena,
+			String par, String blendver, String blendpar, String multiprio,
+			String multiname) {
+		for (Class<?> classe : availableOperations) {
 			// scan all classes defined in operations/iop
 			try {
-				
+
 				DTOperation dtOp = (DTOperation) classe.newInstance();
-				if(dtOp.name.equals(op)) {
-					// current operation name (op) matches to one class definition
+				if (dtOp.name.equals(op)) {
+					// current operation name (op) matches to one class
+					// definition
 					// => we read the parameters of current operation
 					if (!ena.equals("1")) {
 						// iop is not active, but we still scan parameters
@@ -100,17 +118,20 @@ public abstract class DTOperation extends LinkedHashMap<String,DTParameter> {
 					} else {
 						dtOp.enabled = true;
 					}
-					
-					// update parameters definition according to DT_MODULE version
+
+					// update parameters definition according to DT_MODULE
+					// version
 					dtOp.version = ver;
 					dtOp.addParam();
-					
-					// initialise object corresponding to current operation parameters (defined in dt/operation/iop/"Operation".java)
+
+					// initialise object corresponding to current operation
+					// parameters (defined in dt/operation/iop/"Operation".java)
 					Set<String> opParamNames = dtOp.keySet();
-					for(String param : opParamNames) {
-						// each DTParameter reads the first words of the the string par
+					for (String param : opParamNames) {
+						// each DTParameter reads the first words of the the
+						// string par
 						// and returns remaining string (for next parameters)
-						//System.out.println(op+" "+param);
+						// System.out.println(op+" "+param);
 						par = dtOp.get(param).read(par);
 					}
 					dtOp.blendParams = blendpar;
@@ -119,77 +140,64 @@ public abstract class DTOperation extends LinkedHashMap<String,DTParameter> {
 					dtOp.multiName = multiname;
 					return dtOp;
 				}
-				
+
 			} catch (InstantiationException e) {
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
 				e.printStackTrace();
 			}
-			
+
 		}
 		System.err.println("No class found to read " + op);
 		return null;
 	}
-	
+
 	public abstract void addParam();
 
 	public void printVersionError() {
-		System.err.println("operation:"+this.name+" version:"+this.version+" not yet supported... contact project member or update sources");
-	}
-	
-	
-	@SuppressWarnings("unchecked")
-	// dynamic scanning of available operations (put in ./operations/iop folder)
-//	public static Class<? extends DTOperation> [] availableOperations = (Class<? extends DTOperation>[]) getClasses("operations.iop");
-	
-	// static definition
-	// TODO : update the list each time you add a class in operations/iop and then CTRL+SHIFT+O to update imports in eclipse
-	public static Class<? extends DTOperation> [] availableOperations = (Class<? extends DTOperation>[]) getClasses();
-	public static Class<?> [] getClasses() {
-		return new Class<?> [] {
-				Anlfyeni.class,
-				Atrous.class,
-				Basecurve.class,
-				Bilat.class,
-				Bloom.class,
-				Cacorrect.class,
-				Channelmixer.class,
-				Clahe.class,
-				Clipping.class,
-				Colorzones.class,
-				Denoiseprofile.class,
-				Exposure.class,
-				Gamma.class,
-				Graduatednd.class,
-				Hotpixels.class,
-				Lens.class,
-				Levels.class,
-				Monochrome.class,
-				Nlmeans.class,
-				Rawdenoise.class,
-				Shadhi.class,
-				Sharpen.class,
-				Splittoning.class,
-				Spots.class,
-				Temperature.class,
-				Tonecurve.class,
-				Velvia.class,
-				Vibrance.class,
-				Vignette.class,
-		};
+		System.err
+				.println("operation:"
+						+ this.name
+						+ " version:"
+						+ this.version
+						+ " not yet supported... contact project member or update sources");
 	}
 
-	
+	@SuppressWarnings("unchecked")
+	// dynamic scanning of available operations (put in ./operations/iop folder)
+	// public static Class<? extends DTOperation> [] availableOperations =
+	// (Class<? extends DTOperation>[]) getClasses("operations.iop");
+	// static definition
+	// TODO : update the list each time you add a class in operations/iop and
+	// then CTRL+SHIFT+O to update imports in eclipse
+	public static Class<? extends DTOperation>[] availableOperations = (Class<? extends DTOperation>[]) getClasses();
+
+	public static Class<?>[] getClasses() {
+		return new Class<?>[] { Anlfyeni.class, Atrous.class, Basecurve.class,
+				Bilat.class, Bloom.class, Cacorrect.class, Channelmixer.class,
+				Clahe.class, Clipping.class, Colorzones.class,
+				Denoiseprofile.class, Exposure.class, Gamma.class,
+				Graduatednd.class, Hotpixels.class, Lens.class, Levels.class,
+				Monochrome.class, Nlmeans.class, Rawdenoise.class,
+				Shadhi.class, Sharpen.class, Splittoning.class, Spots.class,
+				Temperature.class, Tonecurve.class, Velvia.class,
+				Vibrance.class, Vignette.class, };
+	}
+
 	/**
-	 * Scans all classes accessible from the context class loader which belong to the given package and subpackages.
-	 * @param packageName The base package
+	 * Scans all classes accessible from the context class loader which belong
+	 * to the given package and subpackages.
+	 * 
+	 * @param packageName
+	 *            The base package
 	 * @return The classes
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 */
-	public static Class<?> [] getClasses(String packageName) {
+	public static Class<?>[] getClasses(String packageName) {
 		try {
-			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			ClassLoader classLoader = Thread.currentThread()
+					.getContextClassLoader();
 			assert classLoader != null;
 			String path = packageName.replace('.', '/');
 			Enumeration<URL> resources = classLoader.getResources(path);
@@ -207,30 +215,35 @@ public abstract class DTOperation extends LinkedHashMap<String,DTParameter> {
 				classList.add(Class.forName(clazz));
 			}
 			return classList.toArray(new Class[classes.size()]);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
+
 	/**
-	 * Recursive method used to find all classes in a given directory and subdirs.
-	 * @param directory   The base directory
-	 * @param packageName The package name for classes found inside the base directory
+	 * Recursive method used to find all classes in a given directory and
+	 * subdirs.
+	 * 
+	 * @param directory
+	 *            The base directory
+	 * @param packageName
+	 *            The package name for classes found inside the base directory
 	 * @return The classes
 	 * @throws ClassNotFoundException
 	 */
-	private static TreeSet<String> findClasses(String directory, String packageName) throws Exception {
+	private static TreeSet<String> findClasses(String directory,
+			String packageName) throws Exception {
 		TreeSet<String> classes = new TreeSet<String>();
 		if (directory.startsWith("file:") && directory.contains("!")) {
-			String [] split = directory.split("!");
+			String[] split = directory.split("!");
 			URL jar = new URL(split[0]);
 			ZipInputStream zip = new ZipInputStream(jar.openStream());
 			ZipEntry entry = null;
 			while ((entry = zip.getNextEntry()) != null) {
 				if (entry.getName().endsWith(".class")) {
-					String className = entry.getName().replaceAll("[$].*", "").replaceAll("[.]class", "").replace('/', '.');
+					String className = entry.getName().replaceAll("[$].*", "")
+							.replaceAll("[.]class", "").replace('/', '.');
 					classes.add(className);
 				}
 			}
@@ -243,9 +256,13 @@ public abstract class DTOperation extends LinkedHashMap<String,DTParameter> {
 		for (File file : files) {
 			if (file.isDirectory()) {
 				assert !file.getName().contains(".");
-				classes.addAll(findClasses(file.getAbsolutePath(), packageName + "." + file.getName()));
+				classes.addAll(findClasses(file.getAbsolutePath(), packageName
+						+ "." + file.getName()));
 			} else if (file.getName().endsWith(".class")) {
-				classes.add(packageName + '.' + file.getName().substring(0, file.getName().length() - 6));
+				classes.add(packageName
+						+ '.'
+						+ file.getName().substring(0,
+								file.getName().length() - 6));
 			}
 		}
 		return classes;
@@ -254,11 +271,10 @@ public abstract class DTOperation extends LinkedHashMap<String,DTParameter> {
 	public static String writeParams(DTOperation dtOp) {
 		String params = "";
 		Set<String> opParamNames = dtOp.keySet();
-		for(String param : opParamNames) {
-			params = params+dtOp.get(param).write();
+		for (String param : opParamNames) {
+			params = params + dtOp.get(param).write();
 		}
 		return params;
 	}
 
-	
 }

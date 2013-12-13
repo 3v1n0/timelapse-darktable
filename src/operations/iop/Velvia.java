@@ -11,34 +11,34 @@ public class Velvia extends DTOperation {
 	private static final long serialVersionUID = 4772494720136859836L;
 
 	public Velvia() {
-		super("velvia",true);	
+		super("velvia", true);
 	}
 
 	@Override
 	public void addParam() {
 		if (this.version.equals("1")) {
-			this.put("saturation",new DTParameter("float",1,null));
-			this.put("vibrance",new DTParameter("float",1,null));
-			this.put("luminance",new DTParameter("float",1,null));
-			this.put("clarity",new DTParameter("float",1,null));
+			this.put("saturation", new DTParameter("float", 1, null));
+			this.put("vibrance", new DTParameter("float", 1, null));
+			this.put("luminance", new DTParameter("float", 1, null));
+			this.put("clarity", new DTParameter("float", 1, null));
 		} else {
-			this.put("strength",new DTParameter("float",1,null));
-			this.put("bias",new DTParameter("float",1,null));
+			this.put("strength", new DTParameter("float", 1, null));
+			this.put("bias", new DTParameter("float", 1, null));
 		}
 	}
 }
-//typedef struct dt_iop_velvia_params_t
-//{
-//  float strength;
-//  float bias;
-//}
-//dt_iop_velvia_params_t;
+// typedef struct dt_iop_velvia_params_t
+// {
+// float strength;
+// float bias;
+// }
+// dt_iop_velvia_params_t;
 //
-///* legacy version 1 params */
-//typedef struct dt_iop_velvia_params1_t
-//{
-//  float saturation;
-//  float vibrance;
-//  float luminance;
-//  float clarity;
-//}
+// /* legacy version 1 params */
+// typedef struct dt_iop_velvia_params1_t
+// {
+// float saturation;
+// float vibrance;
+// float luminance;
+// float clarity;
+// }

@@ -11,17 +11,17 @@ public class Cacorrect extends DTOperation {
 	private static final long serialVersionUID = -3969080623012834663L;
 
 	public Cacorrect() {
-		super("cacorrect",false);
+		super("cacorrect", false);
 	}
 
 	@Override
 	public void addParam() {
-		this.put("keep",new DTParameter("int",1,null));
+		this.put("keep", new DTParameter("int", 1, null));
 	}
-	
+
 }
-//typedef struct dt_iop_cacorrect_params_t
-//{
-//  int keep;
-//}
-//dt_iop_cacorrect_params_t;
+// typedef struct dt_iop_cacorrect_params_t
+// {
+// int keep;
+// }
+// dt_iop_cacorrect_params_t;

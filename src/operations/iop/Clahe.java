@@ -11,17 +11,17 @@ public class Clahe extends DTOperation {
 	private static final long serialVersionUID = 9116309930302462999L;
 
 	public Clahe() {
-		super("clahe",true);
+		super("clahe", true);
 	}
 
 	@Override
 	public void addParam() {
-		this.put("radius",new DTParameter("double",1,null));
-		this.put("slope",new DTParameter("double",1,null));
-	}	
+		this.put("radius", new DTParameter("double", 1, null));
+		this.put("slope", new DTParameter("double", 1, null));
+	}
 }
-//typedef struct dt_iop_rlce_params_t
-//{
-//  double radius;
-//  double slope;
-//}
+// typedef struct dt_iop_rlce_params_t
+// {
+// double radius;
+// double slope;
+// }
