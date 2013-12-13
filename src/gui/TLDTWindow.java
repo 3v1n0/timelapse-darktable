@@ -374,39 +374,24 @@ public class TLDTWindow implements Application {
 
 	private String[] genCliOptions() {
 		int maxSize = 40;
-		String[] cliOptions = new String[maxSize];
-		int i = 0;
-		cliOptions[i] = "-x";
-		i += 1;
-		cliOptions[i] = txtXmpSrc.getText();
-		i += 1;
-		cliOptions[i] = "-i";
-		i += 1;
-		cliOptions[i] = txtImgSrc.getText();
-		i += 1;
-		cliOptions[i] = "-o";
-		i += 1;
-		cliOptions[i] = txtOutFolder.getText();
-		i += 1;
-		cliOptions[i] = "-t";
-		i += 1;
-		cliOptions[i] = (String) rbInterpType.getSelection().getButtonData();
-		i += 1;
-		cliOptions[i] = "-w";
-		i += 1;
-		cliOptions[i] = txtWidth.getText();
-		i += 1;
-		cliOptions[i] = "-h";
-		i += 1;
-		cliOptions[i] = txtHeigth.getText();
-		i += 1;
-		cliOptions[i] = "-L";
-		i += 1;
-		cliOptions[i] = "" + sliderDeflick.getValue();
-		i += 1;
-		if (cbIsDeflick.isSelected()) {
-			cliOptions[i] = "-d";
-			i += 1;
+		String[] cliOptions = new String[maxSize] ;
+		int i=0;
+		cliOptions[i] = "-x";i+=1;
+		cliOptions[i] = txtXmpSrc.getText();i+=1;	
+		cliOptions[i] = "-i";i+=1;
+		cliOptions[i] = txtImgSrc.getText();i+=1;
+		cliOptions[i] = "-o";i+=1;
+		cliOptions[i] = txtOutFolder.getText();i+=1;
+		cliOptions[i] = "-t";i+=1;
+		cliOptions[i] = (String) rbInterpType.getSelection().getButtonData();i+=1;
+		cliOptions[i] = "-w";i+=1;
+		cliOptions[i] = txtWidth.getText();i+=1;
+		cliOptions[i] = "-h";i+=1;
+		cliOptions[i] = txtHeigth.getText();i+=1;
+		cliOptions[i] = "-L";i+=1;
+		cliOptions[i] = ""+sliderDeflick.getValue();i+=1;
+		if (cbIsDeflick.isSelected()){
+			cliOptions[i] = "-d";i+=1;
 		}
 		if (cbIsExportJpg.isSelected()) {
 			cliOptions[i] = "-j";
