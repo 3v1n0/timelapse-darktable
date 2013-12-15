@@ -276,5 +276,15 @@ public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
 		}
 		return params;
 	}
+	
+	public static String writeEnable(DTOperation dtOp) {
+		String opEna = "";
+		if (dtOp.enabled) {
+			opEna = "1";
+		} else { 
+			opEna = "0";
+		}
+		return opEna;
+	}
 
 }

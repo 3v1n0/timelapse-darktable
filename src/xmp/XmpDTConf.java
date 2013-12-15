@@ -63,10 +63,11 @@ public class XmpDTConf {
 		setValuesOfNode(new String[] { "x:xmpmeta", "rdf:RDF",
 				"rdf:Description", "darktable:history_params", "rdf:Seq" },
 				"rdf:li", this.histPar);
+		setValuesOfNode(new String[] { "x:xmpmeta", 	"rdf:RDF",
+				"rdf:Description", "darktable:history_enabled", "rdf:Seq" },
+				"rdf:li", this.histEna);
 		setNodeAttribute(new String[] { "x:xmpmeta", "rdf:RDF" },
 				"rdf:Description", "xmpMM:DerivedFrom", this.srcFile);
-		// test : print file
-		// System.out.println(this.srcFile);
 		this.xmpFile.write(outFolder, this.srcFile);
 	}
 

@@ -262,6 +262,13 @@ public class TLDTCore {
 		DTConfiguration dtc = this.dtConfListInterp.first();
 		String fic = dtc.srcFile;
 		String outFolderCalib = this.outFolderDeflick + "/calib";
+		int iFolder = 1;
+		while ((new File(outFolderCalib)).exists()) {
+			outFolderCalib = this.outFolderDeflick + "/calib" + iFolder;
+			iFolder += 1;
+		}
+
+		
 		// double evFirst = getOpParValue(dtc,"exposure ", "exposure", 0);
 		double evFirst = dtc.getOpParValue("exposure ", "exposure", 0);
 		for (int i = 0; i < evCalib.length; i++) {
@@ -273,6 +280,7 @@ public class TLDTCore {
 			// setOpParValue(dtc,"exposure ", "exposure", 0,
 			// evFirst+evCalib[i]);
 			dtc.setOpParValue("exposure ", "exposure", 0, evFirst + evCalib[i]);
+			dtc.setOpEnable("exposure ", true);
 			dtc.updateXmpConf(outFolderCalib);
 			// generate JPG
 			runCmd(this.darktablecliBin, this.imgSrc + "/" + fic,

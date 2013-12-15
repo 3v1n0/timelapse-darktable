@@ -72,8 +72,10 @@ public class DTConfiguration extends HashMap<String, DTOperation> implements
 		for (int i = 0; i < this.xmpConf.histOp.size(); i++) {
 			// for each operation, write parameter value from DTOperation
 			String opkey = xmpConf.histOp.get(i) + xmpConf.multName.get(i);
-			String xmpConfUpd = DTOperation.writeParams(this.get(opkey));
+			DTOperation dtOp = this.get(opkey);
+			String xmpConfUpd = DTOperation.writeParams(dtOp);
 			this.xmpConf.histPar.set(i, xmpConfUpd);
+			this.xmpConf.histEna.set(i, DTOperation.writeEnable(dtOp));
 		}
 		this.xmpConf.srcFile = this.srcFile; // update xmpConf srcFile
 		this.xmpConf.write(outFolder); // update xmpConf in coherency & write
@@ -103,6 +105,25 @@ public class DTConfiguration extends HashMap<String, DTOperation> implements
 		v.put(index, value);
 		this.get(operation).get(parameter).put("value", v);
 	}
+	
+	public void setOpEnable(String operation, String multiName, boolean isEnabled) {
+		// set operation / multiname / is enabled flag
+		DTOperation op = this.get(operation+multiName);
+		op.enabled=isEnabled;
+	}
+	
+	public void setOpEnable(String operation, boolean isEnabled) {
+		// set operation / multiname / is enabled flag
+		try {
+			setOpEnable(operation, "", isEnabled);
+		} catch (Exception e) {
+			try {
+				setOpEnable(operation, " ", isEnabled);
+			} catch (Exception e2) {
+				System.err.println(operation + " " + "not existing operation");
+			}
+		}
+	}
 
 	@Override
 	public int compareTo(DTConfiguration arg0) {
@@ -123,6 +144,7 @@ public class DTConfiguration extends HashMap<String, DTOperation> implements
 
 		// update XMP configuration
 		setOpParValue("exposure ", "exposure", 0, EV + evDeflick);
+		setOpEnable("exposure", true);
 		this.updateXmpConf(outFolder);
 	}
 
