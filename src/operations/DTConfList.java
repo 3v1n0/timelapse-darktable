@@ -325,7 +325,7 @@ public class DTConfList extends TreeSet<DTConfiguration> {
 			DTConfiguration dtc = itDt.next();
 			Integer confIdx = dtc.index;
 			if (firstLine == true) {
-				header = header + "Idx" + "\t";
+				header = header + "Idx" + " \t";
 			}
 			line = line + confIdx;
 			Iterator<String> itOp = this.first().keySet().iterator();
@@ -333,18 +333,18 @@ public class DTConfList extends TreeSet<DTConfiguration> {
 				// loop on all DTOperation in LinkedHashMap
 				String operation = itOp.next();
 				if (firstLine == true) {
-					header = header + "||\t" + operation + "\t";
+					header = header + "|| \t" + operation + " \t";
 				}
-				line = line + "||\t" + operation + "\t";
+				line = line + "|| \t" + operation + " \t";
 				Iterator<String> itPar = this.first().get(operation).keySet()
 						.iterator();
 				while (itPar.hasNext()) {
 					// loop on all DTParameter in LinkedHashMap
 					String parameter = itPar.next();
 					if (firstLine == true) {
-						header = header + "|\t" + parameter;
+						header = header + "| \t" + parameter;
 					}
-					line = line + "|\t";
+					line = line + "| \t";
 					DTValue dtv = (DTValue) this.first().get(operation)
 							.get(parameter).get("value");
 					Iterator<Integer> itVal = dtv.keySet().iterator();
@@ -352,11 +352,11 @@ public class DTConfList extends TreeSet<DTConfiguration> {
 						// loop on all DTValue in LinkedHashMap
 						Integer paramIndex = itVal.next();
 						if (firstLine == true) {
-							header = header + "\t" + paramIndex;
+							header = header + " \t" + paramIndex;
 						}
 						double vi = dtc.getOpParValue(operation, parameter,
 								paramIndex);
-						line = line + vi + "\t";
+						line = line + vi + " \t";
 					}
 				}
 			}

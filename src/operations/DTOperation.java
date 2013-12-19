@@ -16,6 +16,7 @@ import operations.iop.Anlfyeni;
 import operations.iop.Atrous;
 import operations.iop.Basecurve;
 import operations.iop.Bilat;
+import operations.iop.Bilateral;
 import operations.iop.Bloom;
 import operations.iop.Cacorrect;
 import operations.iop.Channelmixer;
@@ -173,15 +174,40 @@ public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
 	public static Class<? extends DTOperation>[] availableOperations = (Class<? extends DTOperation>[]) getClasses();
 
 	public static Class<?>[] getClasses() {
-		return new Class<?>[] { Anlfyeni.class, Atrous.class, Basecurve.class,
-				Bilat.class, Bloom.class, Cacorrect.class, Channelmixer.class,
-				Clahe.class, Clipping.class, Colorzones.class,
-				Denoiseprofile.class, Exposure.class, Gamma.class,
-				Graduatednd.class, Hotpixels.class, Lens.class, Levels.class,
-				Monochrome.class, Nlmeans.class, Rawdenoise.class,
-				Shadhi.class, Sharpen.class, Splittoning.class, Spots.class,
-				Temperature.class, Tonecurve.class, Velvia.class,
-				Vibrance.class, Vignette.class, };
+		// shell command to generate/update the list:
+		// for fic in `ls src/operations/iop` ; do echo ${fic%%.*}.class,; done
+		return new Class<?>[] {
+				Anlfyeni.class,
+				Atrous.class,
+				Basecurve.class,
+				Bilateral.class,
+				Bilat.class,
+				Bloom.class,
+				Cacorrect.class,
+				Channelmixer.class,
+				Clahe.class,
+				Clipping.class,
+				Colorzones.class,
+				Denoiseprofile.class,
+				Exposure.class,
+				Gamma.class,
+				Graduatednd.class,
+				Hotpixels.class,
+				Lens.class,
+				Levels.class,
+				Monochrome.class,
+				Nlmeans.class,
+				Rawdenoise.class,
+				Shadhi.class,
+				Sharpen.class,
+				Splittoning.class,
+				Spots.class,
+				Temperature.class,
+				Tonecurve.class,
+				Velvia.class,
+				Vibrance.class,
+				Vignette.class,
+		};
 	}
 
 	/**

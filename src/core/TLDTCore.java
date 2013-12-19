@@ -198,6 +198,7 @@ public class TLDTCore {
 			DataInputStream in = new DataInputStream(fstream);
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 			String lum = null;
+			boolean isErrDisplayed=false;
 
 			Iterator<DTConfiguration> itDTL = this.dtConfListInterp.iterator();
 			while (itDTL.hasNext()) {
@@ -207,8 +208,12 @@ public class TLDTCore {
 					lum = br.readLine(); // read line by line
 					dtc.luminance = Double.valueOf(lum);
 				} catch (Exception e) {
-					System.err
-							.println("luminance file for deflickering do not have the same size as current XMP list");
+					if (!isErrDisplayed) {
+						System.err
+						.println("\nluminance file for deflickering do not have the same size as current XMP list:\n"
+								+ "consider deleting " + this.outLuminanceFile + " and run again timelapse-darktable\n");
+						isErrDisplayed=true;
+					}
 				}
 			}
 			in.close();
