@@ -85,6 +85,7 @@ public class DTParameter extends LinkedHashMap<String, Object> {
 
 			} else if (this.get("type").equals("int")
 					|| this.get("type").equals("boolean")) {
+				// 4*char = 1*int
 				// Write integer in hexa
 				Integer vali = (int) ((double) vald);
 				s = Integer.toHexString(vali);
