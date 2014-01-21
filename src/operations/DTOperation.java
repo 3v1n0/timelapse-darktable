@@ -1,7 +1,11 @@
 package operations;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -9,8 +13,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import javax.xml.bind.DatatypeConverter;
 
 import operations.iop.Anlfyeni;
 import operations.iop.Atrous;
@@ -124,6 +132,18 @@ public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
 					// version
 					dtOp.version = ver;
 					dtOp.addParam();
+					
+					// par: could be compressed since darktable 1.4
+					// decompress to old hexa format
+					// TODO: change parameter type to byte[]
+					Boolean isCompressed = par.startsWith("gz");
+					if(isCompressed){
+						par = par.substring(4); // remove gz##
+						byte[] bufferBase64 = DatatypeConverter.parseBase64Binary(par);
+						byte[] decomp = decompress(bufferBase64);
+						// uncompressed hexadecimal parameter (as in dtVer<1.4)
+						par=DatatypeConverter.printHexBinary(decomp);	
+					}
 
 					// initialise object corresponding to current operation
 					// parameters (defined in dt/operation/iop/"Operation".java)
@@ -300,6 +320,15 @@ public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
 		for (String param : opParamNames) {
 			params = params + dtOp.get(param).write();
 		}
+		// TODO: compress directly byte[] instead of hexadecimal param
+		int COMPRESS_THRESHOLD = 100;
+		if(params.length()>COMPRESS_THRESHOLD){
+			byte[] paramsBytes = DatatypeConverter.parseHexBinary(params);
+			byte[] paramsBytesCompressed = compress(paramsBytes);
+			String paramsCompressed = DatatypeConverter.printBase64Binary(paramsBytesCompressed);
+			int compFactor = Math.min(99, paramsBytes.length/paramsBytesCompressed.length + 1);  
+			params = "gz"+compFactor+paramsCompressed;
+		}
 		return params;
 	}
 	
@@ -311,6 +340,34 @@ public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
 			opEna = "0";
 		}
 		return opEna;
+	}
+	
+	public static byte[] compress(byte[] inBytes) {
+		// Compress bytes array
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			OutputStream out = new DeflaterOutputStream(baos);
+			out.write(inBytes);
+			out.close();
+		} catch (IOException e) {
+			throw new AssertionError(e);
+		}
+		return baos.toByteArray();
+	}
+
+	public static byte[] decompress(byte[] bytes) {
+		// Decompress bytes array
+		InputStream in = new InflaterInputStream(new ByteArrayInputStream(bytes));
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			byte[] buffer = new byte[8192];
+			int len;
+			while((len = in.read(buffer))>0)
+				baos.write(buffer, 0, len);
+			return baos.toByteArray();
+		} catch (IOException e) {
+			throw new AssertionError(e);
+		}
 	}
 
 }
