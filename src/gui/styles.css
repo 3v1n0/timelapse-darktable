@@ -1,30 +1,10 @@
-{  Button: {
-        color: "#aa0000"
+{  
+    border: { 
+        color: "#00aa00", 
+        padding :"1" 
     },
- 
-    RadioButton: {
-        color: "#00aa00"
-    },
- 
-    "org.apache.pivot.wtk.PushButton": {
-        color: "#0000aa"
-    },
- 
-    heading: {
-        font: {
-            size: "120%",
-            bold: true
-        },
- 
-        color: "#000000"
-    },
- 
-    subHeading: {
-        font: {
-            size: "110%",
-            italic: true
-        },
- 
-        color: "#666666"
-    }
+     
+    txtOutFolder: { 
+        color: "#ff0000", 
+    } 
 }

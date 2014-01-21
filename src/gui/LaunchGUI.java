@@ -9,6 +9,7 @@ public class LaunchGUI {
 	 */
 	public LaunchGUI() {
 		DesktopApplicationContext.main(TLDTWindow.class, new String[] {});
+		//DesktopApplicationContext.applyStylesheet("/gui/styles.css"); 
 	}
 
 }
