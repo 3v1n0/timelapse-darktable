@@ -30,6 +30,7 @@ import operations.iop.Cacorrect;
 import operations.iop.Channelmixer;
 import operations.iop.Clahe;
 import operations.iop.Clipping;
+import operations.iop.Colorin;
 import operations.iop.Colorzones;
 import operations.iop.Denoiseprofile;
 import operations.iop.Exposure;
@@ -207,6 +208,7 @@ public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
 				Channelmixer.class,
 				Clahe.class,
 				Clipping.class,
+				Colorin.class,
 				Colorzones.class,
 				Denoiseprofile.class,
 				Exposure.class,
