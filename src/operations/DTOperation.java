@@ -32,6 +32,7 @@ import operations.iop.Clahe;
 import operations.iop.Clipping;
 import operations.iop.Colorin;
 import operations.iop.Colorzones;
+import operations.iop.Demosaic;
 import operations.iop.Denoiseprofile;
 import operations.iop.Exposure;
 import operations.iop.Gamma;
@@ -210,6 +211,7 @@ public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
 				Clipping.class,
 				Colorin.class,
 				Colorzones.class,
+				Demosaic.class,
 				Denoiseprofile.class,
 				Exposure.class,
 				Gamma.class,
