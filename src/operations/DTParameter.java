@@ -59,10 +59,15 @@ public class DTParameter extends LinkedHashMap<String, Object> {
 				// Interpret hexa value as Integer
 				Integer intValue = Integer.valueOf(s, 16).intValue();
 				value.put(i, (double) intValue);
+			} else if (object.equals("string")) {
+				// interpret as string
+				Integer intValue=0;
+				for (int j = 0; j < 4; j++) {
+					intValue = 16*16*intValue + (Integer.valueOf(s.substring(2*j,2*j+2), 16).intValue());
+				}
+				value.put(i, (double) intValue);
 			} else {
-				System.err
-				.println(object
-						+ " not yet implemented in DTParameter: contact developer");
+				System.err.println(object + " not yet implemented in DTParameter: contact developer");
 				// "double" to implement (clahe)
 			}
 		}
@@ -72,34 +77,30 @@ public class DTParameter extends LinkedHashMap<String, Object> {
 
 	public String write() {
 		String param = "";
-		String s = "";
 		for (int i = 0; i < this.length; i++) {
 			// get value(i)
 			DTValue dtVal = (DTValue) this.get("value");
 			Double vald = (Double) dtVal.get(i);
+			Integer vali = null;
 			if (this.get("type").equals("float")) {
 				// Write float in hexa
 				Float valf = (float) ((double) vald);
-				Integer valb = Float.floatToIntBits(valf);
-				s = Integer.toHexString(valb);
-
+				vali = Float.floatToIntBits(valf);
 			} else if (this.get("type").equals("int")
 					|| this.get("type").equals("boolean")) {
 				// 4*char = 1*int
 				// Write integer in hexa
-				Integer vali = (int) ((double) vald);
-				s = Integer.toHexString(vali);
+				vali = (int) ((double) vald);
+			} else if (this.get("type").equals("string")) {
+				// TODO write int/string in hexa 
+				vali  = (int) ((double) vald);
 			}
-			while (s.length() < 8) {
-				// complete with 0 to have 8 characters
-				s = "0" + s;
-
-			}
+			String s = String.format("%08x", vali);
 			// inverts order of the 8 char word, 2 by 2 char : DDCCBBAA =>
 			// AABBCCDD (little/big endian convention?)
 			param = param + s.substring(6, 8) + s.substring(4, 6)
 					+ s.substring(2, 4) + s.substring(0, 2);
-		}
+		}		
 		return param;
 	}
 

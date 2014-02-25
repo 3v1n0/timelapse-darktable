@@ -27,7 +27,7 @@ public class TLDTCore {
 	// Program properties
 	// ------ hard-coded parameters ----------
 	public String progName = "timelapse-darktable";
-	public String progVersion = "0.5b";
+	public String progVersion = "0.5c";
 	// binaries location
 	public String darktablecliBin = runCmdOut("which", "darktable-cli");
 	public String mencoderBin = runCmdOut("which", "mencoder");
@@ -72,7 +72,7 @@ public class TLDTCore {
 		this.imgSrc = cliConf.imgSrc;
 		this.xmpSrc = cliConf.xmpSrc;
 		this.outFolder = cliConf.outFolder;
-		this.outFolderDeflick = this.outFolder + "/deflick";
+		this.outFolderDeflick = this.outFolder + "/predeflick";
 		this.exportWidth = cliConf.exportWidth;
 		this.exportHeight = cliConf.exportHeight;
 		this.interpType = cliConf.interpType;

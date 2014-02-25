@@ -330,8 +330,8 @@ public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
 			byte[] paramsBytes = DatatypeConverter.parseHexBinary(params);
 			byte[] paramsBytesCompressed = compress(paramsBytes);
 			String paramsCompressed = DatatypeConverter.printBase64Binary(paramsBytesCompressed);
-			int compFactor = Math.min(99, paramsBytes.length/paramsBytesCompressed.length + 1);  
-			params = "gz"+compFactor+paramsCompressed;
+			int compFactor = Math.min(99, paramsBytes.length/paramsBytesCompressed.length + 1);
+			params = "gz"+String.format("%02d", compFactor)+paramsCompressed;
 		}
 		return params;
 	}
