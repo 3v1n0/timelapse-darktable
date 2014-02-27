@@ -38,6 +38,7 @@ import operations.iop.Denoiseprofile;
 import operations.iop.Exposure;
 import operations.iop.Gamma;
 import operations.iop.Graduatednd;
+import operations.iop.Highlights;
 import operations.iop.Hotpixels;
 import operations.iop.Lens;
 import operations.iop.Levels;
@@ -217,6 +218,7 @@ public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
 				Denoiseprofile.class,
 				Exposure.class,
 				Gamma.class,
+				Highlights.class,
 				Graduatednd.class,
 				Hotpixels.class,
 				Lens.class,
