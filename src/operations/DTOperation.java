@@ -31,6 +31,7 @@ import operations.iop.Channelmixer;
 import operations.iop.Clahe;
 import operations.iop.Clipping;
 import operations.iop.Colorcontrast;
+import operations.iop.Colorcorrection;
 import operations.iop.Colorin;
 import operations.iop.Colorzones;
 import operations.iop.Demosaic;
@@ -212,6 +213,7 @@ public abstract class DTOperation extends LinkedHashMap<String, DTParameter> {
 				Clahe.class,
 				Clipping.class,
 				Colorcontrast.class,
+				Colorcorrection.class,
 				Colorin.class,
 				Colorzones.class,
 				Demosaic.class,

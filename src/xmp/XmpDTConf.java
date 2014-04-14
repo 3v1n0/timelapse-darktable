@@ -2,6 +2,9 @@ package xmp;
 
 import java.util.ArrayList;
 
+import operations.DTConfiguration;
+import operations.DTOperation;
+
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -164,6 +167,23 @@ public class XmpDTConf {
 		/* Set new value of the interest node attribute */
 		Node desc = getFirstNodeWithName(rdf, nodeName);
 		desc.getAttributes().getNamedItem(attributeName).setNodeValue(setValue);
+	}
+	
+	public void addNode(DTOperation dto){
+		String defaultOpName = "temperature"; // default filter to copy
+		for (int i = 0; i < this.histOp.size(); i++) {
+			if (this.histOp.get(i).equals(defaultOpName)) {
+				this.blopPar.add(this.blopPar.get(i));
+				this.blopVer.add(this.blopVer.get(i));
+				this.histEna.add(DTOperation.writeEnable(dto));
+				this.histOp.add(dto.name);
+				this.histPar.add(DTOperation.writeParams(dto));
+				this.histVer.add(dto.version);
+				this.multName.add(dto.multiName);
+				this.multPrio.add(dto.multiPriority);
+			}
+		}
+		// add a node in NodeList... TODO
 	}
 
 }

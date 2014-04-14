@@ -12,6 +12,7 @@ import java.util.Iterator;
 
 import operations.DTConfList;
 import operations.DTConfiguration;
+import operations.iop.Exposure;
 
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
@@ -146,13 +147,29 @@ public class TLDTCore {
 		if (this.isDeflick) {
 			System.out
 					.println("\ndeflickering (each frame in JPG with darktable-cli... could be long)");
-
+			
+			// TODO : add checkExposure() method
+			//checkExposure();
 			deflickWriteLuminance();
 			deflickWriteFilter();
 			this.calibLumDeltaEV = deflickCalib();
 			// call deflickering (write XMP files)
 			this.dtConfListInterp.deflick(this.outFolder, this.calibLumDeltaEV);
 		}
+	}
+
+	private void checkExposure() {
+		// check if exposure iop is a part of XMP
+		if (!this.dtConfListInterp.first().containsKey("exposure ")) {
+			System.out.println("Add exposure filter for all files");
+			// if not add exposure with default value for all interpolated XMP
+			Iterator<DTConfiguration> itDTL = this.dtConfListInterp.iterator();
+			while (itDTL.hasNext()) {
+				DTConfiguration dtc = itDTL.next();
+				dtc.addDefaultExposure();
+			}
+		}		
+		
 	}
 
 	public void deflickWriteLuminance() throws IOException {
@@ -360,9 +377,9 @@ public class TLDTCore {
 				// generate directly the output JPG
 				runCmd(this.darktablecliBin, this.imgSrc + "/" + fic,
 						this.outFolder + "/" + fic + ".xmp", this.outFolder
-								+ "/" + fic + ".jpg", "--width "
-								+ this.exportWidth, "--height "
-								+ this.exportHeight);
+								+ "/" + fic + ".jpg",
+								"--width", Integer.toString(this.exportWidth),
+								"--height",	Integer.toString(this.exportHeight));
 			}
 		}
 		outScript.close();

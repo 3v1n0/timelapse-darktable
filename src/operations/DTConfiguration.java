@@ -2,6 +2,8 @@ package operations;
 
 import java.util.HashMap;
 
+import operations.iop.Exposure;
+
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import xmp.XmpDTConf;
@@ -194,6 +196,15 @@ public class DTConfiguration extends HashMap<String, DTOperation> implements
 			evFactor = 1 - 1 / lumRatio;
 		}
 		return evFactor;
+	}
+
+	public void addDefaultExposure() {
+		// Add default Exposure iop
+		Exposure opExpo = new Exposure();
+		opExpo.addDefaultValue();
+		this.put("exposure ", (DTOperation) opExpo);
+		// Update associated xmp params
+		this.xmpConf.addNode(opExpo);
 	}
 
 }
