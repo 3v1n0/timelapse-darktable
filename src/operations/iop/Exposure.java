@@ -17,9 +17,17 @@ public class Exposure extends DTOperation {
 
 	@Override
 	public void addParam() {
-		this.put("black", new DTParameter("float", 1, null));
-		this.put("exposure", new DTParameter("float", 1, null));
-		this.put("gain", new DTParameter("float", 1, null));
+		if (this.version.equals("1") || this.version.equals("2")) {
+			this.put("black", new DTParameter("float", 1, null));
+			this.put("exposure", new DTParameter("float", 1, null));
+			this.put("gain", new DTParameter("float", 1, null));
+		} else {
+			this.put("black", new DTParameter("float", 1, null));
+			this.put("exposure", new DTParameter("float", 1, null));
+			this.put("deflicker", new DTParameter("boolean", 1, null));
+			this.put("deflicker_percentile", new DTParameter("float", 1, null));
+			this.put("deflicker_level", new DTParameter("float", 1, null));
+		}
 	}
 	
 	public void addDefaultValue() {
@@ -52,3 +60,14 @@ public class Exposure extends DTOperation {
  * typedef struct dt_iop_exposure_params_t { float black, exposure, gain; }
  * dt_iop_exposure_params_t;
  */
+
+// float black, exposure, gain; v2
+
+//typedef struct dt_iop_exposure_params_t
+//{
+//  float black, exposure;
+//  gboolean deflicker;
+//  float deflicker_percentile, deflicker_level;
+//}
+//dt_iop_exposure_params_t;
+

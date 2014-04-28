@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
+import java.util.Set;
 
 import operations.DTConfList;
 import operations.DTConfiguration;
@@ -292,7 +293,8 @@ public class TLDTCore {
 
 		
 		// double evFirst = getOpParValue(dtc,"exposure ", "exposure", 0);
-		double evFirst = dtc.getOpParValue("exposure ", "exposure", 0);
+		String expoName = dtc.findExposure();
+		double evFirst = dtc.getOpParValue(expoName, "exposure", 0);
 		for (int i = 0; i < evCalib.length; i++) {
 			// change operations/iop/exposure parameter to calibrate luminance
 			// sensitivity
@@ -301,8 +303,8 @@ public class TLDTCore {
 			// exposure value
 			// setOpParValue(dtc,"exposure ", "exposure", 0,
 			// evFirst+evCalib[i]);
-			dtc.setOpParValue("exposure ", "exposure", 0, evFirst + evCalib[i]);
-			dtc.setOpEnable("exposure ", true);
+			dtc.setOpParValue(expoName, "exposure", 0, evFirst + evCalib[i]);
+			dtc.setOpEnable(expoName, true);
 			dtc.updateXmpConf(outFolderCalib);
 			// generate JPG
 			runCmd(this.darktablecliBin, this.imgSrc + "/" + fic,
@@ -316,7 +318,7 @@ public class TLDTCore {
 		}
 		// setOpParValue(dtc,"exposure ", "exposure", 0, evFirst); // reset
 		// value
-		dtc.setOpParValue("exposure ", "exposure", 0, evFirst); // reset value
+		dtc.setOpParValue(expoName, "exposure", 0, evFirst); // reset value
 		dtc.updateXmpConf(outFolderCalib);
 
 		// write calibration curve
@@ -408,6 +410,8 @@ public class TLDTCore {
 			}
 		}
 	}
+	
+
 
 	// --------------------------------------------
 	// SUPPORT FUNCTIONS

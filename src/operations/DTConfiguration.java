@@ -1,6 +1,8 @@
 package operations;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
 import operations.iop.Exposure;
 
@@ -136,7 +138,8 @@ public class DTConfiguration extends HashMap<String, DTOperation> implements
 			PolynomialSplineFunction calibLumDeltaEV) {
 		// change operations/iop/exposure parameter to deflick (first filter =>
 		// "exposure ")
-		double EV = getOpParValue("exposure ", "exposure", 0);
+		String expoName = this.findExposure();
+		double EV = getOpParValue(expoName, "exposure", 0);
 
 		// compute target EV for deflick
 		// double evDeflick = computeEVtarget(EV, this.luminance,
@@ -145,8 +148,8 @@ public class DTConfiguration extends HashMap<String, DTOperation> implements
 				/ this.luminance - 1.0d));
 
 		// update XMP configuration
-		setOpParValue("exposure ", "exposure", 0, EV + evDeflick);
-		setOpEnable("exposure", true);
+		setOpParValue(expoName, "exposure", 0, EV + evDeflick);
+		setOpEnable(expoName, true);
 		this.updateXmpConf(outFolder);
 	}
 
@@ -205,6 +208,23 @@ public class DTConfiguration extends HashMap<String, DTOperation> implements
 		this.put("exposure ", (DTOperation) opExpo);
 		// Update associated xmp params
 		this.xmpConf.addNode(opExpo);
+	}
+	
+	public String findExposure() {
+		String  iop = null;
+		Set<String> keys = this.keySet();
+		boolean expoFound = false;
+		Iterator<String> ik = keys.iterator();
+		while (ik.hasNext() && !expoFound) {
+			iop = ik.next();
+			if (iop.startsWith("exposure")) {
+				expoFound=true;
+			}
+		}
+		if (!expoFound) {
+			System.err.println("Exposure filter not found: Add active exposure to your XMP settings for all keyframes");
+		} 
+		return iop;	
 	}
 
 }
