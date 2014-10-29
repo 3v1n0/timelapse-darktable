@@ -40,9 +40,9 @@ public class TLDTWindow implements Application {
 
 	// assistant
 	private TextInput txtImgSrc = null;
-	private TextInput txtXmpSrc = null;
+//	private TextInput txtXmpSrc = null;
 	private TextInput txtOutFolder = null;
-	private Button buttonBrowseXmpSrc = null;
+//	private Button buttonBrowseXmpSrc = null;
 	private Button buttonBrowseImgSrc = null;
 	private Button buttonBrowseOut = null;
 	private Button buttonLoadKeyframes = null;
@@ -89,12 +89,12 @@ public class TLDTWindow implements Application {
 		bxmlSerializer.bind(this, TLDTWindow.class);
 
 		// id
-		txtXmpSrc = (TextInput) bxmlSerializer.getNamespace().get("txtXmpSrc");
+//		txtXmpSrc = (TextInput) bxmlSerializer.getNamespace().get("txtXmpSrc");
 		txtImgSrc = (TextInput) bxmlSerializer.getNamespace().get("txtImgSrc");
 		txtOutFolder = (TextInput) bxmlSerializer.getNamespace().get(
 				"txtOutFolder");
-		buttonBrowseXmpSrc = (PushButton) bxmlSerializer.getNamespace().get(
-				"buttonBrowseXmpSrc");
+//		buttonBrowseXmpSrc = (PushButton) bxmlSerializer.getNamespace().get(
+//				"buttonBrowseXmpSrc");
 		buttonBrowseImgSrc = (PushButton) bxmlSerializer.getNamespace().get(
 				"buttonBrowseImgSrc");
 		buttonBrowseOut = (PushButton) bxmlSerializer.getNamespace().get(
@@ -127,13 +127,13 @@ public class TLDTWindow implements Application {
 		imgDeflick = (ImageView) bxmlSerializer.getNamespace()
 				.get("imgDeflick");
 
-		buttonBrowseXmpSrc.getButtonPressListeners().add(
-				new ButtonPressListener() {
-					@Override
-					public void buttonPressed(Button button) {
-						browseFile(txtXmpSrc, window);
-					}
-				});
+//		buttonBrowseXmpSrc.getButtonPressListeners().add(
+//				new ButtonPressListener() {
+//					@Override
+//					public void buttonPressed(Button button) {
+//						browseFile(txtXmpSrc, window);
+//					}
+//				});
 
 		buttonBrowseImgSrc.getButtonPressListeners().add(
 				new ButtonPressListener() {
@@ -235,11 +235,11 @@ public class TLDTWindow implements Application {
 
 	protected boolean checkInputs() {
 		boolean isOk = false;
-		if (txtXmpSrc.getText() == null || txtXmpSrc.getText().length() == 0
-				|| txtImgSrc.getText() == null
+		if ( txtImgSrc.getText() == null
 				|| txtImgSrc.getText().length() == 0
 				|| txtOutFolder.getText() == null
 				|| txtOutFolder.getText().length() == 0) {
+//			|| txtXmpSrc.getText() == null || txtXmpSrc.getText().length() == 0
 			Alert.alert(MessageType.WARNING, "Complete all folder paths first",
 					window);
 		} else {
@@ -376,8 +376,8 @@ public class TLDTWindow implements Application {
 		int maxSize = 40;
 		String[] cliOptions = new String[maxSize] ;
 		int i=0;
-		cliOptions[i] = "-x";i+=1;
-		cliOptions[i] = txtXmpSrc.getText();i+=1;	
+//		cliOptions[i] = "-x";i+=1;
+//		cliOptions[i] = txtXmpSrc.getText();i+=1;	
 		cliOptions[i] = "-i";i+=1;
 		cliOptions[i] = txtImgSrc.getText();i+=1;
 		cliOptions[i] = "-o";i+=1;

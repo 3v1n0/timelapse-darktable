@@ -23,6 +23,8 @@ public class XmpDTConf {
 	public ArrayList<String> multName;
 	public String srcFile; // source RAW file
 	public Integer index;
+	public String ratingStr; // rating stars
+	public Integer rating; // rating stars number
 	public XmpFile xmpFile;
 
 	public XmpDTConf(String xmpFileName) {
@@ -59,6 +61,9 @@ public class XmpDTConf {
 				"rdf:RDF" }, "rdf:Description", "xmpMM:DerivedFrom");
 		index = Integer.parseInt(srcFile.replaceAll("(.*\\D)(\\d+)(\\D.*)",
 				"$2"));
+		ratingStr = getNodeAttribute(xmpFile.nList, new String[] { "x:xmpmeta",
+		"rdf:RDF" }, "rdf:Description", "xmp:Rating");
+		rating = Integer.parseInt(ratingStr);
 	}
 
 	public void write(String outFolder) {

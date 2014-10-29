@@ -23,13 +23,13 @@
 					<Border title="1. Fill information" styles="{padding:20}">
 						<BoxPane orientation="vertical" styles="{spacing:16, fill:true}">
 							<Separator heading="Inputs" />
-							<BoxPane orientation="horizontal" styles="{padding:6, spacing:8, fill:true}">
+							<!-- <BoxPane orientation="horizontal" styles="{padding:6, spacing:8, fill:true}">
 								<Label text="Keyframes XMP Folder" />
 								<TextInput textSize="40" bxml:id="txtXmpSrc" />
 								<PushButton bxml:id="buttonBrowseXmpSrc" buttonData="Browse" />
-							</BoxPane>
+							</BoxPane>-->
 							<BoxPane orientation="horizontal" styles="{padding:6, spacing:8, fill:true}">
-								<Label text="Source images Folder" />
+								<Label text="Source images Folder (rated images are keyframes)" />
 								<TextInput textSize="41" bxml:id="txtImgSrc" />
 								<PushButton bxml:id="buttonBrowseImgSrc" buttonData="Browse" />
 							</BoxPane>

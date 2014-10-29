@@ -31,7 +31,7 @@ public class Cli {
 
 		// JAVA CLI : inputs affectation
 		this.imgSrc = config.getString("imgSrc");
-		this.xmpSrc = config.getString("xmpSrc");
+//		this.xmpSrc = config.getString("xmpSrc");
 		this.outFolder = config.getString("out");
 		this.exportWidth = config.getInt("width");
 		this.exportHeight = config.getInt("height");
@@ -57,14 +57,14 @@ public class Cli {
 	    optImgSrc.setHelp("Image source folder (raw or jpg)");
 	    this.jsap.registerParameter(optImgSrc);                        
 	
-	    FlaggedOption optXmpSrc = new FlaggedOption("xmpSrc")
-	                            .setStringParser(JSAP.STRING_PARSER)
-	                            .setDefault("xmpSrc") 
-	                            .setRequired(true) 
-	                            .setShortFlag('x') 
-	                            .setLongFlag("xmpSrc");
-	    optXmpSrc.setHelp("XMP source folder (to interpolate)");
-	    this.jsap.registerParameter(optXmpSrc);
+//	    FlaggedOption optXmpSrc = new FlaggedOption("xmpSrc")
+//	                            .setStringParser(JSAP.STRING_PARSER)
+//	                            .setDefault("xmpSrc") 
+//	                            .setRequired(true) 
+//	                            .setShortFlag('x') 
+//	                            .setLongFlag("xmpSrc");
+//	    optXmpSrc.setHelp("XMP source folder (to interpolate) - ignored, based on rating now");
+//	    this.jsap.registerParameter(optXmpSrc);
 	    
 	    FlaggedOption optOut = new FlaggedOption("out")
 	                            .setStringParser(JSAP.STRING_PARSER)

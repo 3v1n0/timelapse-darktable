@@ -20,6 +20,7 @@ public class DTConfiguration extends HashMap<String, DTOperation> implements
 	private static final long serialVersionUID = -2007602055999190529L;
 
 	public Integer index; // numbering of file (get in file name)
+	public Integer rating; // star rating
 	public String srcFile; // source RAW file
 	public XmpDTConf xmpConf;
 	public Double luminance; // initial luminance after first interpolation
@@ -37,6 +38,9 @@ public class DTConfiguration extends HashMap<String, DTOperation> implements
 		// index of the File : Get first number between two characters which are
 		// not digit
 		index = xmpConf.index;
+		
+		// Star rating
+		rating = xmpConf.rating;
 
 		// read operations and their parameterization (add operations field)
 		this.readAllOperations(this.xmpConf);

@@ -20,7 +20,11 @@ public class DTConfList extends TreeSet<DTConfiguration> {
 	}
 
 	public void addXmp(String xmpFile) {
-		this.add(new DTConfiguration(xmpFile));
+		// add XMP only if rating is not null
+		DTConfiguration dtc = new DTConfiguration(xmpFile);
+		if (dtc.rating>0) {
+			this.add(new DTConfiguration(xmpFile));
+		}
 	}
 
 	public ArrayList<String> getSrcFileList() {

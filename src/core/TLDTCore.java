@@ -29,7 +29,7 @@ public class TLDTCore {
 	// Program properties
 	// ------ hard-coded parameters ----------
 	public String progName = "timelapse-darktable";
-	public String progVersion = "0.5d";
+	public String progVersion = "0.6"; // no more keyframe - based on rating
 	// binaries location
 	public String darktablecliBin = runCmdOut("which", "darktable-cli");
 	public String mencoderBin = runCmdOut("which", "mencoder");
@@ -72,7 +72,7 @@ public class TLDTCore {
 
 		// JAVA CLI : inputs affectation
 		this.imgSrc = cliConf.imgSrc;
-		this.xmpSrc = cliConf.xmpSrc;
+		this.xmpSrc = cliConf.imgSrc; // cliConf.xmpSrc; based on rating now
 		this.outFolder = cliConf.outFolder;
 		this.outFolderDeflick = this.outFolder + "/predeflick";
 		this.exportWidth = cliConf.exportWidth;
@@ -287,6 +287,7 @@ public class TLDTCore {
 		String outFolderCalib = this.outFolderDeflick + "/calib";
 		int iFolder = 1;
 		while ((new File(outFolderCalib)).exists()) {
+			System.out.print(outFolderCalib+" already exists, increment");
 			outFolderCalib = this.outFolderDeflick + "/calib" + iFolder;
 			iFolder += 1;
 		}
@@ -312,7 +313,7 @@ public class TLDTCore {
 							+ fic + "_" + i + ".jpg", "--width " + exportWidth,
 					"--height " + exportHeight);
 			// retrieve luminance
-			lumCalib[i] = Double.valueOf(runCmdOut(convertBin, outFolderCalib
+			lumCalib[i] = Double.valueOf(runCmdOut(this.convertBin, outFolderCalib
 					+ "/" + fic + "_" + i + ".jpg", "-scale", "1x1!",
 					"-format", "%[fx:luminance]", "info:"));
 		}
