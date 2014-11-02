@@ -224,6 +224,7 @@ public class DTConfList extends TreeSet<DTConfiguration> {
 			}
 			dtc.srcFile = dtc.srcFile.replaceAll("(.*\\D)(\\d+)(\\D.*)", "$1"
 					+ s + "$3");
+			dtc.rating = 0;
 			dtclInterp.add(dtc);
 		}
 

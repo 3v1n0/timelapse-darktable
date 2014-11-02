@@ -76,6 +76,8 @@ public class XmpDTConf {
 				"rdf:li", this.histEna);
 		setNodeAttribute(new String[] { "x:xmpmeta", "rdf:RDF" },
 				"rdf:Description", "xmpMM:DerivedFrom", this.srcFile);
+		setNodeAttribute(new String[] { "x:xmpmeta", "rdf:RDF" },
+				"rdf:Description", "xmp:Rating", this.ratingStr);
 		this.xmpFile.write(outFolder, this.srcFile);
 	}
 

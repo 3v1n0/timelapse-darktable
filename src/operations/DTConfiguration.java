@@ -86,6 +86,8 @@ public class DTConfiguration extends HashMap<String, DTOperation> implements
 			this.xmpConf.histEna.set(i, DTOperation.writeEnable(dtOp));
 		}
 		this.xmpConf.srcFile = this.srcFile; // update xmpConf srcFile
+		this.xmpConf.rating = this.rating; // update xmpConf rating
+		this.xmpConf.ratingStr = ""+this.rating; // update xmpConf ratingStr
 		this.xmpConf.write(outFolder); // update xmpConf in coherency & write
 										// XMP file
 	}
