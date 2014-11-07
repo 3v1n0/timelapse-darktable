@@ -91,7 +91,7 @@ public class MainGui extends JComponent {
 	
 	private PolygonPanel meanPanel, meanOptPanel;
 	private PointerPanel pointerPanel;
-
+	private DrawingPanel drawingPanel; 
 	
 	private JProgressBar progressBar;
 
@@ -102,6 +102,8 @@ public class MainGui extends JComponent {
 	private JButton dloadButton, dtransButton, dsaveButton, dexportButton, drenderButton ;
 
 	private JToggleButton deflickerButton;
+	
+	private JButton dlumiButton;
 	
 	private JButton playButton, stopButton, resetButton;
     
@@ -307,6 +309,7 @@ public class MainGui extends JComponent {
 		            	meanPanel.setVisible(false);
 		            	meanOptPanel.setVisible(false);
 		            	pointerPanel.setVisible(false);
+		            	drawingPanel.setVisible(false);
 
 		    
 				    
@@ -392,6 +395,15 @@ public class MainGui extends JComponent {
 	        pointerPanel.setOpaque(false);
         }
 
+        {
+	        drawingPanel = new DrawingPanel();
+	        drawingPanel.setForeground(Color.gray);
+	        //pointerPanel.setPreferredSize(new Dimension(450, 300));
+	        //pointerPanel.setMinimumSize(new Dimension(450, 300));
+	        drawingPanel.setBounds(0, 0, 600, 400); // mandatory to display
+	        drawingPanel.setOpaque(false);
+        }
+
         
         layeredPane = new JLayeredPane(); // shows picture and curves
 
@@ -400,7 +412,7 @@ public class MainGui extends JComponent {
         layeredPane.add(meanPanel,   0);  //    original mean of luminance
         layeredPane.add(meanOptPanel,   1);  // optimized mean of luminance
         layeredPane.add(pointerPanel,   2);  // pointer of activeindex
-        
+        layeredPane.add(drawingPanel,   3);  // area for luminance calculation
         
  
         layeredPane.setPreferredSize(new Dimension(600,400));
@@ -676,12 +688,14 @@ public class MainGui extends JComponent {
         dsaveButton = new JButton("Save XMP");	
         dexportButton = new JButton("Export Frames");
         drenderButton = new JButton("Render Video");
+        dlumiButton = new JButton("Recalculate luminance");
   
         dloadButton.addActionListener(new ButtonListener()); 
         dtransButton.addActionListener(new ButtonListener()); 
         dsaveButton.addActionListener(new ButtonListener()); 
         dexportButton.addActionListener(new ButtonListener()); 
         drenderButton.addActionListener(new ButtonListener()); 
+        dlumiButton.addActionListener(new ButtonListener()); 
         
         deflickerButton = new JToggleButton("Deflicker");
         deflickerButton.addActionListener(new ButtonListener2());
@@ -708,6 +722,7 @@ public class MainGui extends JComponent {
         deflicRow2Panel.add(new JLabel("Order of polynom"));    
         deflicRow2Panel.add(deflicSlider);   
         deflicRow2Panel.setVisible(false);
+        deflicRow2Panel.add(dlumiButton); 
      
         JPanel deflicWorkflowPanel = new JPanel();
         deflicWorkflowPanel.setLayout(new BorderLayout());
@@ -991,9 +1006,32 @@ public class MainGui extends JComponent {
 		//TODO define picture area for calculation
         // /usr/bin/convert is used, could be replaced by imagej in
         //             newer version to prevent dependancies
+		
+		// -region 600x400+10+20 =  width x height + offsetx + offsety
+		//
+		// panelarea is 600x400, imagepreview has 750x500
+		//
+		int width = (int) ((drawingPanel.x2 - drawingPanel.x1) * 1.25) ;
+		int height = (int) ((drawingPanel.y2 - drawingPanel.y1) * 1.25) ;
+		int offX = (int) (drawingPanel.x1 * 1.25);
+		int offY = (int) (drawingPanel.y1 * 1.25);
+		
+		if (width < 5 | height < 5) {
+			// don't use the rectangle
+			width = 750;
+			height = 500;
+			offX = 0;
+			offY = 0;			
+		}
 
-     	final String[] cmdArrayLum = {"convert", "inputfile", 
+		String parameter = String.valueOf(width) + "x" + String.valueOf(height) + "+" +
+				String.valueOf(offX) + "+" + String.valueOf(offY);
+		System.out.println(parameter);
+	
+
+     	final String[] cmdArrayLum = {"convert", "inputfile", "-region", "parameter",
      			"-scale", "1x1!", "-format", "%[fx:luminance]", "info:"};	
+     	cmdArrayLum[3] = parameter;
  		
 	    Thread threadCalc = new Thread() { // define new Thread as inline class
 			public void run() {
@@ -1142,7 +1180,7 @@ public class MainGui extends JComponent {
 	                	meanPanel.setVisible(true);
 	                	meanOptPanel.setVisible(true);
 	                	pointerPanel.setVisible(true);
-
+	                	drawingPanel.setVisible(true);
 	                	
 	                	deflicSlider.setValue(4);           // search good initial value?
 	                	
@@ -1164,11 +1202,6 @@ public class MainGui extends JComponent {
 	    	  	        meanPanel.repaint();
 
 	                	
-	                	
-	                	
-	                	
-	                	
-	                	
 	      
 	            	}
 	             	
@@ -1177,6 +1210,7 @@ public class MainGui extends JComponent {
 	            	meanPanel.setVisible(false);
 	            	meanOptPanel.setVisible(false);
 	            	pointerPanel.setVisible(false);
+	            	drawingPanel.setVisible(false);
 	            }
 	 		}
 	}
@@ -1197,6 +1231,15 @@ public class MainGui extends JComponent {
 				
 			} else if (ae.getSource() == renderButton | ae.getSource() == drenderButton){
 				System.out.println("Button render video");
+				
+			} else if (ae.getSource() == dlumiButton ){
+				// recalculate luminance with rectangle
+				try {
+					calcLuminance();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
 			}else if (ae.getSource() == playButton ){
 				slideShow.start();
