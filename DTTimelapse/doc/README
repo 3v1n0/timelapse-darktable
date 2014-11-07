@@ -1,0 +1,12 @@
+this is timelapse-darktable, a free raw photo timelapse generator based on darktable
+
+-- to use it for now :
+download java project from repository
+import project in eclipse
+launch main with good arguments
+follow instructions in terminal
+
+-- note :
+Syntax for exported jar
+java -jar timelapse-darktable_v*.jar "raw_folder" "xmp_files" "output_folder" "width" "height"
+

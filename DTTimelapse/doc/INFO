@@ -1,0 +1,58 @@
+Workflow to generate timelapse-videos with darktable and DTTimelapse
+
+
+=== Start darktable ===
+
+Lighttable: Import folder with all timelapse images
+Lighttable: Discard history stack of all images
+Lighttable: Mark keyframe-images with one-star-rating (or color-rating)
+
+Darkroom: Apply modul exposure (value 0,00) to keyframe images
+Darkroom: Apply modul crop+rotate (aspect ratio 16:9) to keyframe images
+Darkroom: Modify keyframe images at need
+Darkroom: Check that all keyframe images share the same filter history 
+(Lighttable: Write sidecar files (normally automatic))
+
+
+=== Start DTTimelapse ===
+
+Choose folder with timelapse images
+(auto: Read image information with exiftool)
+(auto: Create jpg-previews images in subfolder 'preview')
+(JPG: convert large images to 750x500px with imagemagick)
+(RAW: extract jpg-preview with exiftool and convert to 750x500px)
+(auto: Compute the luminance mean of all preview images)
+(auto: Show luminance curve) Not implemeted yet.
+(auto: Read filter data from XMP files)
+(auto: Identify keyframes e.g. one-star-rating from XMP file)
+Interpolate keyframes filter data for all images and save it in XMP files.
+
+Deflicker (optional)
+(auto: Filter the luminance curve for deflickering target) 
+(auto: Show deflicker curve) Not implemeted yet.
+(auto: Calibrate the luminance sensitivity of the scene)
+(auto: Apply deflickering target in settings of darktable exposure module) 
+(auto: export revised XMP-files)
+(Deflicker works only between two neighboured keyframes ?)
+
+Create frames
+(auto: delete old frames if existing in subfolder 'frames')
+(auto: create jpg-frames with darktable-cli and revised XMP-files)
+Export video
+(auto: video export of the frames with mencoder)
+Remark: You can use the same frames for different framerates or codecs
+or quality or smaller sizes, for mencoder can downsize images itself.
+
+
+
+=== Future version ===
+
+Create and initialize XMP-files within DTTimelapse
+(no need to initialize filters in darktable)
+
+Mark keyframe images; at least first and last image.
+Set at least filter exposure and filter cropping.
+Set one-star-rating for keyframe images.
+Export initial XMP-files.
+
+

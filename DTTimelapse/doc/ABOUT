@@ -1,0 +1,20 @@
+This is DTTimelapse,
+a free raw photo timelapse generator based on darktable
+
+Version: 0.1beta
+
+* developers:
+Alexandre Jullien
+
+* contributors:
+Pierre-Etienne Salle
+Rudolf Martin (GUI)
+
+* DTTimelapse calls external executables.
+Be sure that you have these dependencies installed:
+darktable
+octave
+exiftool
+convert (imagemagick)
+mencoder
+
