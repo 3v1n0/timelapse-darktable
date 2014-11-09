@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.print.DocFlavor.URL;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -224,9 +225,13 @@ public class MainGui extends JComponent {
 					// change label
 					labelDirectory.setText(activePathname);
 					
-//					listModel = new DefaultListModel();
-					
 					activeNumber = 0;
+					
+					// set area for luminance to max
+					drawingPanel.x1 = 0;
+					drawingPanel.y1 = 0;
+					drawingPanel.x2 = 600;
+					drawingPanel.y2 = 400;
 					
 					picModel = new PictureModel();  //empty modell
 					
@@ -323,8 +328,17 @@ public class MainGui extends JComponent {
 						
 					} else {
 						picSlider.setMaximum(0);
-//						list.setVisibleRowCount(-1);
+
 						
+						//getClass().getResource("/icon/label_dttimelapse.png");
+						
+						
+						// Read from a URL
+				        //java.net.URL url = getClass().getResource("/icon/label_dttimelapse.png");
+//				        picturePanel.loadRes("/icon/label_dttimelapse.png");
+//				        image = ImageIO.read(url);
+						
+				        //picturePanel.loadImage("/icon/label_dttimelapse.png");
 				        picturePanel.loadImage("icon/label_dttimelapse.png");
 				        picturePanel.repaint();
 					}
@@ -357,11 +371,6 @@ public class MainGui extends JComponent {
         
         
         {
- 	        double[] x = {0.0,  1.0,  2.0,  3.0,  4.0,  5.0, 6.0,  7.0,  8.0,  9.0, 10.0};
-  	        // Array of y
-  	        double[] y = {  0.5000,  0.8000,  0.7000,  0.6500,  0.6000, 0.550,
-  	        		      0.5000, 0.4500, 0.4000, 0.4000,  0.4500};
- 
 	        meanPanel = new PolygonPanel();
 	        //meanPanel.setCoord(x, y);
 	        meanPanel.setForeground(Color.blue);
@@ -372,12 +381,7 @@ public class MainGui extends JComponent {
         }
 
         {
- 	        double[] x = {0.0,  1.0,  2.0,  3.0,  4.0,  5.0, 6.0,  7.0,  8.0,  9.0, 10.0};
-  	        // Array of y
-  	        double[] y = {  0.5000,  0.8000,  0.7000,  0.6500,  0.6000, 0.550,
-  	        		      0.5000, 0.4500, 0.4000, 0.4000,  0.4500};
-
- 	        meanOptPanel = new PolygonPanel();
+	        meanOptPanel = new PolygonPanel();
  	        //meanOptPanel.setCoord(x, y);
 	        meanOptPanel.setForeground(Color.yellow);
 	        //meanPanel.setPreferredSize(new Dimension(450, 300));
@@ -440,7 +444,7 @@ public class MainGui extends JComponent {
         JTabbedPane tabbedPane = new JTabbedPane
             (JTabbedPane.TOP,JTabbedPane.SCROLL_TAB_LAYOUT );
  
-        // Hier werden die JPanels als Registerkarten hinzugef�gt
+        // Hier werden die JPanels als Registerkarten hinzugefgt
         tabbedPane.addTab("Basic workflow", basicWorkflowPanel() );
         tabbedPane.addTab("Deflicker workflow", deflicWorkflowPanel() );
         tabbedPane.addTab("Interpolation", interpolationPanel() );
@@ -475,7 +479,7 @@ public class MainGui extends JComponent {
         // splitpane
         
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setDividerLocation(600);
+        splitPane.setDividerLocation(601);   // set initial size
         splitPane.setLeftComponent(leftPanel);
         splitPane.setRightComponent(rightPanel);
          
@@ -496,20 +500,20 @@ public class MainGui extends JComponent {
         
         // add some abstract listeners for sliders
         picSlider.addChangeListener( new ChangeListener() {
-      	  @Override public void stateChanged( ChangeEvent e ) {
-      		  
-      		  activeIndex=picSlider.getValue();
-      		  
-      		  if (activeNumber <= 0) { return;}   // no action without pics
-      		  
-       		        		      		  
-      		  //jtable
-      		  //picTable.setRowSelectionInterval(activeIndex, activeIndex);
-      		  
-	      		picTable.getSelectionModel().setSelectionInterval(activeIndex, activeIndex);
-	      		picTable.scrollRectToVisible(new Rectangle(picTable.getCellRect(activeIndex, 0, true)));
-      		  
-	      	    
+        	@Override public void stateChanged( ChangeEvent e ) {
+        		
+        		activeIndex=picSlider.getValue();
+      		
+        		if (activeNumber <= 0) { return;}   // no action without pics
+      		
+       		
+        		//jtable
+        		//picTable.setRowSelectionInterval(activeIndex, activeIndex);
+      		
+        		picTable.getSelectionModel().setSelectionInterval(activeIndex, activeIndex);
+        		picTable.scrollRectToVisible(new Rectangle(picTable.getCellRect(activeIndex, 0, true)));
+      		
+	      	
       			pointerPanel.setCoord(activeIndex, activeNumber);
       			pointerPanel.repaint();
 
@@ -521,64 +525,49 @@ public class MainGui extends JComponent {
  
         
         deflicSlider.addChangeListener( new ChangeListener() {
-      	  @Override public void stateChanged( ChangeEvent e ) {
-       		  //TODO update exposure curve
-      		  
-     		  // example
-    	        // Array of x
-    	       // double[] x = {0.0,  1.0,  2.0,  3.0,  4.0,  5.0, 6.0,  7.0,  8.0,  9.0, 10.0};
-    	        // Array of y
-    	        //double[] y = {  0.5000,  0.6000,  0.7000,  0.6500,  0.6000, 0.550,
-    	        //		      0.5000, 0.4500, 0.4000, 0.4000,  0.4500};
-     				 
-    		 //  int order = -1;  // order of polynom, max number of points
-    	        int order = deflicSlider.getValue();
-    	        
-			    // show luminance curve
-    		    // create array with new y-value
-    		    double[] x, y;
-    		    x = new double[activeNumber];
-    		    y = new double[activeNumber];
-			    
-	  	  		  for (int i = 0; i < activeNumber; i++) {
-	  	  			  x[i] = i;
-	  				  y[i] = (double) picTable.getValueAt(i, 3);
-	  				  
+        	@Override public void stateChanged( ChangeEvent e ) {
+        		//TODO update exposure curve
+  			
+        		//  int order = -1;  // order of polynom, max number of points
+        		int order = deflicSlider.getValue();
+        		
+        		//calculate smoothing curve
+        		// create array with new y-value
+        		double[] x, y;
+        		x = new double[activeNumber];
+        		y = new double[activeNumber];
+        		
+	  	  		for (int i = 0; i < activeNumber; i++) {
+	  	  			x[i] = i;
+	  				y[i] = (double) picTable.getValueAt(i, 3);
+	  				
 	  				//System.out.println (picTable.getValueAt(i, 3));
 	  				//System.out.println("x= " + x[i] + " y= " + y[i]);
-	  			   }
+	  			}
 	          
 //	  	  		System.out.println ( Arrays.toString(x)   );   
 //	  	  		System.out.println ( Arrays.toString(y)   );  
-	  	  		  
-	  	  		  
+	  	  		
     		 	Polynomal poly = new Polynomal(x, y, order); 		    
-    		    
-         		 		    
-    		    // display new polyline
-    		    // create array with new y-value
-    		    
-  	  		  for (int i = 0; i < activeNumber; i++) {
-  	  			  		x[i] = i;
-  				       y[i] = poly.calculate(i);
-  			   }
-         
-     	        double[] xx = {0.0,  1.0,  2.0,  3.0,  4.0,  5.0, 6.0,  7.0,  8.0,  9.0, 10.0};
-      	        // Array of y
-      	        double[] yy = {  0.5000,  0.8000,  0.7000,  0.6500,  0.6000, 0.550,
-      	        		      0.5000, 0.4500, 0.4000, 0.4000,  0.4500};
-
-//    		 	System.out.println("x= " + x[1] + " y= " + y[1]);		 	
-//       		 	System.out.println("x= " + x[15] + " y= " + y[15]);
+         		
+    		 	// display new polyline
+    		 	// create array with new y-value
     		 	
-  	        meanOptPanel.setCoord(x, y);
-  	        meanOptPanel.repaint();
+    		 	for (int i = 0; i < activeNumber; i++) {
+  	  				x[i] = i;
+  	  				y[i] = poly.calculate(i);
+    		 	}
+ 
+//    		 	System.out.println("x= " + x[1] + " y= " + y[1]);		 	
+//       		System.out.println("x= " + x[15] + " y= " + y[15]);
+    		 	
+    		 	meanOptPanel.setCoord(x, y);
+    		 	meanOptPanel.repaint();
   	        
-  	        layeredPane.repaint();
-    	  
-      		  
-       	  }
-      	});
+    		 	layeredPane.repaint();
+
+        	}
+        });
 
           
     } // end of constructor
@@ -598,10 +587,7 @@ public class MainGui extends JComponent {
 			
 		//System.out.println("name= " + name);
 		
-		
 		picturePanel.loadImage(activePathname + "/preview/" + name);   
-
-		
 		
 		layeredPane.repaint();
 	}
@@ -689,6 +675,8 @@ public class MainGui extends JComponent {
         dexportButton = new JButton("Export Frames");
         drenderButton = new JButton("Render Video");
         dlumiButton = new JButton("Recalculate luminance");
+        
+        dlumiButton.setToolTipText("Define rectangle in preview area!");
   
         dloadButton.addActionListener(new ButtonListener()); 
         dtransButton.addActionListener(new ButtonListener()); 
@@ -934,7 +922,7 @@ public class MainGui extends JComponent {
 						//System.err.println("Process done, exit status was " + p.exitValue()); 					
 						
 					} else {
-						// rawfile
+						// rawfile needs two exiftool and convert
 						// set command for raw						
 						// set input
 						cmdArrayExif[1] = activePathname + "/" + fullname;
@@ -1015,24 +1003,28 @@ public class MainGui extends JComponent {
 		int height = (int) ((drawingPanel.y2 - drawingPanel.y1) * 1.25) ;
 		int offX = (int) (drawingPanel.x1 * 1.25);
 		int offY = (int) (drawingPanel.y1 * 1.25);
-		
-		if (width < 5 | height < 5) {
-			// don't use the rectangle
-			width = 750;
-			height = 500;
-			offX = 0;
-			offY = 0;			
-		}
-
-		String parameter = String.valueOf(width) + "x" + String.valueOf(height) + "+" +
+				
+		final String parameter = String.valueOf(width) + "x" + String.valueOf(height) + "+" +
 				String.valueOf(offX) + "+" + String.valueOf(offY);
 		System.out.println(parameter);
 	
 
-     	final String[] cmdArrayLum = {"convert", "inputfile", "-region", "parameter",
-     			"-scale", "1x1!", "-format", "%[fx:luminance]", "info:"};	
-     	cmdArrayLum[3] = parameter;
- 		
+//     	final String[] cmdArrayLum = {"convert", "inputfile", 
+//     			"-scale", "1x1!", "-format", "%[fx:luminance]", "info:"};	
+//    	final String[] cmdArrayLum = {"convert", "inputfile", "-region", "parameter",
+//     			"-scale", "1x1!", "-format", "%[fx:luminance]", "info:"};	
+     	
+
+    	final String[] cmdArrayCrop = {"convert", "inputfile", "-crop", "parameter", "-" };
+    	cmdArrayCrop[3] = parameter;			
+
+		
+    	final String[] cmdArrayLum = {"convert", "-", 
+    			"-scale", "1x1!", "-format", "%[fx:luminance]", "info:"};	
+     	//cmdArrayLum[3] = parameter;
+
+     	
+     	
 	    Thread threadCalc = new Thread() { // define new Thread as inline class
 			public void run() {
 				
@@ -1047,7 +1039,8 @@ public class MainGui extends JComponent {
 
 					
 					 // set preview image as input
-			         cmdArrayLum[1] = activePathname + "/preview/" + name;
+			         cmdArrayCrop[1] = activePathname + "/preview/" + name;
+			         
 			        //System.out.println(Arrays.toString(cmdArrayLum));
 					  
 			         
@@ -1066,30 +1059,48 @@ public class MainGui extends JComponent {
 
 					};
 
-			         
-			         
-			         
-				    // A Runtime object has methods for dealing with the OS
-				    Runtime r2 = Runtime.getRuntime();
-				    Process p2 = null;     // Process tracks one external native process
-				    BufferedReader is;  // reader for output of process
-				    String line;
-				    
-				    // Our argv[0] contains the program to run; remaining elements
-				    // of argv contain args for the target program. This is just
-				    // what is needed for the String[] form of exec.
-				    try {
-						p2 = r2.exec(cmdArrayLum);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+      
 
-				    // getInputStream gives an Input stream connected to
-				    // the process p's standard output. Just use it to make
-				    // a BufferedReader to readLine() what the program writes out.
+					
+					//System.out.println(Arrays.toString(cmdArrayCrop));
+					//System.out.println(Arrays.toString(cmdArrayLum));
+
+					
+
+					BufferedReader is;  // reader for output of process
+					String line;
+					
+					Runtime r = Runtime.getRuntime();
+					// Start two processes: convert crop .. | convert fx ...
+					Process p1 = null;
+					try {
+						p1 = r.exec(cmdArrayCrop);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					// convert will wait for input on stdin
+					Process p2 = null;
+					try {
+						p2 = r.exec(cmdArrayLum);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					// Create and start Piper
+					Piper pipe = new Piper(p1.getInputStream(), p2.getOutputStream());
+					new Thread(pipe).start();
+					// Wait for second process to finish
+					try {
+						p2.waitFor();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					// get output of second process
 				    is = new BufferedReader(new InputStreamReader(p2.getInputStream()));
-	
+					
 				    try {
 						while ((line = is.readLine()) != null) {							
 							//System.out.println(line);
@@ -1108,22 +1119,75 @@ public class MainGui extends JComponent {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-				    
-				    try {
-				      p2.waitFor();  // wait for process to complete
-				    } catch (InterruptedException e) {
-				      System.err.println(e);  // "Can'tHappen"
-				      return;
-				    }
+
 					
-				    //System.out.println("lumi= " + luminance);
+
 					
 				} // end for-loop
+				
+				
+				
+			    // show luminance curve ----------------------------------------
+    		    // create array with new y-value
+    		    double[] x, y;
+    		    x = new double[activeNumber];
+    		    y = new double[activeNumber];
+			    
+	  	  		  for (int i = 0; i < activeNumber; i++) {
+	  	  			  x[i] = i;
+	  				  y[i] = (double) picTable.getValueAt(i, 3);
+	  				  
+	  				//System.out.println (picTable.getValueAt(i, 3));
+	  				//System.out.println("x= " + x[i] + " y= " + y[i]);
+	  			   }
+	          
+	  	        meanPanel.setCoord(x, y);
+	  	        
 			
+	  	        
+	  	        
+	  	        
+	  	        // calculate smoothing curve 
+        		//  int order = -1;  // order of polynom, max number of points
+        		int order = deflicSlider.getValue();
+        		// create array with new y-value
+        		
+        		x = new double[activeNumber];
+        		y = new double[activeNumber];
+        		
+	  	  		for (int i = 0; i < activeNumber; i++) {
+	  	  			x[i] = i;
+	  				y[i] = (double) picTable.getValueAt(i, 3);
+	  				
+	  				//System.out.println (picTable.getValueAt(i, 3));
+	  				//System.out.println("x= " + x[i] + " y= " + y[i]);
+	  			}
+	  	  		
+    		 	Polynomal poly = new Polynomal(x, y, order); 		    
+         		
+    		 	// display new polyline
+    		 	// create array with new y-value
+    		 	for (int i = 0; i < activeNumber; i++) {
+  	  				x[i] = i;
+  	  				y[i] = poly.calculate(i);
+    		 	}
+    		 	
+    		 	meanOptPanel.setCoord(x, y);
+    		 	
+  	        
+    		 	layeredPane.repaint();
+	  	        
+	  	        
 			}  // end of run()
+			
+			
 		};
 		threadCalc.start();   
  	}  // end calcLuminance
+	
+	
+	
+	
 	
 	
 	class SelectionListener implements ListSelectionListener {
@@ -1182,26 +1246,7 @@ public class MainGui extends JComponent {
 	                	pointerPanel.setVisible(true);
 	                	drawingPanel.setVisible(true);
 	                	
-	                	deflicSlider.setValue(4);           // search good initial value?
-	                	
-	    			    // show luminance curve ----------------------------------------
-	        		    // create array with new y-value
-	        		    double[] x, y;
-	        		    x = new double[activeNumber];
-	        		    y = new double[activeNumber];
-	    			    
-	    	  	  		  for (int i = 0; i < activeNumber; i++) {
-	    	  	  			  x[i] = i;
-	    	  				  y[i] = (double) picTable.getValueAt(i, 3);
-	    	  				  
-	    	  				//System.out.println (picTable.getValueAt(i, 3));
-	    	  				//System.out.println("x= " + x[i] + " y= " + y[i]);
-	    	  			   }
-	    	          
-	    	  	        meanPanel.setCoord(x, y);
-	    	  	        meanPanel.repaint();
-
-	                	
+	                	deflicSlider.setValue(4);   // search good initial value! - start of polynom
 	      
 	            	}
 	             	
@@ -1240,6 +1285,12 @@ public class MainGui extends JComponent {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
+				// recalculate polynom   ?? maybe in luminance methos
+				// TODO: wait until the calculation of luminance is done
+							
+     	
+            	
 				
 			}else if (ae.getSource() == playButton ){
 				slideShow.start();

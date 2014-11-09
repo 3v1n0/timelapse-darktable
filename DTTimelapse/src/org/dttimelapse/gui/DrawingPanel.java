@@ -21,11 +21,6 @@ import javax.swing.JPanel;
 
 
 
-
-
-
-
-
 public class DrawingPanel extends JPanel {
 
 	public int x1, y1, x2, y2;
@@ -34,8 +29,8 @@ public class DrawingPanel extends JPanel {
 
 		x1 = 0;
 		y1 = 0;
-		x2 = 0;
-		y2 = 0;
+		x2 = 600;
+		y2 = 400;
 
 		this.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
@@ -50,11 +45,16 @@ public class DrawingPanel extends JPanel {
 			public void mouseReleased(MouseEvent e) {
 				x2 = e.getX();
 				y2 = e.getY();
+				
+				// if the dimension is to small - set max area
+				if ( (x2-x1) < 10 | (y2-y1) < 10) {
+					x1 = 0;
+					y1 = 0;
+					x2 = 600;
+					y2 = 400;
+				}
 
 				repaint();
-				
-				// calculate luminance 
-				//MainGui.calcLuminance();
 				
 			}
 		});
