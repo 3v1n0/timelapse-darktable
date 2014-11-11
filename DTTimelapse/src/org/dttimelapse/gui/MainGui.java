@@ -339,7 +339,10 @@ public class MainGui extends JComponent {
 //				        image = ImageIO.read(url);
 						
 				        //picturePanel.loadImage("/icon/label_dttimelapse.png");
-				        picturePanel.loadImage("icon/label_dttimelapse.png");
+				        //picturePanel.loadImage("icon/label_dttimelapse.png");
+				        
+				        
+				        picturePanel.loadLogo(); 
 				        picturePanel.repaint();
 					}
 					
@@ -406,6 +409,7 @@ public class MainGui extends JComponent {
 	        //pointerPanel.setMinimumSize(new Dimension(450, 300));
 	        drawingPanel.setBounds(0, 0, 600, 400); // mandatory to display
 	        drawingPanel.setOpaque(false);
+	        drawingPanel.setVisible(false);
         }
 
         
@@ -494,7 +498,8 @@ public class MainGui extends JComponent {
         f.setVisible(true);      
         
         // load logo
-        picturePanel.loadImage("icon/label_dttimelapse.png");
+        //picturePanel.loadImage("icon/label_dttimelapse.png");
+        picturePanel.loadLogo(); 
         picturePanel.repaint();
         
         
@@ -1006,7 +1011,8 @@ public class MainGui extends JComponent {
 				
 		final String parameter = String.valueOf(width) + "x" + String.valueOf(height) + "+" +
 				String.valueOf(offX) + "+" + String.valueOf(offY);
-		System.out.println(parameter);
+		
+		//System.out.println(parameter);
 	
 
 //     	final String[] cmdArrayLum = {"convert", "inputfile", 

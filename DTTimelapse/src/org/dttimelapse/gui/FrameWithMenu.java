@@ -8,6 +8,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -60,12 +63,14 @@ public class FrameWithMenu extends JFrame implements ActionListener{
 		    // file menu
 		    prevItem = fileMenu.add("Overwrite Previews");
 		    prevItem.addActionListener(this);
+		    prevItem.setEnabled(false);
 
 		    prefItem = fileMenu.add("Preferences");
 		    prefItem.addActionListener(this);
 		    fileMenu.addSeparator();
 		    exitItem = fileMenu.add("Quit");
 		    exitItem.addActionListener(this);
+		    
 		    
 		    
 		    // help menu   
@@ -78,7 +83,8 @@ public class FrameWithMenu extends JFrame implements ActionListener{
 		    helpMenu.addSeparator();
 		    logItem = helpMenu.add("Log messages");
 		    logItem.addActionListener(this);
-		    		    
+		    		
+		    logItem.setEnabled(false);
 		    
 		    menuBar.add(fileMenu);
 		    menuBar.add(helpMenu);
@@ -118,15 +124,22 @@ public class FrameWithMenu extends JFrame implements ActionListener{
         	JTextArea textArea;
         	JScrollPane scrollPane;
         	 
-        	File file = new File("doc/INFO");
-          	 
+        	//URL url = getClass().getResource("/doc/INFO");        	
+           	//File file = ResourceLoader.load("doc/INFO");
+            
+        	//File file = new File("doc/INFO");
+        	
 	        textArea = new JTextArea(40, 50);
-	                try {
-	                    textArea.read(new FileReader(file), null);
-	                } catch (Exception ex) {
-	                    ex.printStackTrace();
-	                }
-        	 
+	        
+	        try {
+					textArea.read(new InputStreamReader(
+					        getClass().getResourceAsStream("/doc/INFO")),
+					        null);
+			} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+			}
+       	 
             scrollPane = new JScrollPane(textArea);
             frame.add(scrollPane);
             frame.pack();
@@ -142,14 +155,17 @@ public class FrameWithMenu extends JFrame implements ActionListener{
         	JTextArea textArea;
         	JScrollPane scrollPane;
         	 
-        	File file = new File("doc/LICENSE");
+        	//File file = new File("doc/LICENSE");
           	 
 	        textArea = new JTextArea(40, 50);
-	                try {
-	                    textArea.read(new FileReader(file), null);
-	                } catch (Exception ex) {
-	                    ex.printStackTrace();
-	                }
+            try {
+				textArea.read(new InputStreamReader(
+				        getClass().getResourceAsStream("/doc/LICENSE")),
+				        null);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
         	 
             scrollPane = new JScrollPane(textArea, 
             		JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -168,15 +184,18 @@ public class FrameWithMenu extends JFrame implements ActionListener{
         	JTextArea textArea;
         	JScrollPane scrollPane;
         	 
-        	File file = new File("doc/ABOUT");
+        	//File file = new File("doc/ABOUT");
           	 
 	        textArea = new JTextArea(10, 40);
-	                try {
-	                    textArea.read(new FileReader(file), null);
-	                } catch (Exception ex) {
-	                    ex.printStackTrace();
-	                }
-        	 
+	        try {
+					textArea.read(new InputStreamReader(
+					        getClass().getResourceAsStream("/doc/ABOUT")),
+					        null);
+			} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+			}
+	         	 
             scrollPane = new JScrollPane(textArea, 
             		JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             		JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

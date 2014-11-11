@@ -42,9 +42,44 @@ public class Polynomal extends MatrixOperation {
 
 
 	public Polynomal(double[] xx, double[] yy, int o ) {  // constructor
+		// input = x-values, y-values, order of polynom
 		
 		if (o < 0 || o >= xx.length)
 			this.order = xx.length - 1;
+		else
+			this.order = o;
+
+		
+		corx = xx;
+		cory = yy;
+		
+		this.isComplete = this.fittingPolynomal();  // calculation
+		
+		
+		if (!this.isComplete) {
+			
+			System.out.println("Error in calculation");
+			
+			return;
+		}
+
+	}
+	
+	public Polynomal( double[] yy, int o ) {  // constructor
+		// input = y-values, order of polynom
+		
+		int dimension = yy.length;
+		
+		// create x-values itself
+		double[] xx = new double[dimension];		
+  		for (int i = 0; i < dimension; i++) {
+	  		xx[i] = i;
+			//System.out.println (picTable.getValueAt(i, 3));
+			//System.out.println("x= " + x[i] + " y= " + y[i]);
+		}
+		
+		if (o < 0 || o >= yy.length)
+			this.order = yy.length - 1;
 		else
 			this.order = o;
 

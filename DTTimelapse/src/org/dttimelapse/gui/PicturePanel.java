@@ -7,6 +7,10 @@ import java.awt.image.BufferedImage;
 import java.net.*;
 import java.io.*;
 
+
+//import	resources.*;
+
+
 public class PicturePanel extends JPanel { 
 	private static final long serialVersionUID = 1L;
 	
@@ -58,6 +62,41 @@ public class PicturePanel extends JPanel {
 	          JOptionPane.showMessageDialog(this, "Error at reading image file!\n"+ioe.getMessage());
 	     }
 	 }
+	 
+	 
+	 public void loadLogo(){
+		 // read logo image from resource
+	     try {
+	    	 //ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+	    	 //InputStream is = classLoader.getResourceAsStream("label_dttimelapse.jpg");
+	    	 
+	    	 InputStream is = getClass().getResourceAsStream("/icon/label_dttimelapse.png");
+	    		
+	    	//image = new ImageIcon(getClass().getClassLoader().getResource("/label_dttimelapse.png")).getImage();  
+	    	 
+	    	// JLabel label = new JLabel(new ImageIcon(getClass().getResource("icon/label_dttimelapse.png")));
+	    	 
+	    	 image = ImageIO.read(is);
+    	 
 
-   
+	     }
+	     catch(IllegalArgumentException iae) {
+	          JOptionPane.showMessageDialog(this, "Grafiklogo nicht gefunden!\n"+iae.getMessage());
+	     }
+	     catch(IOException ioe) {
+	          JOptionPane.showMessageDialog(this, "Fehler beim Einlesen des Grafiklogo!\n"+ioe.getMessage());
+	     }
+	 }
+	 
+
+//	 public void loadRes(String path){
+//		 // read imagefile from url
+//	     try {
+//	      	 image = ResourceLoader.getImage("label_dttimelapse.png");
+//	     }
+//	     catch(IllegalArgumentException iae) {
+//	          JOptionPane.showMessageDialog(this, "Image file not found!\n"+iae.getMessage());
+//	     }
+//
+//	 }
 }
