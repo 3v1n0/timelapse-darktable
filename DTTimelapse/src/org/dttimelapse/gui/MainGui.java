@@ -38,6 +38,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 
 import javax.print.DocFlavor.URL;
 import javax.swing.*;
@@ -544,7 +545,7 @@ public class MainGui extends JComponent {
         		
 	  	  		for (int i = 0; i < activeNumber; i++) {
 	  	  			x[i] = i;
-	  				y[i] = (double) picTable.getValueAt(i, 3);
+	  				y[i] = (double) picTable.getValueAt(i, 9);   // lumi
 	  				
 	  				//System.out.println (picTable.getValueAt(i, 3));
 	  				//System.out.println("x= " + x[i] + " y= " + y[i]);
@@ -561,7 +562,13 @@ public class MainGui extends JComponent {
     		 	for (int i = 0; i < activeNumber; i++) {
   	  				x[i] = i;
   	  				y[i] = poly.calculate(i);
+  	  				picTable.setValueAt(y[i], i, 10); // store smooth in table
     		 	}
+    		 	
+    		 	picTable.repaint(); // Repaint all the component (all Cells).
+		        // better use 
+		        // ((AbstractTableModel) jTable.getModel()).fireTableCellUpdated(x, 0); // Repaint one cell.
+    		 	
  
 //    		 	System.out.println("x= " + x[1] + " y= " + y[1]);		 	
 //       		System.out.println("x= " + x[15] + " y= " + y[15]);
@@ -801,25 +808,30 @@ public class MainGui extends JComponent {
 				
 				//System.out.println(i + name);
 				
-				Picture data;
-				
+				Vector vec = new Vector(); // data to add to table		        
 				
 				if (splittedLine.length == 7) {
 					// create vector and add to table
-					// create vector with data
-					data = new Picture(i, false, name, 0.0,
-							splittedLine[1], splittedLine[2], splittedLine[3],
-							splittedLine[4], splittedLine[5], splittedLine[6]);
-
+					// create vector with data					
+					vec.add(i);
+					vec.add(false);
+					vec.add(name);					
+					vec.add(splittedLine[1]); 
+					vec.add(splittedLine[2]);
+					vec.add(splittedLine[3]);
+					vec.add(splittedLine[4]);
+					vec.add(splittedLine[5]);
+					vec.add(splittedLine[6]); 
+					
 				} else {
 					// some corrupt pics have no exifdata
-					data = new Picture(i, false, name, 0.0,
-							"", "", "",
-							"", "", "");
+					vec.add(i);
+					vec.add(false);
+					vec.add(name);					
 				}
 				
-				picModel.addPicture( data );
-				
+				picModel.addData(vec);
+					
 				i++;
 
 			}	
@@ -1114,8 +1126,8 @@ public class MainGui extends JComponent {
 							luminance = Double.valueOf(line);
 							
 							// set value in table
-				            // luminance mean is in column 3
-					        picTable.setValueAt(luminance, i, 3);
+				            // luminance mean is in column 9
+					        picTable.setValueAt(luminance, i, 9);
 					        
 					        picTable.repaint(); // Repaint all the component (all Cells).
 					        // better use 
@@ -1133,7 +1145,7 @@ public class MainGui extends JComponent {
 				
 				
 				
-			    // show luminance curve ----------------------------------------
+			    // save luminance curve ----------------------------------------
     		    // create array with new y-value
     		    double[] x, y;
     		    x = new double[activeNumber];
@@ -1141,29 +1153,26 @@ public class MainGui extends JComponent {
 			    
 	  	  		  for (int i = 0; i < activeNumber; i++) {
 	  	  			  x[i] = i;
-	  				  y[i] = (double) picTable.getValueAt(i, 3);
-	  				  
+	  				  y[i] = (double) picTable.getValueAt(i, 9);
+	  				    				  
 	  				//System.out.println (picTable.getValueAt(i, 3));
 	  				//System.out.println("x= " + x[i] + " y= " + y[i]);
 	  			   }
 	          
 	  	        meanPanel.setCoord(x, y);
 	  	        
-			
+	  	      layeredPane.repaint();
 	  	        
-	  	        
+  	        
 	  	        
 	  	        // calculate smoothing curve 
         		//  int order = -1;  // order of polynom, max number of points
         		int order = deflicSlider.getValue();
         		// create array with new y-value
         		
-        		x = new double[activeNumber];
-        		y = new double[activeNumber];
-        		
 	  	  		for (int i = 0; i < activeNumber; i++) {
-	  	  			x[i] = i;
-	  				y[i] = (double) picTable.getValueAt(i, 3);
+	  	  			//x[i] = i;
+	  				y[i] = (double) picTable.getValueAt(i, 9);  // lumi
 	  				
 	  				//System.out.println (picTable.getValueAt(i, 3));
 	  				//System.out.println("x= " + x[i] + " y= " + y[i]);
@@ -1171,16 +1180,22 @@ public class MainGui extends JComponent {
 	  	  		
     		 	Polynomal poly = new Polynomal(x, y, order); 		    
          		
+    		 	
+      			
     		 	// display new polyline
     		 	// create array with new y-value
     		 	for (int i = 0; i < activeNumber; i++) {
-  	  				x[i] = i;
+  	  				//x[i] = i;
   	  				y[i] = poly.calculate(i);
+  	  				
+  	  				picTable.setValueAt( y[i], i, 10); // store smooth in table
     		 	}
+    		 	picTable.repaint();
+    		 	
+    		 	
     		 	
     		 	meanOptPanel.setCoord(x, y);
-    		 	
-  	        
+    		 	  	        
     		 	layeredPane.repaint();
 	  	        
 	  	        
@@ -1252,6 +1267,7 @@ public class MainGui extends JComponent {
 	                	pointerPanel.setVisible(true);
 	                	drawingPanel.setVisible(true);
 	                	
+	                	deflicSlider.setValue(3);   // this is a hack to invoke the smoothing curve
 	                	deflicSlider.setValue(4);   // search good initial value! - start of polynom
 	      
 	            	}
@@ -1291,6 +1307,8 @@ public class MainGui extends JComponent {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
+				//layeredPane.repaint();
 				
 				// recalculate polynom   ?? maybe in luminance methos
 				// TODO: wait until the calculation of luminance is done

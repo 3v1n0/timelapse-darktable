@@ -25,7 +25,7 @@ public class PicturePanel extends JPanel {
 //   		protected void paintComponent(Graphics g) {
 //   			super.paintComponent(g);
 //   			if(image != null) { //Bild muss im Speicher liegen, sonst wird nichts gezeichnet
-//   				g.drawImage(image, 0, 0, this);  // feste Bildgr��e
+//   				g.drawImage(image, 0, 0, this);  // feste Bildgroesse
 //   			}
 //   		}
    		
@@ -87,16 +87,7 @@ public class PicturePanel extends JPanel {
 	          JOptionPane.showMessageDialog(this, "Fehler beim Einlesen des Grafiklogo!\n"+ioe.getMessage());
 	     }
 	 }
-	 
 
-//	 public void loadRes(String path){
-//		 // read imagefile from url
-//	     try {
-//	      	 image = ResourceLoader.getImage("label_dttimelapse.png");
-//	     }
-//	     catch(IllegalArgumentException iae) {
-//	          JOptionPane.showMessageDialog(this, "Image file not found!\n"+iae.getMessage());
-//	     }
-//
-//	 }
+
+
 }
