@@ -19,9 +19,6 @@ You should have received a copy of the GNU General Public License
 along with DTTimelapse.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -53,26 +50,17 @@ import javax.swing.table.TableRowSorter;
 import javax.swing.tree.TreePath;
 
 
-
-
 import org.dttimelapse.math.Polynomal;
 
-
-
-
-
  
-public class MainGui extends JComponent {	  
-	
+public class MainGui extends JComponent {	  	
 	
 	public static String version = "0.1beta";
 	
 	// global variables
 	public static String activePathname;
 	public static Integer activeIndex;
-	public static Integer activeNumber;
-	
-	
+	public static Integer activeNumber;		
 	
 //	DefaultListModel listModel;
 //	JList list;
@@ -117,11 +105,9 @@ public class MainGui extends JComponent {
 	DTTPreferences dttPref;   // preferences
 	JTable picTable;
 	PictureModel picModel;
-    
 	
-    public MainGui() {                  //constructor
-    	
-    	  
+	
+    public MainGui() {                  //constructor    	  
   
 	    ///  custom Nimbus Look+Feel ----------------------------------------
   		try {
@@ -136,13 +122,11 @@ public class MainGui extends JComponent {
  		UIManager.put("Table.background", new Color(150,150,150)); 
  		//UIManager.put("List.foreground", new Color( 255,255,255)); 
  		UIManager.put("Tree.background", new Color(150, 150, 150)); 
- 		//UIManager.put("Tree.foreground", new Color( 255,255,255)); 
- 		
+ 		//UIManager.put("Tree.foreground", new Color( 255,255,255));  		
  		
  		UIManager.put("nimbusLightBackground", new Color(150,150,150));  // works for jlist
- 		// ------------------------------------------------------------------
  		
- 		
+ 		// -------------------- Global settings -------------------------------------- 		
  		activeNumber = 0;
  		activeIndex = 0;
  		
@@ -151,18 +135,13 @@ public class MainGui extends JComponent {
 		dttPref.loadPreferences();
 		
         // create component for slideshow
-		slideShow = new SlideShow(this);
-		
-		
-
-		
+		slideShow = new SlideShow(this);	
 		
     	// create frame with menubar
 		// herein we start preferences and choose dirs 
         FrameWithMenu f = new FrameWithMenu(this, dttPref);
 
-        labelDirectory = new JLabel("");
-	
+        labelDirectory = new JLabel("");	
 
 		//----------------------------------------------------------------------
 		// initialize jtable
@@ -171,7 +150,6 @@ public class MainGui extends JComponent {
 		picTable = new JTable(picModel);
 
 		picTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
 		
 		listSelectionModel = picTable.getSelectionModel();
 		
@@ -191,175 +169,34 @@ public class MainGui extends JComponent {
 	    picTable.getColumn( "Height" ).setPreferredWidth(  40 );
 	    picTable.getColumn( "DateTaken" ).setPreferredWidth(  150 );
 		
-
-        
-		//----------------------------------------------------------------------
       
-        // panels on left side ***************************************
- 
+        // panels on left side *************************************** 
    
         JLabel labelLeft = new JLabel("Preview");
 
         picturePanel = new PicturePanel();
         picturePanel.setBounds(0, 0, 600, 400);  // mandatory for layeredpane?
-
- 
-        
         
         JPanel treePanel = new JPanel();
         
-        //------------------------------------------------------------------------
         try {
 			final FileTree ft = new FileTree(dttPref.prefTreeDirectory);
 			
 			ft.addTreeSelectionListener(new TreeSelectionListener() {
-				public void valueChanged(TreeSelectionEvent evt) {
-					TreePath path = evt.getPath();
-					File file = ft.getFile(path);
-					
+				public void valueChanged(TreeSelectionEvent evt) {					
+										
+					TreePath path = evt.getPath();					
 					activePathname = ft.getPathName(path);
 					
-//					System.out.println("File " + pathname + " has been "
-//						+ (evt.isAddedPath() ? "selected" : "deselected"));
-//					System.out.println("File object is " + file);
-					
-					// change label
-					labelDirectory.setText(activePathname);
-					
-					activeNumber = 0;
-					
-					// set area for luminance to max
-					drawingPanel.x1 = 0;
-					drawingPanel.y1 = 0;
-					drawingPanel.x2 = 600;
-					drawingPanel.y2 = 400;
-					
-					picModel = new PictureModel();  //empty modell
-					
-					
-					if (deflickerButton.isSelected()) {  
-		            	
-		            	
-		            		deflickerButton.doClick();   // reverse the button
-					}
-					
-					
-					// Scan the directory
-					try {
-						activeNumber = scanDirectory();
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					
-					//System.out.println("number is " + activeNumber);
-					
-					
-					picTable.setModel(picModel);  // new data
-					
-					// definition of sorting the table
-					TableRowSorter<TableModel> sorter = new TableRowSorter<>(picTable.getModel());
-					picTable.setRowSorter(sorter);
-					List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-					 
-					int columnIndexToSort = 2;
-					sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING));
-					 
-					sorter.setSortKeys(sortKeys);
-					sorter.sort();
-					
-					// correction of index, after sorting, starting with 1
-		  	  		  for (int i = 0; i < activeNumber; i++) {	  			  		
-	  	  			  		picTable.setValueAt(i+1, i, 0);	  	  			  		
-		  	  		  }
-	 
-					
-					
-					
-					
-					
-					picTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );	    
-				    picTable.getColumn( "Index" ).setPreferredWidth( 40 );
-				    picTable.getColumn( "Key" ).setPreferredWidth(  15 );
-				    picTable.getColumn( "Filename" ).setPreferredWidth( 200 );
-				    picTable.getColumn( "Mean" ).setPreferredWidth( 50  );
-				    picTable.getColumn( "Aperture" ).setPreferredWidth(  60 );
-				    picTable.getColumn( "ExposureTime" ).setPreferredWidth(  60 );
-				    picTable.getColumn( "ISO" ).setPreferredWidth(  40 );
-				    picTable.getColumn( "Width" ).setPreferredWidth(  50 );
-				    picTable.getColumn( "Height" ).setPreferredWidth(  50 );
-				    picTable.getColumn( "DateTaken" ).setPreferredWidth(  150 );
-
-				    
-				    //activeNumber = picTable.getRowCount();   // number of pics in directory
-					
-					
-					if (activeNumber > 0) {
-						
-					    try {
-							scanPreview();
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-
-					    try {
-							calcLuminance();
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					    
-
-		            	meanPanel.setVisible(false);
-		            	meanOptPanel.setVisible(false);
-		            	pointerPanel.setVisible(false);
-		            	drawingPanel.setVisible(false);
-
-		    
-				    
-					    
-					    
-						activeIndex = 0;
-						picSlider.setValue(activeIndex);  // picslider refresh						
-						picSlider.setMaximum(activeNumber-1);   // picSlider refresh
-						
-						//deflicSlider.setMaximum(activeNumber);
-						
-					} else {
-						picSlider.setMaximum(0);
-
-						
-						//getClass().getResource("/icon/label_dttimelapse.png");
-						
-						
-						// Read from a URL
-				        //java.net.URL url = getClass().getResource("/icon/label_dttimelapse.png");
-//				        picturePanel.loadRes("/icon/label_dttimelapse.png");
-//				        image = ImageIO.read(url);
-						
-				        //picturePanel.loadImage("/icon/label_dttimelapse.png");
-				        //picturePanel.loadImage("icon/label_dttimelapse.png");
-				        
-				        
-				        picturePanel.loadLogo(); 
-				        picturePanel.repaint();
-					}
-					
-					
+					newDirectory();			// check new directory					
 				}
-			});
-			
+			});			
 			
 			ft.setPreferredSize(null);
-			ft.setMinimumSize(new Dimension(450,0));
-			
+			ft.setMinimumSize(new Dimension(450,0));			
 	    	
 			treePanel.setLayout(new GridLayout(0, 1)); // extends width of jtree
-			treePanel.add(new JScrollPane(ft));
-			
-			
+			treePanel.add(new JScrollPane(ft));			
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -367,12 +204,10 @@ public class MainGui extends JComponent {
 		} catch (SecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-        
+		}        
         
         //treePanel.setPreferredSize(new Dimension(400,400));
-        //treePanel.setMaximumSize(new Dimension(400,400));
-        
+        //treePanel.setMaximumSize(new Dimension(400,400));        
         
         {
 	        meanPanel = new PolygonPanel();
@@ -412,7 +247,6 @@ public class MainGui extends JComponent {
 	        drawingPanel.setOpaque(false);
 	        drawingPanel.setVisible(false);
         }
-
         
         layeredPane = new JLayeredPane(); // shows picture and curves
 
@@ -421,12 +255,9 @@ public class MainGui extends JComponent {
         layeredPane.add(meanPanel,   0);  //    original mean of luminance
         layeredPane.add(meanOptPanel,   1);  // optimized mean of luminance
         layeredPane.add(pointerPanel,   2);  // pointer of activeindex
-        layeredPane.add(drawingPanel,   3);  // area for luminance calculation
-        
+        layeredPane.add(drawingPanel,   3);  // area for luminance calculation        
  
         layeredPane.setPreferredSize(new Dimension(600,400));
-        
-
         
         // leftpanel 
         leftPanel = new JPanel();
@@ -436,14 +267,11 @@ public class MainGui extends JComponent {
         leftPanel.add(layeredPane);
         leftPanel.add( sliderPanel() );
         leftPanel.add(treePanel);
- 
         
 
 
         
-        // panels on right side *********************************
-
-       
+        // panels on right side *********************************       
         
         // Erzeugung eines JTabbedPane-Objektes
         JTabbedPane tabbedPane = new JTabbedPane
@@ -474,11 +302,8 @@ public class MainGui extends JComponent {
         
         
         JScrollPane tablePane = new JScrollPane(picTable);
-        rightPanel.add(tablePane);
-        
-        
-        //rightPanel.add(Box.createVerticalGlue());   // decrease hight of tablepanel
-        
+        rightPanel.add(tablePane);        
+        //rightPanel.add(Box.createVerticalGlue());   // decrease hight of tablepanel  
         
         
         // splitpane
@@ -505,7 +330,7 @@ public class MainGui extends JComponent {
         
         
         // add some abstract listeners for sliders
-        picSlider.addChangeListener( new ChangeListener() {
+        picSlider.addChangeListener( new ChangeListener() {  // ----------------  picSlider
         	@Override public void stateChanged( ChangeEvent e ) {
         		
         		activeIndex=picSlider.getValue();
@@ -530,7 +355,7 @@ public class MainGui extends JComponent {
       	} );
  
         
-        deflicSlider.addChangeListener( new ChangeListener() {
+        deflicSlider.addChangeListener( new ChangeListener() {  // ----------------  deflicSlider
         	@Override public void stateChanged( ChangeEvent e ) {
         		//TODO update exposure curve
   			
@@ -561,8 +386,10 @@ public class MainGui extends JComponent {
     		 	
     		 	for (int i = 0; i < activeNumber; i++) {
   	  				x[i] = i;
-  	  				y[i] = poly.calculate(i);
-  	  				picTable.setValueAt(y[i], i, 10); // store smooth in table
+  	  				y[i] = poly.calculate(i);  	  				
+ 	  				double flicker = y[1] - (double) picTable.getValueAt(i, 9);
+  	  				picTable.setValueAt( y[i], i, 10); // store smooth in table
+  	  				picTable.setValueAt( flicker, i, 11); // store smooth in table
     		 	}
     		 	
     		 	picTable.repaint(); // Repaint all the component (all Cells).
@@ -602,176 +429,266 @@ public class MainGui extends JComponent {
 		picturePanel.loadImage(activePathname + "/preview/" + name);   
 		
 		layeredPane.repaint();
-	}
+	}    
     
     
-    
-    // methods to create some parts of the GUI
-    public JPanel sliderPanel(){
-     	// panel with slider, start and stop button
-        picSlider = new JSlider();
+	// methods to create some parts of the GUI
+	public JPanel sliderPanel(){
+		// panel with slider, start and stop button
+		picSlider = new JSlider();
  
-        playButton = new JButton("Play preview");
-        stopButton = new JButton("Stop");
-        resetButton = new JButton("Reset");
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(playButton);
-        buttonPanel.add(stopButton);
-        buttonPanel.add(resetButton);
+		playButton = new JButton("Play preview");
+		stopButton = new JButton("Stop");
+		resetButton = new JButton("Reset");
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.add(playButton);
+		buttonPanel.add(stopButton);
+		buttonPanel.add(resetButton);
+		
+		playButton.addActionListener(new ButtonListener());
+		stopButton.addActionListener(new ButtonListener());
+		resetButton.addActionListener(new ButtonListener());
+		
+		sliderPanel = new JPanel();
+		sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
+		sliderPanel.add(picSlider);
+		sliderPanel.add(buttonPanel);
+		
+		return sliderPanel;
+	}
+	
+	public JPanel progressPanel(){
+		// Panel with programname and progressbar
+		
+		progressPanel = new JPanel();
+		// progressPanel.setLayout(new BorderLayout());
         
-        playButton.addActionListener(new ButtonListener());
-        stopButton.addActionListener(new ButtonListener());
-        resetButton.addActionListener(new ButtonListener());
+		JLabel labelSoftware = new JLabel("DTTimelapse");
+		
+		progressPanel.add(labelSoftware);
         
-       	sliderPanel = new JPanel();
-    	sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
-        sliderPanel.add(picSlider);
-        sliderPanel.add(buttonPanel);
-            	
-    	return sliderPanel;
-    }
-    
-    public JPanel progressPanel(){
-    	// Panel with programname and progressbar
-    	
-        progressPanel = new JPanel();
-        //progressPanel.setLayout(new BorderLayout());
-        
-        JLabel labelSoftware = new JLabel("DTTimelapse");
-        
-        progressPanel.add(labelSoftware);
-        
-        progressBar = new JProgressBar();
-        progressBar.setMaximum(0);
-        progressBar.setStringPainted(true);
-        
-        progressPanel.add(progressBar);
-        progressPanel.setMaximumSize( progressPanel.getPreferredSize() );
-        progressPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-    	
-    	return progressPanel;
-    }
-    
+		progressBar = new JProgressBar();
+		progressBar.setMaximum(0);
+		progressBar.setStringPainted(true);
+		
+		progressPanel.add(progressBar);
+		progressPanel.setMaximumSize( progressPanel.getPreferredSize() );
+		progressPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		
+		return progressPanel;
+	} 
     
       
 	public JPanel basicWorkflowPanel(){
 		// basic workflow
-        loadButton = new JButton("Load XMP");
-        transButton = new JButton("Interpolation");
-        saveButton = new JButton("Save XMP");	
-        exportButton = new JButton("Export Frames");
-        renderButton = new JButton("Render Video");
+		loadButton = new JButton("Load XMP");
+		transButton = new JButton("Interpolation");
+		saveButton = new JButton("Save XMP");	
+		exportButton = new JButton("Export Frames");
+		renderButton = new JButton("Render Video");
 
-        loadButton.addActionListener(new ButtonListener()); 
-        transButton.addActionListener(new ButtonListener()); 
-        saveButton.addActionListener(new ButtonListener()); 
-        exportButton.addActionListener(new ButtonListener()); 
-        renderButton.addActionListener(new ButtonListener()); 
+		loadButton.addActionListener(new ButtonListener()); 
+		transButton.addActionListener(new ButtonListener()); 
+		saveButton.addActionListener(new ButtonListener()); 
+		exportButton.addActionListener(new ButtonListener()); 
+		renderButton.addActionListener(new ButtonListener()); 
    
-        JPanel basicWorkflowPanel = new JPanel();
-        basicWorkflowPanel.add(loadButton);
-        basicWorkflowPanel.add(transButton);    
-        basicWorkflowPanel.add(saveButton);
-        basicWorkflowPanel.add(exportButton);
-        basicWorkflowPanel.add(renderButton);
-        basicWorkflowPanel.setMaximumSize( basicWorkflowPanel.getPreferredSize() );
-        
-        return basicWorkflowPanel;
+		JPanel basicWorkflowPanel = new JPanel();
+		basicWorkflowPanel.add(loadButton);
+		basicWorkflowPanel.add(transButton);    
+		basicWorkflowPanel.add(saveButton);
+		basicWorkflowPanel.add(exportButton);
+		basicWorkflowPanel.add(renderButton);
+		basicWorkflowPanel.setMaximumSize( basicWorkflowPanel.getPreferredSize() );
+		
+		return basicWorkflowPanel;
 	}
 
 	public JPanel deflicWorkflowPanel(){
-        // deflicker workflow
-        dloadButton = new JButton("Load XMP");
-        dtransButton = new JButton("Interpolation");
-        dsaveButton = new JButton("Save XMP");	
-        dexportButton = new JButton("Export Frames");
-        drenderButton = new JButton("Render Video");
-        dlumiButton = new JButton("Recalculate luminance");
-        
-        dlumiButton.setToolTipText("Define rectangle in preview area!");
+		// deflicker workflow
+		dloadButton = new JButton("Load XMP");
+		dtransButton = new JButton("Interpolation");
+		dsaveButton = new JButton("Save XMP");	
+		dexportButton = new JButton("Export Frames");
+		drenderButton = new JButton("Render Video");
+		dlumiButton = new JButton("Recalculate luminance");
+		
+		dlumiButton.setToolTipText("Define rectangle in preview area!");
   
-        dloadButton.addActionListener(new ButtonListener()); 
-        dtransButton.addActionListener(new ButtonListener()); 
-        dsaveButton.addActionListener(new ButtonListener()); 
-        dexportButton.addActionListener(new ButtonListener()); 
-        drenderButton.addActionListener(new ButtonListener()); 
-        dlumiButton.addActionListener(new ButtonListener()); 
-        
-        deflickerButton = new JToggleButton("Deflicker");
-        deflickerButton.addActionListener(new ButtonListener2());
-        
-         //deflickerButton.addActionListener(actionListener2);
-          
-        deflicSlider = new JSlider();
-        deflicSlider.setMaximum(8);
-        deflicSlider.setMajorTickSpacing(1);
-        deflicSlider.setPaintTicks(true);
-          
-        JPanel deflicRow1Panel = new JPanel();
-        deflicRow1Panel.add(dloadButton);    
-        deflicRow1Panel.add(dtransButton);    
-        deflicRow1Panel.add(deflickerButton);    
-        deflicRow1Panel.add(dsaveButton);
-        deflicRow1Panel.add(dexportButton);
-        deflicRow1Panel.add(drenderButton);
-        
-        //deflicRow1Panel.setMaximumSize( basicWorkflowPanel.getPreferredSize() );
-        //deflicWorkflowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		dloadButton.addActionListener(new ButtonListener()); 
+		dtransButton.addActionListener(new ButtonListener()); 
+		dsaveButton.addActionListener(new ButtonListener()); 
+		dexportButton.addActionListener(new ButtonListener()); 
+		drenderButton.addActionListener(new ButtonListener()); 
+		dlumiButton.addActionListener(new ButtonListener()); 
+		
+		deflickerButton = new JToggleButton("Deflicker");
+		deflickerButton.addActionListener(new ButtonListener2());
+		
+		//deflickerButton.addActionListener(actionListener2);
+		
+		deflicSlider = new JSlider();
+		deflicSlider.setMaximum(8);
+		deflicSlider.setMajorTickSpacing(1);
+		deflicSlider.setPaintTicks(true);
+		deflicSlider.setValue(4);          // initial value
+		
+		JPanel deflicRow1Panel = new JPanel();
+		deflicRow1Panel.add(dloadButton);    
+		deflicRow1Panel.add(dtransButton);    
+		deflicRow1Panel.add(deflickerButton);    
+		deflicRow1Panel.add(dsaveButton);
+		deflicRow1Panel.add(dexportButton);
+		deflicRow1Panel.add(drenderButton);
+		
+		//deflicRow1Panel.setMaximumSize( basicWorkflowPanel.getPreferredSize() );
+		//deflicWorkflowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        deflicRow2Panel = new JPanel();
-        deflicRow2Panel.add(new JLabel("Order of polynom"));    
-        deflicRow2Panel.add(deflicSlider);   
-        deflicRow2Panel.setVisible(false);
-        deflicRow2Panel.add(dlumiButton); 
-     
-        JPanel deflicWorkflowPanel = new JPanel();
-        deflicWorkflowPanel.setLayout(new BorderLayout());
-        deflicWorkflowPanel.add(deflicRow1Panel, BorderLayout.NORTH);    
-        deflicWorkflowPanel.add(deflicRow2Panel, BorderLayout.SOUTH);    
-      
+		deflicRow2Panel = new JPanel();
+		deflicRow2Panel.add(new JLabel("Order of polynom"));    
+		deflicRow2Panel.add(deflicSlider);   
+		deflicRow2Panel.setVisible(false);
+		deflicRow2Panel.add(dlumiButton); 
+		 
+		JPanel deflicWorkflowPanel = new JPanel();
+		deflicWorkflowPanel.setLayout(new BorderLayout());
+		deflicWorkflowPanel.add(deflicRow1Panel, BorderLayout.NORTH);    
+		deflicWorkflowPanel.add(deflicRow2Panel, BorderLayout.SOUTH);    
+		
 		return deflicWorkflowPanel;
 	}
 	
 	public JPanel interpolationPanel(){
-        // Interpolation settings
-        JRadioButton radio1=new JRadioButton("linear");  
-        JRadioButton radio2=new JRadioButton("spline");  
-        radio1.setSelected(true); 
-        
-        ButtonGroup bg=new ButtonGroup();  
-        bg.add(radio1);
-        bg.add(radio2);  
-          
-        JPanel interpolationPanel = new JPanel();
-        interpolationPanel.add(new JLabel("Interpolation setting"));
-        interpolationPanel.add(radio1);
-        interpolationPanel.add(radio2);    
+		// Interpolation settings
+		JRadioButton radio1=new JRadioButton("linear");  
+		JRadioButton radio2=new JRadioButton("spline");  
+		radio1.setSelected(true); 
+		
+		ButtonGroup bg=new ButtonGroup();  
+		bg.add(radio1);
+		bg.add(radio2);  
+		
+		JPanel interpolationPanel = new JPanel();
+		interpolationPanel.add(new JLabel("Interpolation setting"));
+		interpolationPanel.add(radio1);
+		interpolationPanel.add(radio2);    
 		
 		return interpolationPanel;
 	}
     
+	
+	public void newDirectory() {   // check new choosen directory 
+	//		System.out.println("File " + pathname + " has been "
+	//		+ (evt.isAddedPath() ? "selected" : "deselected"));
+	//	System.out.println("File object is " + file);
+		
+		// change label
+		labelDirectory.setText(activePathname);
+		
+		activeNumber = 0;
+		
+		// set area for luminance to max
+		drawingPanel.x1 = 0;
+		drawingPanel.y1 = 0;
+		drawingPanel.x2 = 600;
+		drawingPanel.y2 = 400;
+		
+		picModel = new PictureModel();  //empty modell		
+		
+		if (deflickerButton.isSelected()) {  
+	    	deflickerButton.doClick();   // reverse the button
+		}		
+		
+		// Scan the directory to find all images
+		try {
+			activeNumber = scanDirectory();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}					
+		
+		//System.out.println("number is " + activeNumber);
+		
+		picTable.setModel(picModel);  // new data
+		
+		// definition of sorting the table
+		TableRowSorter<TableModel> sorter = new TableRowSorter<>(picTable.getModel());
+		picTable.setRowSorter(sorter);
+		List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+		 
+		int columnIndexToSort = 2;
+		sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING));
+		 
+		sorter.setSortKeys(sortKeys);
+		sorter.sort();
+		
+		// correction of index, after sorting, starting with 1
+		for (int i = 0; i < activeNumber; i++) {	  			  		
+			picTable.setValueAt(i+1, i, 0);	  	  			  		
+		}
+		
+		// set column width
+		picTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );	    
+		picTable.getColumn( "Index" ).setPreferredWidth( 40 );
+		picTable.getColumn( "Key" ).setPreferredWidth(  15 );
+		picTable.getColumn( "Filename" ).setPreferredWidth( 200 );
+		picTable.getColumn( "Mean" ).setPreferredWidth( 50  );
+		picTable.getColumn( "Aperture" ).setPreferredWidth(  60 );
+		picTable.getColumn( "ExposureTime" ).setPreferredWidth(  60 );
+		picTable.getColumn( "ISO" ).setPreferredWidth(  40 );
+		picTable.getColumn( "Width" ).setPreferredWidth(  50 );
+		picTable.getColumn( "Height" ).setPreferredWidth(  50 );
+		picTable.getColumn( "DateTaken" ).setPreferredWidth(  150 );
+	
+		
+		if (activeNumber > 0) {			
+		    try {
+				scanPreview();            // extract previews
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	
+		    try {
+				calcLuminance();          // calculate luminance + smooth
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		    
+		    // initial settings
+		    meanPanel.setVisible(false);
+		    meanOptPanel.setVisible(false);
+		    pointerPanel.setVisible(false);
+		    drawingPanel.setVisible(false);
+		    
+			activeIndex = 0;
+			picSlider.setValue(activeIndex);  // picslider refresh						
+			picSlider.setMaximum(activeNumber-1);   // picSlider refresh			
+				
+		} else {
+			// no images found
+			picSlider.setMaximum(0);
+	
+			picturePanel.loadLogo(); 
+			picturePanel.repaint();
+		}		
+	}  //   end of newDirectory
+	
+	
       
 	public int scanDirectory() throws Exception{
 		//extract exif infos
 		
 		progressBar.setIndeterminate(true);
-		progressBar.paint(progressBar.getGraphics());  // not very good
-		
-		//String[] fnames = file.list();		// Get array with all filenames
-		
-		//Arrays.sort(fnames);  // sort array to alphabetical order
-		
-        //final List<String> picList = new ArrayList<String>();     // create empty list with name of picturefiles
-		
-        //Path path = Paths.get(activePathname);  // path to active directory 
+		progressBar.paint(progressBar.getGraphics());  // not very good		
         
-        // alternative: Filtering a Directory Listing By Using Globbing
-    	// extract info of all files in directory
-    	// exiftool -csv -ext JPG -ext NEF -ext CR2 -ext DNG 
-    	//          -aperture -shutterspeed -iso -ImageWidth -ImageHeight -createdate .
-    	//String[] cmdArrayEx = {"D:\\Programme\\exiftool\\exiftool.exe", "-csv", 
+		// extract info of all files in directory
+		// exiftool -csv -ext JPG -ext NEF -ext CR2 -ext DNG 
+		//          -aperture -shutterspeed -iso -ImageWidth -ImageHeight -createdate .
+		//String[] cmdArrayEx = {"D:\\Programme\\exiftool\\exiftool.exe", "-csv", 
  
-     	String[] cmdArrayEx = {"exiftool", "-csv", 
+		String[] cmdArrayEx = {"exiftool", "-csv", 
 				 "-ext", "JPG", "-ext", "NEF" , "-ext", "CR2", "-ext", "DNG",
 				 "-aperture", "-shutterspeed", "-iso", "-ImageWidth", "-ImageHeight",
 				 "-createdate", "directory" };
@@ -797,18 +714,12 @@ public class MainGui extends JComponent {
 			if (line != null) {
 				String[] splittedLine = line.split(",");
 				String pathname = splittedLine[0];
-//					aperture = splittedLine[1];
-//					shutterspeed = splittedLine[2];
-//					iso = splittedLine[3];
-//					width = splittedLine[4];
-//					height = splittedLine[5];
-//					date = splittedLine[6];
 				
 				String name = pathname.substring( pathname.lastIndexOf("/")+1, pathname.length() );
 				
 				//System.out.println(i + name);
 				
-				Vector vec = new Vector(); // data to add to table		        
+				Vector<Comparable> vec = new Vector<Comparable>(); // data to add to table
 				
 				if (splittedLine.length == 7) {
 					// create vector and add to table
@@ -816,24 +727,28 @@ public class MainGui extends JComponent {
 					vec.add(i);
 					vec.add(false);
 					vec.add(name);					
-					vec.add(splittedLine[1]); 
-					vec.add(splittedLine[2]);
-					vec.add(splittedLine[3]);
-					vec.add(splittedLine[4]);
-					vec.add(splittedLine[5]);
-					vec.add(splittedLine[6]); 
+					vec.add(splittedLine[1]);  // aperture
+					vec.add(splittedLine[2]);  // shutterspeed
+					vec.add(splittedLine[3]);  // iso
+					//int iso = Integer.parseInt(splittedLine[3]);
 					
-				} else {
+					int width = Integer.parseInt(splittedLine[4]);
+					int height = Integer.parseInt(splittedLine[5]);
+					
+					//vec.add(iso);
+					vec.add(width);					
+					vec.add(height);					
+					
+					vec.add(splittedLine[6]); // date taken
+					} else {
 					// some corrupt pics have no exifdata
 					vec.add(i);
 					vec.add(false);
 					vec.add(name);					
 				}
 				
-				picModel.addData(vec);
-					
+				picModel.addData(vec);					
 				i++;
-
 			}	
 			
 		} // end of while
@@ -853,15 +768,12 @@ public class MainGui extends JComponent {
 	public void scanPreview() throws Exception, IOException, InterruptedException{   // create previews
 		
 		File dir = new File(activePathname+"/preview");
-	    // attempt to create the directory here
-	    boolean successful = dir.mkdir();
-	    if (successful) {
-	      System.out.println("directory was created successfully");
-	    }
+		// attempt to create the directory here
+		boolean successful = dir.mkdir();
+		if (successful) {
+			//System.out.println("directory was created successfully");
+		}
 	
-        // create a new array for extern command
-//        final String[] cmdArray = new String[5];
-
 		// imagemagick convert overwrites existing files without warning
 		// command= convert path+fname -resize 750x500 path+/preview/+fname
         
@@ -981,8 +893,7 @@ public class MainGui extends JComponent {
 						//String s = null;
 						//while ((s = r.readLine()) != null) {
 						//    System.out.println(s);
-						//}
-						
+						//}						
 					}
 					
 					progressBar.setValue(ii);
@@ -1024,24 +935,14 @@ public class MainGui extends JComponent {
 		final String parameter = String.valueOf(width) + "x" + String.valueOf(height) + "+" +
 				String.valueOf(offX) + "+" + String.valueOf(offY);
 		
-		//System.out.println(parameter);
-	
-
-//     	final String[] cmdArrayLum = {"convert", "inputfile", 
-//     			"-scale", "1x1!", "-format", "%[fx:luminance]", "info:"};	
-//    	final String[] cmdArrayLum = {"convert", "inputfile", "-region", "parameter",
-//     			"-scale", "1x1!", "-format", "%[fx:luminance]", "info:"};	
-     	
+		//System.out.println(parameter);	
 
     	final String[] cmdArrayCrop = {"convert", "inputfile", "-crop", "parameter", "-" };
-    	cmdArrayCrop[3] = parameter;			
-
+    	cmdArrayCrop[3] = parameter;
 		
     	final String[] cmdArrayLum = {"convert", "-", 
     			"-scale", "1x1!", "-format", "%[fx:luminance]", "info:"};	
-     	//cmdArrayLum[3] = parameter;
-
-     	
+     	//cmdArrayLum[3] = parameter;     	
      	
 	    Thread threadCalc = new Thread() { // define new Thread as inline class
 			public void run() {
@@ -1049,18 +950,14 @@ public class MainGui extends JComponent {
 				Double luminance = 0.0;
 	    
 				for (int i = 0; i < activeNumber; i++) {
-					// create preview of every picture
-					// do only one call at time, to avoid system overload
 			         
 					String fullname = (String) picTable.getValueAt(i, 2);
 					String name = fullname.substring(0, fullname.lastIndexOf(".")) + ".jpg";
-
 					
 					 // set preview image as input
 			         cmdArrayCrop[1] = activePathname + "/preview/" + name;
 			         
-			        //System.out.println(Arrays.toString(cmdArrayLum));
-					  
+			        //System.out.println(Arrays.toString(cmdArrayLum));					  
 			         
 			        // wait if preview is not yet created
 			        //TODO beware of endless loops			         
@@ -1073,17 +970,11 @@ public class MainGui extends JComponent {
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
-						}  	
-
+						} 
 					};
-
-      
-
 					
 					//System.out.println(Arrays.toString(cmdArrayCrop));
 					//System.out.println(Arrays.toString(cmdArrayLum));
-
-					
 
 					BufferedReader is;  // reader for output of process
 					String line;
@@ -1126,161 +1017,131 @@ public class MainGui extends JComponent {
 							luminance = Double.valueOf(line);
 							
 							// set value in table
-				            // luminance mean is in column 9
-					        picTable.setValueAt(luminance, i, 9);
-					        
-					        picTable.repaint(); // Repaint all the component (all Cells).
-					        // better use 
-					        // ((AbstractTableModel) jTable.getModel()).fireTableCellUpdated(x, 0); // Repaint one cell.
+							// luminance mean is in column 9
+							picTable.setValueAt(luminance, i, 9);
+							
+							picTable.repaint(); // Repaint all the component (all Cells).
+							// better use 
+							// ((AbstractTableModel) jTable.getModel()).fireTableCellUpdated(x, 0); // Repaint one cell.
 						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
-					}
-
+					}					
+				} // end for-loop				
+				
+				// save luminance curve ----------------------------------------
+				// create array with new y-value
+				double[] x, y;
+				x = new double[activeNumber];
+				y = new double[activeNumber];
+				
+				for (int i = 0; i < activeNumber; i++) {
+					x[i] = i;
+					y[i] = (double) picTable.getValueAt(i, 9);
 					
-
-					
-				} // end for-loop
-				
-				
-				
-			    // save luminance curve ----------------------------------------
-    		    // create array with new y-value
-    		    double[] x, y;
-    		    x = new double[activeNumber];
-    		    y = new double[activeNumber];
-			    
-	  	  		  for (int i = 0; i < activeNumber; i++) {
-	  	  			  x[i] = i;
-	  				  y[i] = (double) picTable.getValueAt(i, 9);
-	  				    				  
-	  				//System.out.println (picTable.getValueAt(i, 3));
-	  				//System.out.println("x= " + x[i] + " y= " + y[i]);
-	  			   }
-	          
-	  	        meanPanel.setCoord(x, y);
+  				//System.out.println (picTable.getValueAt(i, 3));
+  				//System.out.println("x= " + x[i] + " y= " + y[i]);
+				}	          
+	  	        meanPanel.setCoord(x, y);  	        
 	  	        
-	  	      layeredPane.repaint();
 	  	        
-  	        
 	  	        
-	  	        // calculate smoothing curve 
-        		//  int order = -1;  // order of polynom, max number of points
-        		int order = deflicSlider.getValue();
-        		// create array with new y-value
-        		
-	  	  		for (int i = 0; i < activeNumber; i++) {
-	  	  			//x[i] = i;
-	  				y[i] = (double) picTable.getValueAt(i, 9);  // lumi
-	  				
-	  				//System.out.println (picTable.getValueAt(i, 3));
-	  				//System.out.println("x= " + x[i] + " y= " + y[i]);
-	  			}
-	  	  		
-    		 	Polynomal poly = new Polynomal(x, y, order); 		    
-         		
-    		 	
+	  	        // calculate smoothing curve, but don't display this until
+	  	        //         deflicker is active
+	  	        // we should the caclculation at this place, otherwise the
+	  	        //    calc. of luminance is slower than this process
+	  	        
+	  	        int order = deflicSlider.getValue();
+    		 	Polynomal poly = new Polynomal(x, y, order);  // with initial order=4    		 	
       			
-    		 	// display new polyline
+    		 	// store new smoothed line
     		 	// create array with new y-value
     		 	for (int i = 0; i < activeNumber; i++) {
   	  				//x[i] = i;
   	  				y[i] = poly.calculate(i);
-  	  				
+  	  				double flicker = y[1] - (double) picTable.getValueAt(i, 9);
   	  				picTable.setValueAt( y[i], i, 10); // store smooth in table
+  	  				picTable.setValueAt( flicker, i, 11); // store smooth in table
     		 	}
-    		 	picTable.repaint();
     		 	
-    		 	
-    		 	
-    		 	meanOptPanel.setCoord(x, y);
-    		 	  	        
-    		 	layeredPane.repaint();
+    		 	meanOptPanel.setCoord(x, y);    		 	
+    		 	    		 	   		 	  	        
+    		 	layeredPane.repaint();	  	// after recalculating        
 	  	        
-	  	        
-			}  // end of run()
-			
+			}  // end of run()		
 			
 		};
-		threadCalc.start();   
+		threadCalc.start();   		
+		
  	}  // end calcLuminance
 	
+		
 	
 	
-	
-	
-	
-	class SelectionListener implements ListSelectionListener {
-		// used for jtable
-	    public void valueChanged(ListSelectionEvent e) {
-	        if(e.getValueIsAdjusting()) // mouse button not released yet
-	            return;
-	        int row =  picTable.getSelectedRow();
-	        if(row < 0)              // true when clearSelection
-	            return;
-	        
-	        int col =  picTable.getSelectedColumn();   
-	             
-	        if(col < 0)              // true when clearSelection
-	            return;
-	 
-	        
-        	activeIndex=picTable.getSelectedRow();
+	class SelectionListener implements ListSelectionListener {  // -------   used for jtable
+		
+		public void valueChanged(ListSelectionEvent e) {
+			if(e.getValueIsAdjusting()) // mouse button not released yet
+				return;
+			int row =  picTable.getSelectedRow();
+			if(row < 0)              // true when clearSelection
+				return;
+			
+			int col =  picTable.getSelectedColumn();   
+			
+			if(col < 0)              // true when clearSelection
+				return;
+			
+			activeIndex=picTable.getSelectedRow();
 			picSlider.setValue(activeIndex);
 
 			//System.out.println("Selected row: "+row);
-	        //System.out.println("Selected col: "+col);
-	        //System.out.println( picTable.getValueAt(row, col) );   // 
-	        
-	        
-	        //	        System.out.println(picTable.getValueAt(row, 2) );   // spalte 2 = filename
+			//System.out.println("Selected col: "+col);
+			//System.out.println( picTable.getValueAt(row, col) );   //	        
+			
+			//	        System.out.println(picTable.getValueAt(row, 2) );   // spalte 2 = filename
 
-            // test: change mean
-	        // table.setValueAt(0.999, row, 3);
-	        
-	        
-	        
-	        //table.clearSelection();
-	        }
-	         
+			// test: change mean
+			// table.setValueAt(0.999, row, 3);	        
+			
+			//table.clearSelection();
+		}
 	}	
 
-	class ButtonListener2 implements ActionListener {
+	class ButtonListener2 implements ActionListener { // ----------------  deflicker jogglebutton
 		public void actionPerformed(ActionEvent ae) {
 			// this is used for deflicker jogglebutton          
-	          AbstractButton abstractButton = (AbstractButton) ae.getSource();
-	          boolean selected = abstractButton.getModel().isSelected();
-	          //System.out.println("Action - selected=" + selected + "\n");
-	           if (selected) {  
-	            	
-	            	if (activeNumber < 10) {
-	            		JOptionPane.showMessageDialog (null, "Not enough pictures for deflicker!",
-	            				"Title", JOptionPane.WARNING_MESSAGE);
-	            		deflickerButton.doClick();   // reverse the button
-	            		
-	            	} else {
-	            		// activate deflicker options
-	                  	deflicRow2Panel.setVisible(true);
-	                	meanPanel.setVisible(true);
-	                	meanOptPanel.setVisible(true);
-	                	pointerPanel.setVisible(true);
-	                	drawingPanel.setVisible(true);
-	                	
-	                	deflicSlider.setValue(3);   // this is a hack to invoke the smoothing curve
-	                	deflicSlider.setValue(4);   // search good initial value! - start of polynom
-	      
-	            	}
-	             	
-	            } else {
-	            	deflicRow2Panel.setVisible(false);
-	            	meanPanel.setVisible(false);
-	            	meanOptPanel.setVisible(false);
-	            	pointerPanel.setVisible(false);
-	            	drawingPanel.setVisible(false);
-	            }
-	 		}
+			AbstractButton abstractButton = (AbstractButton) ae.getSource();
+			boolean selected = abstractButton.getModel().isSelected();
+			//System.out.println("Action - selected=" + selected + "\n");
+			if (selected) {  
+				
+				if (activeNumber < 10) {
+					JOptionPane.showMessageDialog (null, "Not enough pictures for deflicker!",
+							"Title", JOptionPane.WARNING_MESSAGE);
+					deflickerButton.doClick();   // reverse the button
+					
+				} else {
+					// activate deflicker options
+					deflicRow2Panel.setVisible(true);
+					meanPanel.setVisible(true);
+					meanOptPanel.setVisible(true);
+					pointerPanel.setVisible(true);
+					drawingPanel.setVisible(true);
+					
+				}
+				
+			} else {
+				deflicRow2Panel.setVisible(false);
+				meanPanel.setVisible(false);
+				meanOptPanel.setVisible(false);
+				pointerPanel.setVisible(false);
+				drawingPanel.setVisible(false);
+			}
+		}
 	}
+	
 	
 	class ButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent ae) {
@@ -1296,25 +1157,40 @@ public class MainGui extends JComponent {
 			} else if (ae.getSource() == exportButton | ae.getSource() == dexportButton){
 				System.out.println("Button export frames");
 				
+				
+				// some testing ****************************
+				picTable.setValueAt( 99.9, activeIndex, 12);
+				picTable.setValueAt( 88.8, activeIndex, 14);
+				picTable.setValueAt( 77.7, activeIndex, 16);
+				picTable.setValueAt( 66.6, activeIndex, 18);
+				
+				// toggle keyframe
+				if ((Boolean) picTable.getValueAt( activeIndex, 1)) {
+					picTable.setValueAt( false, activeIndex, 1);
+				} else {
+					picTable.setValueAt( true, activeIndex, 1);
+				}
+				
+				picTable.repaint();				
+				// end of testing ****************************
+				
+				
+				
 			} else if (ae.getSource() == renderButton | ae.getSource() == drenderButton){
 				System.out.println("Button render video");
 				
 			} else if (ae.getSource() == dlumiButton ){
 				// recalculate luminance with rectangle
 				try {
-					calcLuminance();
+					calcLuminance();   // calc and repaint
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				// invoke smoothing curve
+				deflicSlider.setValue(3);   // hack to force calculation !?
+				deflicSlider.setValue(4);   // initial value
 				
-				//layeredPane.repaint();
-				
-				// recalculate polynom   ?? maybe in luminance methos
-				// TODO: wait until the calculation of luminance is done
-							
-     	
-            	
 				
 			}else if (ae.getSource() == playButton ){
 				slideShow.start();
@@ -1331,7 +1207,5 @@ public class MainGui extends JComponent {
 			}
 		}
 	}
-
-
-
 }
+

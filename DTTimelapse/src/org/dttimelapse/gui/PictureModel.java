@@ -39,7 +39,7 @@ public class PictureModel extends AbstractTableModel {
 	
 	String[] columnNames = {
 			"Index",		// 0
-			"Key",
+			"Key",		// 1
 			"Filename",
 			"Aperture",
 			"ExposureTime",
@@ -49,11 +49,18 @@ public class PictureModel extends AbstractTableModel {
 			"DateTaken",
 			"Mean",			//  9
 			"Smooth",		// 10  
-			"Exp cor",
-			"Crop T",		
-			"Crop B",
-			"Crop L",
-			"Crop R"
+			"Flicker",		// 11	
+			"D-Exposure",	// 12
+			"Black",		// 13
+			"Exposure",		// 14
+			"Clip x",		// 15
+			"Clip y",		// 16
+			"Clip w",		// 17
+			"Clip h",		// 18
+			"Angle",		// 19 
+			"WB temp",  	// 20
+			"WB tint",		// 21
+			"Vibrance",		// 22
 	};
 
 	 //public final Object[] longValues = {"", new Integer(20), new Float(20), new Float(20), Boolean.TRUE};
@@ -88,7 +95,7 @@ public class PictureModel extends AbstractTableModel {
 
 	public boolean isCellEditable(int row, int col) {
         if (col == 1) {  // isKeyframe
-            return true; 
+            return false; 
         } else {
             return false;    // no editing
         }
