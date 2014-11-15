@@ -45,6 +45,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.tree.TreePath;
@@ -77,11 +81,16 @@ public class MainGui extends JComponent {
 			
 	private JPanel rightPanel, leftPanel, deflicRow2Panel,  progressPanel;
 	
+	
+	
+	JScrollPane tablePane;
+	
 	private JPanel basicWorkflowPanel, deflicWorkflowPanel;
 	
 	private PolygonPanel meanPanel, meanOptPanel;
 	private PointerPanel pointerPanel;
 	private DrawingPanel drawingPanel; 
+	private KeyframePanel keyframePanel;
 	
 	private JProgressBar progressBar;
 
@@ -103,7 +112,7 @@ public class MainGui extends JComponent {
     SlideShow slideShow;
 	PicturePanel picturePanel; // jpanel with image display
 	DTTPreferences dttPref;   // preferences
-	JTable picTable;
+	JTable picTable, fixTable;
 	PictureModel picModel;
 	
 	
@@ -157,19 +166,11 @@ public class MainGui extends JComponent {
 	    
 	    picTable.setSelectionModel(listSelectionModel);
 
-	    picTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );	    
-	    picTable.getColumn( "Index" ).setPreferredWidth( 30 );
-	    picTable.getColumn( "Key" ).setPreferredWidth(  15 );
-	    picTable.getColumn( "Filename" ).setPreferredWidth( 200 );
-	    picTable.getColumn( "Mean" ).setPreferredWidth( 40  );
-	    picTable.getColumn( "Aperture" ).setPreferredWidth(  50 );
-	    picTable.getColumn( "ExposureTime" ).setPreferredWidth(  50 );
-	    picTable.getColumn( "ISO" ).setPreferredWidth(  40 );
-	    picTable.getColumn( "Width" ).setPreferredWidth(  40 );
-	    picTable.getColumn( "Height" ).setPreferredWidth(  40 );
-	    picTable.getColumn( "DateTaken" ).setPreferredWidth(  150 );
-		
-      
+    
+	    fixTable = new JTable(picModel);
+	    fixTable.setSelectionModel(listSelectionModel);
+	    
+	    
         // panels on left side *************************************** 
    
         JLabel labelLeft = new JLabel("Preview");
@@ -248,6 +249,18 @@ public class MainGui extends JComponent {
 	        drawingPanel.setVisible(false);
         }
         
+        {
+	        keyframePanel = new KeyframePanel();
+	        keyframePanel.setForeground(Color.white);
+	        //pointerPanel.setPreferredSize(new Dimension(450, 300));
+	        //pointerPanel.setMinimumSize(new Dimension(450, 300));
+	        keyframePanel.setBounds(0, 0, 600, 400); // mandatory to display
+	        keyframePanel.setOpaque(false);
+        }
+ 
+        
+        
+        
         layeredPane = new JLayeredPane(); // shows picture and curves
 
         layeredPane.add(picturePanel, JLayeredPane.FRAME_CONTENT_LAYER);  //  (-3000)
@@ -256,7 +269,9 @@ public class MainGui extends JComponent {
         layeredPane.add(meanOptPanel,   1);  // optimized mean of luminance
         layeredPane.add(pointerPanel,   2);  // pointer of activeindex
         layeredPane.add(drawingPanel,   3);  // area for luminance calculation        
- 
+        layeredPane.add(keyframePanel,  4);  // area for keyframe icons        
+       
+        
         layeredPane.setPreferredSize(new Dimension(600,400));
         
         // leftpanel 
@@ -301,9 +316,14 @@ public class MainGui extends JComponent {
  //       rightPanel.add(tablePanel);    // no use of jlist anymore
         
         
-        JScrollPane tablePane = new JScrollPane(picTable);
+        tablePane = new JScrollPane(picTable);
         rightPanel.add(tablePane);        
         //rightPanel.add(Box.createVerticalGlue());   // decrease hight of tablepanel  
+        
+        
+        
+    
+       
         
         
         // splitpane
@@ -317,7 +337,7 @@ public class MainGui extends JComponent {
                  
         f.pack();
         
-        f.setSize(1400,1000);
+        f.setSize(1500,1000);
         
         f.setLocationRelativeTo(null);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -370,7 +390,7 @@ public class MainGui extends JComponent {
         		
 	  	  		for (int i = 0; i < activeNumber; i++) {
 	  	  			x[i] = i;
-	  				y[i] = (double) picTable.getValueAt(i, 9);   // lumi
+	  				y[i] = (double) picModel.getValueAt(i, 9);   // lumi
 	  				
 	  				//System.out.println (picTable.getValueAt(i, 3));
 	  				//System.out.println("x= " + x[i] + " y= " + y[i]);
@@ -387,9 +407,9 @@ public class MainGui extends JComponent {
     		 	for (int i = 0; i < activeNumber; i++) {
   	  				x[i] = i;
   	  				y[i] = poly.calculate(i);  	  				
- 	  				double flicker = y[1] - (double) picTable.getValueAt(i, 9);
-  	  				picTable.setValueAt( y[i], i, 10); // store smooth in table
-  	  				picTable.setValueAt( flicker, i, 11); // store smooth in table
+ 	  				double flicker =  (double) picModel.getValueAt(i, 9) - y[1];
+ 	  				picModel.setValueAt( y[i], i, 10); // store smooth in table
+ 	  				picModel.setValueAt( flicker, i, 11); // store smooth in table
     		 	}
     		 	
     		 	picTable.repaint(); // Repaint all the component (all Cells).
@@ -412,6 +432,9 @@ public class MainGui extends JComponent {
     } // end of constructor
     
 
+    
+ 
+    
 	public void picRefresh(){
 		// load and display active picture
  		//picturePanel.loadImage(activePathname + "/preview/" +picTable.getValueAt(activeIndex, 2));   // old
@@ -421,7 +444,7 @@ public class MainGui extends JComponent {
 		if (activeNumber < 1) return;
 		
 		// set extension of filename to "jpg" 
-		String fullname = (String) picTable.getValueAt(activeIndex, 2);
+		String fullname = (String) picModel.getValueAt(activeIndex, 2);
 		String name = fullname.substring(0, fullname.lastIndexOf(".")) + ".jpg";
 			
 		//System.out.println("name= " + name);
@@ -592,7 +615,7 @@ public class MainGui extends JComponent {
 		drawingPanel.y1 = 0;
 		drawingPanel.x2 = 600;
 		drawingPanel.y2 = 400;
-		
+
 		picModel = new PictureModel();  //empty modell		
 		
 		if (deflickerButton.isSelected()) {  
@@ -605,43 +628,107 @@ public class MainGui extends JComponent {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}					
+		}							
 		
-		//System.out.println("number is " + activeNumber);
+		picTable.setModel(picModel);  // new data			
 		
-		picTable.setModel(picModel);  // new data
-		
-		// definition of sorting the table
-		TableRowSorter<TableModel> sorter = new TableRowSorter<>(picTable.getModel());
-		picTable.setRowSorter(sorter);
-		List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-		 
-		int columnIndexToSort = 2;
-		sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING));
-		 
-		sorter.setSortKeys(sortKeys);
-		sorter.sort();
-		
-		// correction of index, after sorting, starting with 1
-		for (int i = 0; i < activeNumber; i++) {	  			  		
-			picTable.setValueAt(i+1, i, 0);	  	  			  		
-		}
-		
-		// set column width
-		picTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );	    
-		picTable.getColumn( "Index" ).setPreferredWidth( 40 );
-		picTable.getColumn( "Key" ).setPreferredWidth(  15 );
-		picTable.getColumn( "Filename" ).setPreferredWidth( 200 );
-		picTable.getColumn( "Mean" ).setPreferredWidth( 50  );
-		picTable.getColumn( "Aperture" ).setPreferredWidth(  60 );
-		picTable.getColumn( "ExposureTime" ).setPreferredWidth(  60 );
-		picTable.getColumn( "ISO" ).setPreferredWidth(  40 );
-		picTable.getColumn( "Width" ).setPreferredWidth(  50 );
-		picTable.getColumn( "Height" ).setPreferredWidth(  50 );
-		picTable.getColumn( "DateTaken" ).setPreferredWidth(  150 );
-	
-		
+		//fixTable = new JTable(picModel);  // model with fixed columns
+		fixTable.setModel(picModel);  // model with fixed columns
+				
+        // System.out.println("Total number is " + activeNumber);        
+        
 		if (activeNumber > 0) {			
+			// pictures found
+			
+			// definition of sorting the table
+			TableRowSorter<TableModel> sorter = new TableRowSorter<>(picTable.getModel());
+			picTable.setRowSorter(sorter);
+			List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+			 
+			int columnIndexToSort = 2;
+			sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING));
+			 
+			sorter.setSortKeys(sortKeys);
+			sorter.sort();
+			
+			// correction of index, after sorting, starting with 1
+			for (int i = 0; i < activeNumber; i++) {	  			  		
+				picModel.setValueAt(i+1, i, 0);	  	  			  		
+			}
+			
+			// set column width
+			picTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );	    
+			fixTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			
+			TableColumn col;
+			
+			TableColumnModel tcm = picTable.getColumnModel();
+	        TableColumnModel tcmfix = new DefaultTableColumnModel();  //empty			
+		       
+	        // make some settings to fix the fist 3 columns of jtable ******************
+	        // build a second table from the original
+	        // put in fixed columns
+	        // remove fixed columns from first table
+	        col = tcm.getColumn(0);
+	        tcm.removeColumn(col);
+	        tcmfix.addColumn(col);
+	        col = tcm.getColumn(0);
+	        tcm.removeColumn(col);
+	        tcmfix.addColumn(col);
+	        col = tcm.getColumn(0);
+	        tcm.removeColumn(col);
+	        tcmfix.addColumn(col);
+
+	        // column index shifted with remove  !!
+	        
+			// Set the widths of the columns for the
+			// second table before we get its preferred size
+	        tcmfix.getColumn(0).setPreferredWidth(40);   // index	       
+	        tcmfix.getColumn(1).setPreferredWidth(15);   // key
+	        tcmfix.getColumn(2).setPreferredWidth(200);  // filename
+	        
+
+	        fixTable.setColumnModel(tcmfix); // install new col model
+//			fixTable.setPreferredScrollableViewportSize(fixTable.getPreferredSize());
+
+			// Keep row selection in sync   ListSelectionModel
+			//fixTable.setSelectionModel(picTable.getSelectionModel());
+			// or
+			ListSelectionModel lmodel = picTable.getSelectionModel();
+		    fixTable.setSelectionModel(lmodel);
+
+		    Dimension fixedSize = fixTable.getPreferredSize();
+		    JViewport viewport = new JViewport();
+		    viewport.setView(fixTable);
+		    viewport.setPreferredSize(fixedSize);
+		    viewport.setMaximumSize(fixedSize);
+		    
+		    // put header of second table in top left corner
+		    tablePane.setCorner(JScrollPane.UPPER_LEFT_CORNER, fixTable.getTableHeader());
+		    
+		    // put second table in row header
+		    tablePane.setRowHeaderView(viewport);
+	    
+			// Set appropriate column widths of picTable
+			for (int i = 0; i < widths.length; i++) {
+				col = tcm.getColumn(i);
+				col.setMinWidth(widths[i]);
+				col.setPreferredWidth(widths[i]);
+			}		
+
+//			picTable.getColumn( "Index" ).setPreferredWidth( 40 );
+//			picTable.getColumn( "Key" ).setPreferredWidth(  15 );
+//			picTable.getColumn( "Filename" ).setPreferredWidth( 200 );
+//			picTable.getColumn( "Aperture" ).setPreferredWidth(  60 );
+//			picTable.getColumn( "ExposureTime" ).setPreferredWidth(  60 );
+//			picTable.getColumn( "ISO" ).setPreferredWidth(  40 );
+//			picTable.getColumn( "Width" ).setPreferredWidth(  50 );
+//			picTable.getColumn( "Height" ).setPreferredWidth(  50 );
+//			picTable.getColumn( "DateTaken" ).setPreferredWidth(  150 );
+//			picTable.getColumn( "Mean" ).setPreferredWidth( 50  );		
+
+			
+			
 		    try {
 				scanPreview();            // extract previews
 			} catch (Exception e) {
@@ -667,14 +754,22 @@ public class MainGui extends JComponent {
 			picSlider.setMaximum(activeNumber-1);   // picSlider refresh			
 				
 		} else {
+			
 			// no images found
 			picSlider.setMaximum(0);
 	
 			picturePanel.loadLogo(); 
 			picturePanel.repaint();
-		}		
+		}	
+		
 	}  //   end of newDirectory
 	
+   	// Column widths
+	protected int[] widths = {
+		60, 60 , 60 , 60, 60,  150, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60
+	};
+
+
 	
       
 	public int scanDirectory() throws Exception{
@@ -747,6 +842,7 @@ public class MainGui extends JComponent {
 					vec.add(name);					
 				}
 				
+								
 				picModel.addData(vec);					
 				i++;
 			}	
@@ -764,6 +860,7 @@ public class MainGui extends JComponent {
 		return i;   //  activeNumber
 	}  //   end of exiftool
         
+	
         
 	public void scanPreview() throws Exception, IOException, InterruptedException{   // create previews
 		
@@ -795,7 +892,13 @@ public class MainGui extends JComponent {
 					// create preview of every picture
 					// do only one call at time, to avoid system overload
 					
-					String fullname = (String) picTable.getValueAt(ii, 2);
+					
+					//String fullname = (String) picTable.getValueAt(ii, 2);  // uses jtable, index can change
+					
+					
+					String fullname = (String) picModel.getValueAt(ii, 2);  // uses tablemodell
+				
+					
 					int dot = fullname.lastIndexOf(".");
 					String name = fullname.substring(0, dot);
 					String extension = fullname.substring(dot + 1);	
@@ -951,7 +1054,7 @@ public class MainGui extends JComponent {
 	    
 				for (int i = 0; i < activeNumber; i++) {
 			         
-					String fullname = (String) picTable.getValueAt(i, 2);
+					String fullname = (String) picModel.getValueAt(i, 2);
 					String name = fullname.substring(0, fullname.lastIndexOf(".")) + ".jpg";
 					
 					 // set preview image as input
@@ -1018,7 +1121,7 @@ public class MainGui extends JComponent {
 							
 							// set value in table
 							// luminance mean is in column 9
-							picTable.setValueAt(luminance, i, 9);
+							picModel.setValueAt(luminance, i, 9);
 							
 							picTable.repaint(); // Repaint all the component (all Cells).
 							// better use 
@@ -1038,7 +1141,7 @@ public class MainGui extends JComponent {
 				
 				for (int i = 0; i < activeNumber; i++) {
 					x[i] = i;
-					y[i] = (double) picTable.getValueAt(i, 9);
+					y[i] = (double) picModel.getValueAt(i, 9);
 					
   				//System.out.println (picTable.getValueAt(i, 3));
   				//System.out.println("x= " + x[i] + " y= " + y[i]);
@@ -1060,9 +1163,9 @@ public class MainGui extends JComponent {
     		 	for (int i = 0; i < activeNumber; i++) {
   	  				//x[i] = i;
   	  				y[i] = poly.calculate(i);
-  	  				double flicker = y[1] - (double) picTable.getValueAt(i, 9);
-  	  				picTable.setValueAt( y[i], i, 10); // store smooth in table
-  	  				picTable.setValueAt( flicker, i, 11); // store smooth in table
+  	  				double flicker = (double) picModel.getValueAt(i, 9) - y[1];
+  	  				picModel.setValueAt( y[i], i, 10); // store smooth in table
+  	  				picModel.setValueAt( flicker, i, 11); // store smooth in table
     		 	}
     		 	
     		 	meanOptPanel.setCoord(x, y);    		 	
@@ -1081,14 +1184,25 @@ public class MainGui extends JComponent {
 	
 	class SelectionListener implements ListSelectionListener {  // -------   used for jtable
 		
-		public void valueChanged(ListSelectionEvent e) {
-			if(e.getValueIsAdjusting()) // mouse button not released yet
+		public void valueChanged(ListSelectionEvent ae) {
+			if(ae.getValueIsAdjusting()) // mouse button not released yet
 				return;
-			int row =  picTable.getSelectedRow();
+			
+			int row = 0;
+			int col = 0;
+			
+			
+			if(ae.getSource() == picTable ) row =  picTable.getSelectedRow();
+			if(ae.getSource() == fixTable ) row =  fixTable.getSelectedRow();
+			
+			//int row =  picTable.getSelectedRow();
 			if(row < 0)              // true when clearSelection
 				return;
 			
-			int col =  picTable.getSelectedColumn();   
+			if(ae.getSource() == picTable ) col =  picTable.getSelectedColumn();  
+			if(ae.getSource() == fixTable ) col =  fixTable.getSelectedColumn();
+			
+			//int col =  picTable.getSelectedColumn();   
 			
 			if(col < 0)              // true when clearSelection
 				return;
@@ -1109,6 +1223,13 @@ public class MainGui extends JComponent {
 		}
 	}	
 
+
+
+	
+	
+	
+	
+	
 	class ButtonListener2 implements ActionListener { // ----------------  deflicker jogglebutton
 		public void actionPerformed(ActionEvent ae) {
 			// this is used for deflicker jogglebutton          
@@ -1124,6 +1245,40 @@ public class MainGui extends JComponent {
 					
 				} else {
 					// activate deflicker options
+					
+					
+					// display keyframes
+					List<Integer> indexlist = new ArrayList<Integer>();
+					int[] x;
+					
+					// get indexnumbers of keyframes
+					int numberkey = 0;					
+					for (int i = 0; i < activeNumber; i++) {
+						if ((Boolean) picModel.getValueAt( i, 1)) {
+							indexlist.add(i);
+						}											
+					}					
+					x = new int[indexlist.size()];
+					// set indexnumbers in array
+					for (int i = 0; i < indexlist.size(); i++) {						
+						x[i] = indexlist.get(i);																		
+					}	   										
+		  	        keyframePanel.setCoord( x, activeNumber);  	        
+		  	        layeredPane.repaint();
+					
+					
+					
+					
+					
+					// set gradient background for luminance with differnt gray		
+					TableColumn colLum = picTable.getColumnModel().getColumn(6);
+					colLum.setCellRenderer(new MeanColorColumnRenderer());
+
+					// set gradient background for flicker with differnt red		
+					TableColumn colFlicker = picTable.getColumnModel().getColumn(8);
+					colFlicker.setCellRenderer(new FlickerColorColumnRenderer());
+
+					
 					deflicRow2Panel.setVisible(true);
 					meanPanel.setVisible(true);
 					meanOptPanel.setVisible(true);
@@ -1159,19 +1314,26 @@ public class MainGui extends JComponent {
 				
 				
 				// some testing ****************************
-				picTable.setValueAt( 99.9, activeIndex, 12);
-				picTable.setValueAt( 88.8, activeIndex, 14);
-				picTable.setValueAt( 77.7, activeIndex, 16);
-				picTable.setValueAt( 66.6, activeIndex, 18);
+				picModel.setValueAt( 99.9, activeIndex, 12);
+				picModel.setValueAt( 88.8, activeIndex, 14);
+				picModel.setValueAt( 77.7, activeIndex, 16);
+				picModel.setValueAt( 66.6, activeIndex, 18);
 				
 				// toggle keyframe
-				if ((Boolean) picTable.getValueAt( activeIndex, 1)) {
-					picTable.setValueAt( false, activeIndex, 1);
+				if ((Boolean) picModel.getValueAt( activeIndex, 1)) {
+					picModel.setValueAt( false, activeIndex, 1);
 				} else {
-					picTable.setValueAt( true, activeIndex, 1);
+					picModel.setValueAt( true, activeIndex, 1);
 				}
 				
-				picTable.repaint();				
+				picTable.repaint();			
+				
+				
+				
+				
+				
+				
+				
 				// end of testing ****************************
 				
 				
