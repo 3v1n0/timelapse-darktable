@@ -48,20 +48,21 @@ public class PictureModel extends AbstractTableModel {
 			"ISO",
 			"Width",
 			"Height",
-			"DateTaken", "Mean", // 9
-			"Smooth", // 10
-			"Flicker", // 11
-			"D-Exposure", // 12
-			"Black", // 13
-			"Exposure", // 14
-			"Clip x", // 15
-			"Clip y", // 16
-			"Clip w", // 17
-			"Clip h", // 18
-			"Angle", // 19
-			"WB temp", // 20
-			"WB tint", // 21
-			"Vibrance", // 22
+			"DateTaken", 	// 8
+			"Mean", 		// 9
+			"Smooth", 		// 10
+			"Flicker", 		// 11
+			"D-Exposure", 	// 12
+			"Black", 		// 13
+			"Exposure", 	// 14
+			"Clip x", 		// 15
+			"Clip y", 		// 16
+			"Clip w", 		// 17
+			"Clip h", 		// 18
+			"Angle", 		// 19
+			"WB temp", 		// 20
+			"WB tint", 		// 21
+			"Vibrance", 	// 22
 	};
 
 	// public final Object[] longValues = {"", new Integer(20), new Float(20),
@@ -224,7 +225,7 @@ class MeanColorColumnRenderer extends DefaultTableCellRenderer {
 
 
 class FlickerColorColumnRenderer extends DefaultTableCellRenderer {
-	// show different red background according to value
+	// show different red background according to flicker value
 
 	private static final long serialVersionUID = 1L;
 	
@@ -242,15 +243,17 @@ class FlickerColorColumnRenderer extends DefaultTableCellRenderer {
 		Component cellComponent = super.getTableCellRendererComponent(table, value,
 				isSelected, hasFocus, row, column);
 		
-        if( (double) table.getValueAt(row, column) < 0.01 ) {
+        if( (double) table.getValueAt(row, column) < 0.00 ) {
+	            cellComponent.setBackground( Color.LIGHT_GRAY );
+	    } else if( (double) table.getValueAt(row, column) < 0.01 ) {
             cellComponent.setBackground( mistyrose );
         } else if( (double) table.getValueAt(row, column) < 0.02 ){
             cellComponent.setBackground( pink );
         } else if( (double) table.getValueAt(row, column) < 0.03 ){
             cellComponent.setBackground( lightpink );
-        }else if( (double) table.getValueAt(row, column) < 0.04 ){
+        } else if( (double) table.getValueAt(row, column) < 0.04 ){
             cellComponent.setBackground(tomato );
-        }else if( (double) table.getValueAt(row, column) < 0.05 ){
+        } else if( (double) table.getValueAt(row, column) < 0.05 ){
             cellComponent.setBackground( orangered );
         } else {
             cellComponent.setBackground( red );

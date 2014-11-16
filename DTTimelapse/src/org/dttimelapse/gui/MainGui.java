@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -43,6 +44,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.RowSorterEvent;
+import javax.swing.event.RowSorterListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -251,7 +254,7 @@ public class MainGui extends JComponent {
         
         {
 	        keyframePanel = new KeyframePanel();
-	        keyframePanel.setForeground(Color.white);
+	        keyframePanel.setForeground(Color.yellow);
 	        //pointerPanel.setPreferredSize(new Dimension(450, 300));
 	        //pointerPanel.setMinimumSize(new Dimension(450, 300));
 	        keyframePanel.setBounds(0, 0, 600, 400); // mandatory to display
@@ -383,7 +386,7 @@ public class MainGui extends JComponent {
         		int order = deflicSlider.getValue();
         		
         		//calculate smoothing curve
-        		// create array with new y-value
+        		// create array with new y-value of luminance
         		double[] x, y;
         		x = new double[activeNumber];
         		y = new double[activeNumber];
@@ -407,7 +410,7 @@ public class MainGui extends JComponent {
     		 	for (int i = 0; i < activeNumber; i++) {
   	  				x[i] = i;
   	  				y[i] = poly.calculate(i);  	  				
- 	  				double flicker =  (double) picModel.getValueAt(i, 9) - y[1];
+ 	  				double flicker =  (double) picModel.getValueAt(i, 9) - y[i];
  	  				picModel.setValueAt( y[i], i, 10); // store smooth in table
  	  				picModel.setValueAt( flicker, i, 11); // store smooth in table
     		 	}
@@ -444,7 +447,7 @@ public class MainGui extends JComponent {
 		if (activeNumber < 1) return;
 		
 		// set extension of filename to "jpg" 
-		String fullname = (String) picModel.getValueAt(activeIndex, 2);
+		String fullname = (String) fixTable.getValueAt(activeIndex, 2);
 		String name = fullname.substring(0, fullname.lastIndexOf(".")) + ".jpg";
 			
 		//System.out.println("name= " + name);
@@ -631,30 +634,13 @@ public class MainGui extends JComponent {
 		}							
 		
 		picTable.setModel(picModel);  // new data			
-		
-		//fixTable = new JTable(picModel);  // model with fixed columns
 		fixTable.setModel(picModel);  // model with fixed columns
 				
-        // System.out.println("Total number is " + activeNumber);        
+        // System.out.println("Total number is " + activeNumber);
+		
         
 		if (activeNumber > 0) {			
-			// pictures found
-			
-			// definition of sorting the table
-			TableRowSorter<TableModel> sorter = new TableRowSorter<>(picTable.getModel());
-			picTable.setRowSorter(sorter);
-			List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-			 
-			int columnIndexToSort = 2;
-			sortKeys.add(new RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING));
-			 
-			sorter.setSortKeys(sortKeys);
-			sorter.sort();
-			
-			// correction of index, after sorting, starting with 1
-			for (int i = 0; i < activeNumber; i++) {	  			  		
-				picModel.setValueAt(i+1, i, 0);	  	  			  		
-			}
+			// pictures found			
 			
 			// set column width
 			picTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );	    
@@ -774,6 +760,7 @@ public class MainGui extends JComponent {
       
 	public int scanDirectory() throws Exception{
 		//extract exif infos
+		// sort all pictures by name
 		
 		progressBar.setIndeterminate(true);
 		progressBar.paint(progressBar.getGraphics());  // not very good		
@@ -797,8 +784,10 @@ public class MainGui extends JComponent {
 		BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
 		String line;
-		int i = 0;
+		
+		List<String> listA = new ArrayList<String>();
 
+		// store all output in list
 		while ((line = stdInput.readLine()) != null) {
 			
 			//skip first line with tag infos
@@ -806,53 +795,68 @@ public class MainGui extends JComponent {
 			
 			//System.out.println(line);
 			
-			if (line != null) {
-				String[] splittedLine = line.split(",");
-				String pathname = splittedLine[0];
-				
-				String name = pathname.substring( pathname.lastIndexOf("/")+1, pathname.length() );
-				
-				//System.out.println(i + name);
-				
-				Vector<Comparable> vec = new Vector<Comparable>(); // data to add to table
-				
-				if (splittedLine.length == 7) {
-					// create vector and add to table
-					// create vector with data					
-					vec.add(i);
-					vec.add(false);
-					vec.add(name);					
-					vec.add(splittedLine[1]);  // aperture
-					vec.add(splittedLine[2]);  // shutterspeed
-					vec.add(splittedLine[3]);  // iso
-					//int iso = Integer.parseInt(splittedLine[3]);
-					
-					int width = Integer.parseInt(splittedLine[4]);
-					int height = Integer.parseInt(splittedLine[5]);
-					
-					//vec.add(iso);
-					vec.add(width);					
-					vec.add(height);					
-					
-					vec.add(splittedLine[6]); // date taken
-					} else {
-					// some corrupt pics have no exifdata
-					vec.add(i);
-					vec.add(false);
-					vec.add(name);					
-				}
-				
-								
-				picModel.addData(vec);					
-				i++;
+			if (line != null) {					
+				listA.add( line );		// add line to list				
 			}	
 			
 		} // end of while
-
 		
 		while ((line = stdError.readLine()) != null) {
-
+			// nothing to do
 		}
+		
+		// now we have a list with all output of exiftool 
+		// sort the list according to pathname (first element of line)		
+		Collections.sort(listA);			
+			
+		// second turn to fetch the data and put it in picModel	
+		//access list via new for-loop
+		int i = 0;
+		for(Object object : listA) {
+		    String element = (String) object;
+		    
+			String[] splittedLine = element.split(",");
+			String pathname = splittedLine[0];
+			
+			String name = pathname.substring( pathname.lastIndexOf("/")+1, pathname.length() );
+			
+			//System.out.println(i + name);
+			
+			Vector<Comparable> vec = new Vector<Comparable>(); // data to add to table
+			
+			if (splittedLine.length == 7) {
+				// create vector and add to table
+				// create vector with data					
+				vec.add(i);
+				vec.add(false);
+				vec.add(name);					
+				vec.add(splittedLine[1]);  // aperture
+				vec.add(splittedLine[2]);  // shutterspeed
+				vec.add(splittedLine[3]);  // iso
+				//int iso = Integer.parseInt(splittedLine[3]);
+				
+				int width = Integer.parseInt(splittedLine[4]);
+				int height = Integer.parseInt(splittedLine[5]);
+				
+				//vec.add(iso);
+				vec.add(width);					
+				vec.add(height);					
+				
+				vec.add(splittedLine[6]); // date taken
+			} else {
+				// some corrupt pics have no exifdata
+				vec.add(i);
+				vec.add(false);
+				vec.add(name);					
+			}			
+							
+			picModel.addData(vec);	
+			
+			i++;
+				
+		} // end for-loop of list		
+		
+		
 		process.waitFor();
 		
 		progressBar.setIndeterminate(false);
@@ -896,7 +900,7 @@ public class MainGui extends JComponent {
 					//String fullname = (String) picTable.getValueAt(ii, 2);  // uses jtable, index can change
 					
 					
-					String fullname = (String) picModel.getValueAt(ii, 2);  // uses tablemodell
+					String fullname = (String) fixTable.getValueAt(ii, 2);  // uses tablemodell
 				
 					
 					int dot = fullname.lastIndexOf(".");
@@ -1054,7 +1058,7 @@ public class MainGui extends JComponent {
 	    
 				for (int i = 0; i < activeNumber; i++) {
 			         
-					String fullname = (String) picModel.getValueAt(i, 2);
+					String fullname = (String) fixTable.getValueAt(i, 2);
 					String name = fullname.substring(0, fullname.lastIndexOf(".")) + ".jpg";
 					
 					 // set preview image as input
@@ -1163,9 +1167,13 @@ public class MainGui extends JComponent {
     		 	for (int i = 0; i < activeNumber; i++) {
   	  				//x[i] = i;
   	  				y[i] = poly.calculate(i);
-  	  				double flicker = (double) picModel.getValueAt(i, 9) - y[1];
+  	  				double lumi = (double) picModel.getValueAt(i, 9);
+  	  				double flicker = lumi - y[i];  	  				
   	  				picModel.setValueAt( y[i], i, 10); // store smooth in table
-  	  				picModel.setValueAt( flicker, i, 11); // store smooth in table
+  	  				picModel.setValueAt( flicker, i, 11); // store flicker in table
+  	  				
+  	  				//System.out.println( "i= " + i + " lum= " + lumi + " smooth= " + y[i] + " flick= " + flicker);
+  	  				
     		 	}
     		 	
     		 	meanOptPanel.setCoord(x, y);    		 	
@@ -1189,25 +1197,33 @@ public class MainGui extends JComponent {
 				return;
 			
 			int row = 0;
-			int col = 0;
+			int col = 0;			
+	
+			System.out.println("event: " + ae.getSource() );
+			
+
+				
+			row =  fixTable.getSelectedRow();
+			
+			//if (row < 0) row =  picTable.getSelectedRow();
+				
+			
+			if(row < 0)  return;            // true when clearSelection					
+
+			col =  fixTable.getSelectedColumn();	
+			
+			// we must check two jtable !
+			if(col < 0) col = picTable.getSelectedColumn();
+			
+			if(col < 0)  return;            // true when clearSelection					
 			
 			
-			if(ae.getSource() == picTable ) row =  picTable.getSelectedRow();
-			if(ae.getSource() == fixTable ) row =  fixTable.getSelectedRow();
+			activeIndex = row;			
+
 			
-			//int row =  picTable.getSelectedRow();
-			if(row < 0)              // true when clearSelection
-				return;
+			//	System.out.println("Selected fix row: " + row);
 			
-			if(ae.getSource() == picTable ) col =  picTable.getSelectedColumn();  
-			if(ae.getSource() == fixTable ) col =  fixTable.getSelectedColumn();
 			
-			//int col =  picTable.getSelectedColumn();   
-			
-			if(col < 0)              // true when clearSelection
-				return;
-			
-			activeIndex=picTable.getSelectedRow();
 			picSlider.setValue(activeIndex);
 
 			//System.out.println("Selected row: "+row);
@@ -1326,13 +1342,7 @@ public class MainGui extends JComponent {
 					picModel.setValueAt( true, activeIndex, 1);
 				}
 				
-				picTable.repaint();			
-				
-				
-				
-				
-				
-				
+				picTable.repaint();					
 				
 				// end of testing ****************************
 				
