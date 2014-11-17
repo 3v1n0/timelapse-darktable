@@ -75,7 +75,9 @@ public class PolygonPanel extends JPanel {
 			   for (int i = 0; i < n; i++) {				      
 				   
 			       x[i] = (int) (xValues[i] * factorX);
-			       y[i] = (int) (200-200 * yValues[i]);
+			       y[i] = (int) (400-400 * yValues[i]);
+			       
+			       //y[i] = (int) (200-200 * yValues[i]);
 			   
 			     //System.out.println("i= " + i + " x= " + x[i]+ " y= " + y[i]);	
 			       

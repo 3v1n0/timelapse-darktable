@@ -75,18 +75,19 @@ public class SlideShow extends JComponent {
 		
 		//System.out.println(framerate);
 		
+		int startindex = MainGui.activeIndex;
 				
 		while (noStopRequested) {
 			
-			for (int i = MainGui.activeIndex; i <= MainGui.activeNumber; i++) {	
+			for (int i = startindex; i <= MainGui.activeNumber; i++) {	
 						
 				try {
 					Thread.sleep(time); // 
 					
-					MainGui.activeIndex = i;
+					//MainGui.activeIndex = i;
 					
 					// changing slider invokes new picture display
-					gui.picSlider.setValue(MainGui.activeIndex);
+					gui.picSlider.setValue(i);
 					
 				} catch (InterruptedException x) {
 					Thread.currentThread().interrupt();
@@ -94,6 +95,26 @@ public class SlideShow extends JComponent {
 				
  			}  // end for-loop
 		
+			// start at begin until startindex
+			for (int i = 0; i <= startindex; i++) {	
+				
+				try {
+					Thread.sleep(time); // 
+					
+					//MainGui.activeIndex = i;
+					
+					// changing slider invokes new picture display
+					gui.picSlider.setValue(i);
+					
+				} catch (InterruptedException x) {
+					Thread.currentThread().interrupt();
+				}
+				
+ 			}  // end for-loop
+			
+			
+			
+			
 			// stop slideshow when last image reached
 			stopRequest();
 			
@@ -103,9 +124,16 @@ public class SlideShow extends JComponent {
 	public void stopRequest() {
 		noStopRequested = false;
 		internalThread.interrupt();
+		gui.picSlider.setValue(MainGui.activeIndex);
+		
+		gui.playButton.setSelected(false);
+		
 	}
 
 	public boolean isAlive() {
+		
+		if (internalThread == null) return false;
+		
 		return internalThread.isAlive();
 	}
 

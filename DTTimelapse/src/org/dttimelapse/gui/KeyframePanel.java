@@ -1,6 +1,7 @@
 package org.dttimelapse.gui;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -17,7 +18,10 @@ public class KeyframePanel extends JPanel {
 	private int x[];
 	private int n;
 
-    Icon icon = new DynamicIcon();
+    //Icon icon = new DynamicIcon();
+    
+    Icon icon = new RauteIcon();
+    
     JLabel dynamicLabel = new JLabel(icon);
 
 
@@ -36,10 +40,10 @@ public class KeyframePanel extends JPanel {
 				
 		for (int i = 0; i < n; i++) {
 			int shift = 0;
-			if (i == 0) shift = 5;
-			if (i == n-1) shift = -5;
+//			if (i == 0) shift = 5;
+//			if (i == n-1) shift = -5;
 
-			icon.paintIcon(this, g, x[i] + shift, 395);
+			icon.paintIcon(this, g, x[i] + shift, 400);
 
 		}
 
@@ -85,6 +89,57 @@ public class KeyframePanel extends JPanel {
         }
     };
 
-	
+    
+    // A little icon class to draw an icon.
+    class RauteIcon implements Icon {
+        public int getIconWidth() { return 10; }
+        public int getIconHeight() { return 10; }
+        
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+        	
+        	Graphics2D g2d;
+        	g2d = (Graphics2D)g.create();
+        	
+            //g2d.fill3DRect(x-5, y-5, getIconWidth(), getIconHeight(), true);
+            
+            // rotate            
+            g2d.rotate(Math.toRadians(45), x, y);
+            g2d.setColor(Color.RED);
+            g2d.fillRect(x-8, y-8, 16, 16);
+
+            
+        }
+    };
+
+    
+    
+    
+    
+//    class RauteIcon implements Icon {
+//    	//TODO
+//        public int getIconWidth() { return 10; }
+//        public int getIconHeight() { return 10; }
+//        
+//        protected void paintComponent(Graphics g) {
+//            Graphics2D g2d;
+//            g2d = (Graphics2D)g.create();
+//            
+//      
+//            // base rectangle
+//            g2d.setColor(Color.GRAY.brighter());
+//            g2d.fillRect(10, 10, 10, 10);
+//            
+//            
+//            // rotated 45 degrees about center of rect
+//            g2d = (Graphics2D)g.create();
+//            g2d.rotate(Math.toRadians(45), 5, 5);
+//            g2d.setColor(Color.BLACK);
+//            g2d.fillRect(10, 10, 10, 10);
+//
+//            // done with g2d, dispose it
+//            g2d.dispose();
+//        }
+//    };
+
 
 }

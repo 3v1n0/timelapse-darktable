@@ -82,9 +82,7 @@ public class MainGui extends JComponent {
 	
 	private JLayeredPane layeredPane;
 			
-	private JPanel rightPanel, leftPanel, deflicRow2Panel,  progressPanel;
-	
-	
+	private JPanel rightPanel, leftPanel, deflicRow2Panel,  progressPanel;	
 	
 	JScrollPane tablePane;
 	
@@ -107,8 +105,9 @@ public class MainGui extends JComponent {
 	
 	private JButton dlumiButton;
 	
-	private JButton playButton, stopButton, resetButton;
-    
+	private JButton resetButton;
+	JToggleButton playButton;
+	
 	ListSelectionModel listSelectionModel;
     
     // specific classes of DTTimelapse GUI
@@ -236,8 +235,6 @@ public class MainGui extends JComponent {
         {
 	        pointerPanel = new PointerPanel();
 	        pointerPanel.setForeground(Color.gray);
-	        //pointerPanel.setPreferredSize(new Dimension(450, 300));
-	        //pointerPanel.setMinimumSize(new Dimension(450, 300));
 	        pointerPanel.setBounds(0, 0, 600, 400); // mandatory to display
 	        pointerPanel.setOpaque(false);
         }
@@ -245,8 +242,6 @@ public class MainGui extends JComponent {
         {
 	        drawingPanel = new DrawingPanel();
 	        drawingPanel.setForeground(Color.gray);
-	        //pointerPanel.setPreferredSize(new Dimension(450, 300));
-	        //pointerPanel.setMinimumSize(new Dimension(450, 300));
 	        drawingPanel.setBounds(0, 0, 600, 400); // mandatory to display
 	        drawingPanel.setOpaque(false);
 	        drawingPanel.setVisible(false);
@@ -255,13 +250,17 @@ public class MainGui extends JComponent {
         {
 	        keyframePanel = new KeyframePanel();
 	        keyframePanel.setForeground(Color.yellow);
-	        //pointerPanel.setPreferredSize(new Dimension(450, 300));
-	        //pointerPanel.setMinimumSize(new Dimension(450, 300));
 	        keyframePanel.setBounds(0, 0, 600, 400); // mandatory to display
 	        keyframePanel.setOpaque(false);
         }
  
-        
+        {
+//	        cropframePanel = new KeyframePanel();
+//	        cropframePanel.setForeground(Color.yellow);
+//	        cropframePanel.setBounds(0, 0, 600, 400); // mandatory to display
+//	        cropframePanel.setOpaque(false);
+        }
+       
         
         
         layeredPane = new JLayeredPane(); // shows picture and curves
@@ -272,8 +271,8 @@ public class MainGui extends JComponent {
         layeredPane.add(meanOptPanel,   1);  // optimized mean of luminance
         layeredPane.add(pointerPanel,   2);  // pointer of activeindex
         layeredPane.add(drawingPanel,   3);  // area for luminance calculation        
-        layeredPane.add(keyframePanel,  4);  // area for keyframe icons        
-       
+        layeredPane.add(keyframePanel,  4);  // area for keyframe icons          
+//      layeredPane.add(cropframePanel, 5);  // rectangle with clipping          
         
         layeredPane.setPreferredSize(new Dimension(600,400));
         
@@ -285,8 +284,6 @@ public class MainGui extends JComponent {
         leftPanel.add(layeredPane);
         leftPanel.add( sliderPanel() );
         leftPanel.add(treePanel);
-        
-
 
         
         // panels on right side *********************************       
@@ -306,9 +303,7 @@ public class MainGui extends JComponent {
         JPanel tablePanel = new JPanel();
         
         //tablePanel.setLayout(new GridLayout(1, 0)); // extends width of table       
-        tablePanel.setLayout(new BorderLayout()); //
-        
-                
+        tablePanel.setLayout(new BorderLayout()); //                
         
         rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
@@ -321,12 +316,7 @@ public class MainGui extends JComponent {
         
         tablePane = new JScrollPane(picTable);
         rightPanel.add(tablePane);        
-        //rightPanel.add(Box.createVerticalGlue());   // decrease hight of tablepanel  
-        
-        
-        
-    
-       
+        //rightPanel.add(Box.createVerticalGlue());   // decrease hight of tablepanel 
         
         
         // splitpane
@@ -358,19 +348,16 @@ public class MainGui extends JComponent {
         		
         		activeIndex=picSlider.getValue();
       		
-        		if (activeNumber <= 0) { return;}   // no action without pics
-      		
-       		
-        		//jtable
-        		//picTable.setRowSelectionInterval(activeIndex, activeIndex);
-      		
-        		picTable.getSelectionModel().setSelectionInterval(activeIndex, activeIndex);
-        		picTable.scrollRectToVisible(new Rectangle(picTable.getCellRect(activeIndex, 0, true)));
-      		
+        		if (activeNumber <= 0) { return;}   // no action without pics          		
+        		
+        		if ( !slideShow.isAlive() ) {
+        			// scroll table when no slideshow
+        			picTable.getSelectionModel().setSelectionInterval(activeIndex, activeIndex);
+        			picTable.scrollRectToVisible(new Rectangle(picTable.getCellRect(activeIndex, 0, true)));
+        		}      		
 	      	
       			pointerPanel.setCoord(activeIndex, activeNumber);
       			pointerPanel.repaint();
-
       		  
 	        	// changes in picSlider shows selected picture
 	        	picRefresh();    	     
@@ -417,8 +404,7 @@ public class MainGui extends JComponent {
     		 	
     		 	picTable.repaint(); // Repaint all the component (all Cells).
 		        // better use 
-		        // ((AbstractTableModel) jTable.getModel()).fireTableCellUpdated(x, 0); // Repaint one cell.
-    		 	
+		        // ((AbstractTableModel) jTable.getModel()).fireTableCellUpdated(x, 0); // Repaint one cell.    		 	
  
 //    		 	System.out.println("x= " + x[1] + " y= " + y[1]);		 	
 //       		System.out.println("x= " + x[15] + " y= " + y[15]);
@@ -463,17 +449,14 @@ public class MainGui extends JComponent {
 		// panel with slider, start and stop button
 		picSlider = new JSlider();
  
-		playButton = new JButton("Play preview");
-		stopButton = new JButton("Stop");
+		playButton = new JToggleButton("Play/Stop");
 		resetButton = new JButton("Reset");
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.add(playButton);
-		buttonPanel.add(stopButton);
 		buttonPanel.add(resetButton);
 		
-		playButton.addActionListener(new ButtonListener());
-		stopButton.addActionListener(new ButtonListener());
-		resetButton.addActionListener(new ButtonListener());
+		playButton.addActionListener(new ButtonListener3());
+		resetButton.addActionListener(new ButtonListener3());
 		
 		sliderPanel = new JPanel();
 		sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
@@ -496,6 +479,7 @@ public class MainGui extends JComponent {
 		progressBar = new JProgressBar();
 		progressBar.setMaximum(0);
 		progressBar.setStringPainted(true);
+		progressBar.setPreferredSize(new Dimension(250, 20));
 		
 		progressPanel.add(progressBar);
 		progressPanel.setMaximumSize( progressPanel.getPreferredSize() );
@@ -671,8 +655,7 @@ public class MainGui extends JComponent {
 			// second table before we get its preferred size
 	        tcmfix.getColumn(0).setPreferredWidth(40);   // index	       
 	        tcmfix.getColumn(1).setPreferredWidth(15);   // key
-	        tcmfix.getColumn(2).setPreferredWidth(200);  // filename
-	        
+	        tcmfix.getColumn(2).setPreferredWidth(200);  // filename	        
 
 	        fixTable.setColumnModel(tcmfix); // install new col model
 //			fixTable.setPreferredScrollableViewportSize(fixTable.getPreferredSize());
@@ -711,9 +694,7 @@ public class MainGui extends JComponent {
 //			picTable.getColumn( "Width" ).setPreferredWidth(  50 );
 //			picTable.getColumn( "Height" ).setPreferredWidth(  50 );
 //			picTable.getColumn( "DateTaken" ).setPreferredWidth(  150 );
-//			picTable.getColumn( "Mean" ).setPreferredWidth( 50  );		
-
-			
+//			picTable.getColumn( "Mean" ).setPreferredWidth( 50  );					
 			
 		    try {
 				scanPreview();            // extract previews
@@ -850,12 +831,10 @@ public class MainGui extends JComponent {
 				vec.add(name);					
 			}			
 							
-			picModel.addData(vec);	
-			
+			picModel.addData(vec);				
 			i++;
 				
-		} // end for-loop of list		
-		
+		} // end for-loop of list			
 		
 		process.waitFor();
 		
@@ -886,7 +865,7 @@ public class MainGui extends JComponent {
 	    
 		// set progressbar
 	    progressBar.setMaximum(activeNumber);
-	    progressBar.setString("create previews");	    
+	    progressBar.setString("Extract previews");	    
 	    
 		// define new Thread as inline class
 	    Thread threadConvert = new Thread()  {
@@ -894,14 +873,11 @@ public class MainGui extends JComponent {
 	    
 				for (int ii = 0; ii < activeNumber; ii++) {
 					// create preview of every picture
-					// do only one call at time, to avoid system overload
+					// do only one call at time, to avoid system overload					
 					
+					//String fullname = (String) picTable.getValueAt(ii, 2);  // uses jtable, index can change					
 					
-					//String fullname = (String) picTable.getValueAt(ii, 2);  // uses jtable, index can change
-					
-					
-					String fullname = (String) fixTable.getValueAt(ii, 2);  // uses tablemodell
-				
+					String fullname = (String) fixTable.getValueAt(ii, 2);  // uses tablemodell				
 					
 					int dot = fullname.lastIndexOf(".");
 					String name = fullname.substring(0, dot);
@@ -1073,7 +1049,7 @@ public class MainGui extends JComponent {
 						// do nothing and wait						
 						Thread wait = new Thread();
 						try {
-							wait.sleep(500);
+							wait.sleep(1000);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -1150,13 +1126,11 @@ public class MainGui extends JComponent {
   				//System.out.println (picTable.getValueAt(i, 3));
   				//System.out.println("x= " + x[i] + " y= " + y[i]);
 				}	          
-	  	        meanPanel.setCoord(x, y);  	        
-	  	        
-	  	        
+	  	        meanPanel.setCoord(x, y);  	  	  	        
 	  	        
 	  	        // calculate smoothing curve, but don't display this until
 	  	        //         deflicker is active
-	  	        // we should the caclculation at this place, otherwise the
+	  	        // we must do the calculation at this place, otherwise the
 	  	        //    calc. of luminance is slower than this process
 	  	        
 	  	        int order = deflicSlider.getValue();
@@ -1199,14 +1173,9 @@ public class MainGui extends JComponent {
 			int row = 0;
 			int col = 0;			
 	
-			System.out.println("event: " + ae.getSource() );
-			
-
-				
-			row =  fixTable.getSelectedRow();
-			
-			//if (row < 0) row =  picTable.getSelectedRow();
-				
+			//System.out.println("event: " + ae.getSource() );
+					
+			row =  fixTable.getSelectedRow();	
 			
 			if(row < 0)  return;            // true when clearSelection					
 
@@ -1214,26 +1183,13 @@ public class MainGui extends JComponent {
 			
 			// we must check two jtable !
 			if(col < 0) col = picTable.getSelectedColumn();
+			if(col < 0)  return;            // true when clearSelection				
 			
-			if(col < 0)  return;            // true when clearSelection					
+			activeIndex = row;	
 			
-			
-			activeIndex = row;			
-
-			
-			//	System.out.println("Selected fix row: " + row);
-			
+			//	System.out.println("Selected fix row: " + row);			
 			
 			picSlider.setValue(activeIndex);
-
-			//System.out.println("Selected row: "+row);
-			//System.out.println("Selected col: "+col);
-			//System.out.println( picTable.getValueAt(row, col) );   //	        
-			
-			//	        System.out.println(picTable.getValueAt(row, 2) );   // spalte 2 = filename
-
-			// test: change mean
-			// table.setValueAt(0.999, row, 3);	        
 			
 			//table.clearSelection();
 		}
@@ -1241,7 +1197,30 @@ public class MainGui extends JComponent {
 
 
 
-	
+	class ButtonListener3 implements ActionListener { // ----------------  play jogglebutton
+		public void actionPerformed(ActionEvent ae) {
+			          
+			AbstractButton abstractButton = (AbstractButton) ae.getSource();
+			boolean selected = abstractButton.getModel().isSelected();
+			//System.out.println("Action - selected=" + selected + "\n");
+			if (selected) {  
+				slideShow.start();
+			
+			} else {
+				slideShow.stopRequest();
+				// scroll table
+       			picTable.getSelectionModel().setSelectionInterval(activeIndex, activeIndex);
+    			picTable.scrollRectToVisible(new Rectangle(picTable.getCellRect(activeIndex, 0, true)));		
+			}
+			
+			if (ae.getSource() == resetButton ){
+				activeIndex=0;
+				picSlider.setValue(activeIndex);
+			}
+			
+		}
+	}
+
 	
 	
 	
@@ -1282,10 +1261,6 @@ public class MainGui extends JComponent {
 		  	        keyframePanel.setCoord( x, activeNumber);  	        
 		  	        layeredPane.repaint();
 					
-					
-					
-					
-					
 					// set gradient background for luminance with differnt gray		
 					TableColumn colLum = picTable.getColumnModel().getColumn(6);
 					colLum.setCellRenderer(new MeanColorColumnRenderer());
@@ -1304,6 +1279,7 @@ public class MainGui extends JComponent {
 				}
 				
 			} else {
+				// deactivate deflicker options
 				deflicRow2Panel.setVisible(false);
 				meanPanel.setVisible(false);
 				meanOptPanel.setVisible(false);
@@ -1361,16 +1337,8 @@ public class MainGui extends JComponent {
 				}
 				// invoke smoothing curve
 				deflicSlider.setValue(3);   // hack to force calculation !?
-				deflicSlider.setValue(4);   // initial value
+				deflicSlider.setValue(4);   // initial value				
 				
-				
-			}else if (ae.getSource() == playButton ){
-				slideShow.start();
-			}else if (ae.getSource() == stopButton ){
-				slideShow.stopRequest();
-			}else if (ae.getSource() == resetButton ){
-				activeIndex=0;
-				picSlider.setValue(activeIndex);
 			} else {
 				
 				System.out.println("unknown Button '" + ((JButton)ae.getSource()).getText() + 
