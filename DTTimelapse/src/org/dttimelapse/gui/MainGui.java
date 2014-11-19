@@ -1,6 +1,6 @@
 package org.dttimelapse.gui;
 
-/**
+/*
 Copyright 2014 Rudolf Martin
  
 This file is part of DTTimelapse.
@@ -23,10 +23,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -56,8 +59,8 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.tree.TreePath;
 
-
 import org.dttimelapse.math.Polynomal;
+import org.dttimelapse.math.MovingAverage;
 
  
 public class MainGui extends JComponent {	  	
@@ -88,10 +91,7 @@ public class MainGui extends JComponent {
 	
 	private JPanel basicWorkflowPanel, deflicWorkflowPanel;
 	
-	private PolygonPanel meanPanel, meanOptPanel;
-	private PointerPanel pointerPanel;
-	private DrawingPanel drawingPanel; 
-	private KeyframePanel keyframePanel;
+	
 	
 	private JProgressBar progressBar;
 
@@ -108,6 +108,9 @@ public class MainGui extends JComponent {
 	private JButton resetButton;
 	JToggleButton playButton;
 	
+	private JCheckBox cb1, cb2, cb3;
+	private JComboBox comboFilter;
+	
 	ListSelectionModel listSelectionModel;
     
     // specific classes of DTTimelapse GUI
@@ -116,6 +119,13 @@ public class MainGui extends JComponent {
 	DTTPreferences dttPref;   // preferences
 	JTable picTable, fixTable;
 	PictureModel picModel;
+	
+	private PolygonPanel meanPanel, meanOptPanel, clippingPanel, filterPanel;
+	private PointerPanel pointerPanel;
+	private DrawingPanel drawingPanel; 
+	private KeyframePanel keyframePanel;
+
+	
 	
 	
     public MainGui() {                  //constructor    	  
@@ -248,31 +258,37 @@ public class MainGui extends JComponent {
         }
         
         {
-	        keyframePanel = new KeyframePanel();
-	        keyframePanel.setForeground(Color.yellow);
+	        keyframePanel = new KeyframePanel();	        
 	        keyframePanel.setBounds(0, 0, 600, 400); // mandatory to display
 	        keyframePanel.setOpaque(false);
         }
  
         {
-//	        cropframePanel = new KeyframePanel();
-//	        cropframePanel.setForeground(Color.yellow);
-//	        cropframePanel.setBounds(0, 0, 600, 400); // mandatory to display
-//	        cropframePanel.setOpaque(false);
+	        clippingPanel = new PolygonPanel();
+	        clippingPanel.setForeground(Color.MAGENTA);
+	        clippingPanel.setBounds(0, 0, 600, 400); // mandatory to display
+	        clippingPanel.setOpaque(false);
         }
        
+        {
+	        filterPanel = new PolygonPanel();
+	        filterPanel.setForeground(Color.yellow);
+	        filterPanel.setBounds(0, 0, 600, 400); // mandatory to display
+	        filterPanel.setOpaque(false);
+        }
         
         
         layeredPane = new JLayeredPane(); // shows picture and curves
 
         layeredPane.add(picturePanel, JLayeredPane.FRAME_CONTENT_LAYER);  //  (-3000)
       
-        layeredPane.add(meanPanel,   0);  //    original mean of luminance
-        layeredPane.add(meanOptPanel,   1);  // optimized mean of luminance
+        layeredPane.add(meanOptPanel,   0);  // optimized mean of luminance
+        layeredPane.add(meanPanel,      1);  //    original mean of luminance
         layeredPane.add(pointerPanel,   2);  // pointer of activeindex
         layeredPane.add(drawingPanel,   3);  // area for luminance calculation        
         layeredPane.add(keyframePanel,  4);  // area for keyframe icons          
-//      layeredPane.add(cropframePanel, 5);  // rectangle with clipping          
+        layeredPane.add(clippingPanel,  5);  // rectangle with clipping    
+        layeredPane.add(filterPanel,    6);  // filter curve 
         
         layeredPane.setPreferredSize(new Dimension(600,400));
         
@@ -389,18 +405,51 @@ public class MainGui extends JComponent {
 //	  	  		System.out.println ( Arrays.toString(x)   );   
 //	  	  		System.out.println ( Arrays.toString(y)   );  
 	  	  		
-    		 	Polynomal poly = new Polynomal(x, y, order); 		    
-         		
-    		 	// display new polyline
-    		 	// create array with new y-value
+	  	  		
+	  	  		
+//    		 	Polynomal poly = new Polynomal(x, y, order);         		
+//    		 	// display new polyline
+//    		 	// create array with new y-value    		 	
+//    		 	for (int i = 0; i < activeNumber; i++) {
+//  	  				x[i] = i;
+//  	  				y[i] = poly.calculate(i);  	  				
+// 	  				double flicker =  (double) picModel.getValueAt(i, 9) - y[i];
+// 	  				picModel.setValueAt( y[i], i, 10); // store smooth in table
+// 	  				picModel.setValueAt( flicker, i, 11); // store smooth in table
+//    		 	}
     		 	
-    		 	for (int i = 0; i < activeNumber; i++) {
-  	  				x[i] = i;
-  	  				y[i] = poly.calculate(i);  	  				
- 	  				double flicker =  (double) picModel.getValueAt(i, 9) - y[i];
- 	  				picModel.setValueAt( y[i], i, 10); // store smooth in table
- 	  				picModel.setValueAt( flicker, i, 11); // store smooth in table
-    		 	}
+    		 	
+    		 	
+    		 	
+    		 	
+      	        int range = deflicSlider.getValue();	  	        
+        		 	MovingAverage ma = new MovingAverage( y );  // set y-values      			
+        		 	// calculate new smoothed line
+        		 	//   with moving average
+        		 	for (int i = 0; i < activeNumber; i++) {
+      	  				y[i] = ma.calculate( i, range );
+      	  			    //y[i] = ma.calculateWeighted( i, range );
+      	  				double lumi = (double) picModel.getValueAt(i, 9);
+      	  				double flicker = lumi - y[i];  	  				
+      	  				picModel.setValueAt( y[i], i, 10); // store smooth in table
+      	  				picModel.setValueAt( flicker, i, 11); // store flicker in table
+      	  				
+      	  				//System.out.println( "x= " + i + " y= " + y[i] + " aver= " + y[i] );
+          		 	}    		 	
+        		 			 	
+
+       
+    		 	
+    		 	
+    		 	
+    		 	
+    		 	
+    		 	
+    		 	
+    		 	
+    		 	
+    		 	
+    		 	
     		 	
     		 	picTable.repaint(); // Repaint all the component (all Cells).
 		        // better use 
@@ -448,15 +497,113 @@ public class MainGui extends JComponent {
 	public JPanel sliderPanel(){
 		// panel with slider, start and stop button
 		picSlider = new JSlider();
+		picSlider.setMaximum(0);
  
 		playButton = new JToggleButton("Play/Stop");
 		resetButton = new JButton("Reset");
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.add(playButton);
-		buttonPanel.add(resetButton);
 		
 		playButton.addActionListener(new ButtonListener3());
 		resetButton.addActionListener(new ButtonListener3());
+
+		cb1 = new JCheckBox( "Image", true );
+		cb2 = new JCheckBox( "Clipping", false );
+		cb3 = new JCheckBox( "Flicker", false );	
+
+		ItemListener cbListener = new ItemListener() {
+		  @Override public void itemStateChanged( ItemEvent e ) {
+			  
+		    //System.out.print( ((JCheckBox) e.getItem()).getText() );
+		    //System.out.println( e.getStateChange() == ItemEvent.SELECTED ?
+		    //                    " selected" : " unselected" );
+		    
+		    Boolean isSelected;
+		    if ( e.getStateChange() == ItemEvent.SELECTED){
+		    	isSelected = true;
+		    } else {
+		    	isSelected = false;
+		    }
+			    
+		    if (e.getSource() == cb1 ) {
+		    	// image checkbox		    		    		
+		    	picturePanel.setVisible(isSelected);	    	
+		    }
+		    
+		    if (e.getSource() == cb2 ) {
+		    	// clipping checkbox		    		    		
+		    	//TODO show clipping	
+		    	clippingPanel.setVisible(isSelected);
+		    	pointerPanel.setVisible(isSelected);
+		    }
+		    
+		    if (e.getSource() == cb3 ) {
+		    	// image checkbox		    		    		
+				meanPanel.setVisible(isSelected);
+				meanOptPanel.setVisible(isSelected);
+				pointerPanel.setVisible(isSelected);
+		    }
+
+		  }
+		};
+
+		cb1.addItemListener( cbListener );
+		cb2.addItemListener( cbListener );
+		cb3.addItemListener( cbListener );
+		
+		
+		String[] filter = {
+				  "none",
+				  "Exp-black",
+				  "Exp-exposure",
+				  "WB temp",
+				  "WB tint",
+				  "Vibrance"
+				};
+
+		// Non-editable JComboBox
+		comboFilter = new JComboBox();
+
+		for ( String s : filter ) comboFilter.addItem( s );
+
+		comboFilter.addActionListener( new ActionListener() {
+		  @Override public void actionPerformed( ActionEvent e )
+		  {
+		    //System.out.println( e );
+		    JComboBox selectedChoice = (JComboBox) e.getSource();
+		    //System.out.println( selectedChoice.getSelectedItem() );
+		    //TODO show filter curve
+		    
+		    if ( "none".equals( selectedChoice.getSelectedItem() ) ) {
+		    	filterPanel.setVisible(false);
+		    } else if ( "Exp-black".equals( selectedChoice.getSelectedItem() ) ) {
+		    	filterPanel.setVisible(true);
+		    	
+		    } else if ( "Exp-exposure".equals( selectedChoice.getSelectedItem() ) ) {
+		    	filterPanel.setVisible(true);
+		    	
+		    } else if ( "WB temp".equals( selectedChoice.getSelectedItem() ) ) {
+		    	filterPanel.setVisible(true);
+		    	
+		    } else if ( "WB tint".equals( selectedChoice.getSelectedItem() ) ) {
+		    	filterPanel.setVisible(true);
+		    	
+		    } else if ( "Vibrance".equals( selectedChoice.getSelectedItem() ) ) {
+		    	filterPanel.setVisible(true);
+		    	
+		    }
+
+		    
+		  }
+		} );
+	
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new FlowLayout());
+		buttonPanel.add(playButton);
+		buttonPanel.add(resetButton);
+		buttonPanel.add( cb1 );
+		buttonPanel.add( cb2 );
+		buttonPanel.add( cb3 );
+		buttonPanel.add( comboFilter );
+		buttonPanel.add (new JLabel("Filter"));
 		
 		sliderPanel = new JPanel();
 		sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS));
@@ -538,10 +685,15 @@ public class MainGui extends JComponent {
 		//deflickerButton.addActionListener(actionListener2);
 		
 		deflicSlider = new JSlider();
-		deflicSlider.setMaximum(8);
-		deflicSlider.setMajorTickSpacing(1);
+		deflicSlider.setMajorTickSpacing(10);
+		deflicSlider.setMinorTickSpacing(1);
 		deflicSlider.setPaintTicks(true);
-		deflicSlider.setValue(4);          // initial value
+		deflicSlider.setPaintLabels(true);		
+		deflicSlider.setMaximum(30);
+		deflicSlider.setValue(10);          // initial value
+		
+		deflicSlider.setToolTipText("Radius for calculating the average");
+		
 		
 		JPanel deflicRow1Panel = new JPanel();
 		deflicRow1Panel.add(dloadButton);    
@@ -555,7 +707,7 @@ public class MainGui extends JComponent {
 		//deflicWorkflowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
 		deflicRow2Panel = new JPanel();
-		deflicRow2Panel.add(new JLabel("Order of polynom"));    
+		deflicRow2Panel.add(new JLabel("Radius for smoothing"));    
 		deflicRow2Panel.add(deflicSlider);   
 		deflicRow2Panel.setVisible(false);
 		deflicRow2Panel.add(dlumiButton); 
@@ -1128,6 +1280,8 @@ public class MainGui extends JComponent {
 				}	          
 	  	        meanPanel.setCoord(x, y);  	  	  	        
 	  	        
+	  	        
+	  	        
 	  	        // calculate smoothing curve, but don't display this until
 	  	        //         deflicker is active
 	  	        // we must do the calculation at this place, otherwise the
@@ -1136,19 +1290,52 @@ public class MainGui extends JComponent {
 	  	        int order = deflicSlider.getValue();
     		 	Polynomal poly = new Polynomal(x, y, order);  // with initial order=4    		 	
       			
-    		 	// store new smoothed line
-    		 	// create array with new y-value
-    		 	for (int i = 0; i < activeNumber; i++) {
-  	  				//x[i] = i;
-  	  				y[i] = poly.calculate(i);
-  	  				double lumi = (double) picModel.getValueAt(i, 9);
-  	  				double flicker = lumi - y[i];  	  				
-  	  				picModel.setValueAt( y[i], i, 10); // store smooth in table
-  	  				picModel.setValueAt( flicker, i, 11); // store flicker in table
-  	  				
-  	  				//System.out.println( "i= " + i + " lum= " + lumi + " smooth= " + y[i] + " flick= " + flicker);
-  	  				
-    		 	}
+//    		 	// store new smoothed line
+//    		 	// create array with new y-value
+//    		 	for (int i = 0; i < activeNumber; i++) {
+//  	  				//x[i] = i;
+//  	  				y[i] = poly.calculate(i);
+//  	  				double lumi = (double) picModel.getValueAt(i, 9);
+//  	  				double flicker = lumi - y[i];  	  				
+//  	  				picModel.setValueAt( y[i], i, 10); // store smooth in table
+//  	  				picModel.setValueAt( flicker, i, 11); // store flicker in table
+//  	  				
+//  	  				//System.out.println( "i= " + i + " lum= " + lumi + " smooth= " + y[i] + " flick= " + flicker);
+//  	  				
+//    		 	}
+//    		 	
+    		 	
+    		 	
+    		 	
+    		 	
+	  	         //double[] yy = { 2, 2, 3, 3, 5, 3, 3, 1 };   // testing
+  	  	      
+  	  	      
+    		 	// calculate smoothing curve, but don't display this until
+    		 	//         deflicker is active
+    		 	// we must do the calculation at this place, otherwise the
+    		 	//    calc. of luminance is slower than this process	  	        
+	  	        int range = deflicSlider.getValue();	  	        
+	  	        MovingAverage ma = new MovingAverage( y );  // set y-values      			
+	  	        // store new smoothed line
+	  	        //   as moving average
+	  	        for (int i = 0; i < activeNumber; i++) {
+ 	  				y[i] = ma.calculate( i, range );
+ 	  				//y[i] = ma.calculateWeighted( i, 2 );
+ 	  				double lumi = (double) picModel.getValueAt(i, 9);
+ 	  				double flicker = lumi - y[i];  	  				
+ 	  				picModel.setValueAt( y[i], i, 10); // store smooth in table
+ 	  				picModel.setValueAt( flicker, i, 11); // store flicker in table
+ 	  				
+ 	  				//System.out.println( "x= " + i + " y= " + yy[i] + " aver= " + y[i] );
+     		 	}    		 	
+    		 	
+    		 	
+    		 	
+    		 	
+    		 	
+    		 	
+    		 	
     		 	
     		 	meanOptPanel.setCoord(x, y);    		 	
     		 	    		 	   		 	  	        
@@ -1336,8 +1523,8 @@ public class MainGui extends JComponent {
 					e.printStackTrace();
 				}
 				// invoke smoothing curve
-				deflicSlider.setValue(3);   // hack to force calculation !?
-				deflicSlider.setValue(4);   // initial value				
+				deflicSlider.setValue(9);   // hack to force calculation !?
+				deflicSlider.setValue(10);   // initial value				
 				
 			} else {
 				

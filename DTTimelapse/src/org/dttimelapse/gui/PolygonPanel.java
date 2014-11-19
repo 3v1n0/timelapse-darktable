@@ -37,7 +37,7 @@ public class PolygonPanel extends JPanel {
 //		       
 		       Graphics2D g2 = (Graphics2D) g;
 //		       
-		       g2.setStroke( new BasicStroke( 3) );   // 3 pix
+		       g2.setStroke( new BasicStroke( 2) );   // 3 pix
 		       
 		       
 //		       g2.drawLine( 30, 150, 200, 150 );

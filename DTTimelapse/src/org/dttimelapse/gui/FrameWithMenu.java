@@ -186,7 +186,7 @@ public class FrameWithMenu extends JFrame implements ActionListener{
         	 
         	//File file = new File("doc/ABOUT");
           	 
-	        textArea = new JTextArea(10, 40);
+	        textArea = new JTextArea(25, 40);
 	        try {
 					textArea.read(new InputStreamReader(
 					        getClass().getResourceAsStream("/doc/ABOUT")),
