@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -15,7 +17,7 @@ import javax.swing.JPanel;
 public class KeyframePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
-	private int x[];
+	private int x[];   // index of keyframes
 	private int n;
 
     //Icon icon = new DynamicIcon();
@@ -50,8 +52,59 @@ public class KeyframePanel extends JPanel {
 	}
 
 
-	public void setCoord(int xValues[], int number) {
+//	public void setCoord(int xValues[], int number) {		
+//		
+//		
+//		this.n = xValues.length; // number of keyframes
+//
+//		if (n <= 1)
+//			return;
+//
+//		x = new int[n];
+//
+//		// change the scaling of the Values to fit the panel
+//		// we need global variables for dimensions
+//
+//		final double factorX = (600.0 / (number - 1));
+//
+//		// System.out.println("polygon n= " + n);
+//		// System.out.println("factor= " + factorX);
+//
+//		for (int i = 0; i < n; i++) {
+//
+//			x[i] = (int) (xValues[i] * factorX);
+//			
+//			//System.out.println("i= " + xValues[i] + " x= " + x[i]);
+//
+//		}
+//
+//		return;
+//
+//	}
+//	
+	
+	
+	public void setCoord(PictureModel picModel, int anumber) {
 
+		// search for keyframes
+		List<Integer> indexlist = new ArrayList<Integer>();
+		int[] xValues;					
+		// get indexnumbers of keyframes
+		int numberkey = 0;					
+		for (int i = 0; i < anumber; i++) {
+			if ((Boolean) picModel.getValueAt( i, 1)) {
+				indexlist.add(i);
+			}											
+		}					
+		xValues = new int[indexlist.size()];
+		// set indexnumbers in array
+		for (int i = 0; i < indexlist.size(); i++) {						
+			xValues[i] = indexlist.get(i);																		
+		}	   										
+
+		
+				
+		
 		this.n = xValues.length; // number of keyframes
 
 		if (n <= 1)
@@ -62,7 +115,7 @@ public class KeyframePanel extends JPanel {
 		// change the scaling of the Values to fit the panel
 		// we need global variables for dimensions
 
-		final double factorX = (600.0 / (number - 1));
+		final double factorX = (600.0 / (anumber - 1));
 
 		// System.out.println("polygon n= " + n);
 		// System.out.println("factor= " + factorX);
@@ -78,6 +131,11 @@ public class KeyframePanel extends JPanel {
 		return;
 
 	}
+	
+
+	
+	
+	
 	
     // A little icon class to draw an icon.
     class DynamicIcon implements Icon {

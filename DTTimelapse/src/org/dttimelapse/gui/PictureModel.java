@@ -87,18 +87,14 @@ public class PictureModel extends AbstractTableModel {
 
 	public Object getValueAt(int row, int col) {
 		
-		if (data.size() == 0) {
-			return null;
-		} 
+		if (data.size() == 0) return null; 
 		
 		return ((Vector) data.get(row)).get(col);
 	}
 
 	public Class getColumnClass(int col) {
 		
-		if (data.size() == 0) {
-			return String.class;
-		}
+		if (data.size() == 0) return String.class;
 				
 		return getValueAt(0, col).getClass();		
 	}
@@ -115,7 +111,6 @@ public class PictureModel extends AbstractTableModel {
 		((Vector) data.get(row)).setElementAt(value, col);
 
 		fireTableCellUpdated(row, col); // don't works ??
-
 	}
 
 	public void addTableModelListener(TableModelListener l) {
@@ -133,6 +128,18 @@ public class PictureModel extends AbstractTableModel {
 		while (vec.size() < columnNames.length) {
 			vec.add(0.0);
 		}
+		
+        // remove clipping elements (format double)
+        vec.remove(15);
+        vec.remove(15);
+        vec.remove(15);
+        vec.remove(15);
+        // add integer elements instead
+        vec.add(15, 0);
+        vec.add(15, 0);
+        vec.add(15, 0);
+        vec.add(15, 0);
+		
 
 		int index = data.size(); // index of new row
 

@@ -1,6 +1,8 @@
 package org.dttimelapse.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
@@ -27,13 +29,18 @@ public class PointerPanel extends JPanel {
 		// int xValues2[] = { 0, 750, 00, 750 };
 		// int yValues2[] = { 0, 500, 500, 0 };
 
-		g.drawLine(x1, y1, x2, y2);
+		//g.drawLine(x1, y1, x2, y2);
+		
+		
 
 		// Swing graphics with more functions
 		//
-		// Graphics2D g2 = (Graphics2D) g;
-		//
-		// g2.setStroke( new BasicStroke( 5) ); // 10 pix
+		Graphics2D g2 = (Graphics2D) g;
+				
+		g2.setStroke( new BasicStroke( 2) ); // 2 pix
+		g2.drawLine(x1, y1, x2, y2);
+		
+		
 		// //g2.drawLine( 30, 150, 200, 150 );
 		//
 		// g2.scale( 0.2500, 0.2500 );
