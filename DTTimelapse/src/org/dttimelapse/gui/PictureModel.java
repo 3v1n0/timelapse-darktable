@@ -103,7 +103,9 @@ public class PictureModel extends AbstractTableModel {
 		if (col == 1) { // isKeyframe
 			return false;
 		} else {
-			return false; // no editing
+			return true; // test
+			//return false; // no editing
+			
 		}
 	}
 

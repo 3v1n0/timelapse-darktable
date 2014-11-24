@@ -17,8 +17,17 @@ import javax.swing.JPanel;
 public class KeyframePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
-	private int x[];   // index of keyframes
+	public int[] indexKey;	
+	
+	private int xScreen[];   // x-values of keyframes
 	private int n;
+	
+	
+	private int yScreen[];   // values for display
+	// normaly 400 = bottom of preview
+	// if filterdisplay enabled then get the filter-y-values
+	
+	
 
     //Icon icon = new DynamicIcon();
     
@@ -30,7 +39,8 @@ public class KeyframePanel extends JPanel {
     
 	public KeyframePanel() { // constructor
 
-		x = new int[0];		
+		xScreen = new int[0];	
+		yScreen = new int[0];
 
 	} // end const
 
@@ -45,8 +55,9 @@ public class KeyframePanel extends JPanel {
 //			if (i == 0) shift = 5;
 //			if (i == n-1) shift = -5;
 
-			icon.paintIcon(this, g, x[i] + shift, 400);
-
+			icon.paintIcon(this, g, xScreen[i] + shift, yScreen[i]);
+			
+			System.out.println("i= " + i + " xk= " + xScreen[i] + " yk= " + yScreen[i]);
 		}
 
 	}
@@ -88,7 +99,7 @@ public class KeyframePanel extends JPanel {
 
 		// search for keyframes
 		List<Integer> indexlist = new ArrayList<Integer>();
-		int[] xValues;					
+						
 		// get indexnumbers of keyframes
 		int numberkey = 0;					
 		for (int i = 0; i < anumber; i++) {
@@ -96,21 +107,22 @@ public class KeyframePanel extends JPanel {
 				indexlist.add(i);
 			}											
 		}					
-		xValues = new int[indexlist.size()];
+		indexKey = new int[indexlist.size()];
 		// set indexnumbers in array
 		for (int i = 0; i < indexlist.size(); i++) {						
-			xValues[i] = indexlist.get(i);																		
+			indexKey[i] = indexlist.get(i);																		
 		}	   										
 
 		
 				
 		
-		this.n = xValues.length; // number of keyframes
+		this.n = indexKey.length; // number of keyframes
 
 		if (n <= 1)
 			return;
 
-		x = new int[n];
+		xScreen = new int[n];
+		yScreen = new int[n];
 
 		// change the scaling of the Values to fit the panel
 		// we need global variables for dimensions
@@ -122,8 +134,8 @@ public class KeyframePanel extends JPanel {
 
 		for (int i = 0; i < n; i++) {
 
-			x[i] = (int) (xValues[i] * factorX);
-			
+			xScreen[i] = (int) (indexKey[i] * factorX);
+			yScreen[i] = 400;   // initial value
 			//System.out.println("i= " + xValues[i] + " x= " + x[i]);
 
 		}
@@ -132,8 +144,25 @@ public class KeyframePanel extends JPanel {
 
 	}
 	
-
 	
+	public void setY(int YValues[]) {
+		// set y-values from filterPanel
+		for (int i = 0; i < n; i++) {			
+			yScreen[i] = YValues[ indexKey[i] ];   // set y-value at index of keyframes
+			//System.out.println("i= " + xValues[i] + " x= " + x[i]);
+		}
+		return;
+	}
+	
+	
+	public void resetY() {
+		// set y-values to initial value		
+		for (int i = 0; i < n; i++) {			
+			yScreen[i] = 400;   // set y-value at bottom of preview
+			//System.out.println("i= " + xValues[i] + " x= " + x[i]);
+		}
+		return;
+	}
 	
 	
 	
