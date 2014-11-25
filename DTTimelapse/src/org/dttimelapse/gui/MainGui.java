@@ -39,18 +39,17 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.TreePath;
 
 import org.dttimelapse.math.MovingAverage;
-
-
+import org.dttimelapse.math.Polynomal;
 
 // some long methods are shifted to "DirectoryMethods.java"
 //       for better maintaining
 //
 // See values and index of picModel in "PictureModel.java"
-
 
 public class MainGui extends JComponent {
 
@@ -64,9 +63,9 @@ public class MainGui extends JComponent {
 	public static Integer activeNumber;
 
 	JLabel labelDirectory;
-	
-	JSlider picSlider, deflicSlider;
-	
+
+	JSlider picSlider, deflicSlider, sharpnessSlider, orderSlider;
+
 	JScrollPane scrollPane;
 
 	JLayeredPane layeredPane;
@@ -82,13 +81,16 @@ public class MainGui extends JComponent {
 	JSplitPane splitPane;
 
 	JButton loadButton, transButton, saveButton, exportButton, renderButton;
+	JButton interpolateButton;
+
+	JRadioButton radioLinear, radioSpline, radioSigmoid;
 
 	JButton dloadButton, dtransButton, dsaveButton, dexportButton,
 			drenderButton, dlumiButton;
 
 	JToggleButton deflickerButton, playButton;
 
-	JButton resetButton;	
+	JButton resetButton;
 
 	JCheckBox cbImage, cbClipping, cbLumi;
 	JComboBox comboFilter;
@@ -109,9 +111,7 @@ public class MainGui extends JComponent {
 	ClippingPanel clippingPanel;
 	FilterPanel filterPanel;
 
-	DirectoryMethods dm;  // some large methods of mainGui
-	
-	
+	DirectoryMethods dm; // some large methods of mainGui
 
 	public MainGui() { // constructor
 
@@ -135,7 +135,8 @@ public class MainGui extends JComponent {
 
 		UIManager.put("nimbusLightBackground", new Color(150, 150, 150)); // jlist
 
-		// -------------------- Global settings ---------------------------------
+		// -------------------- Global settings
+		// ---------------------------------
 		activeNumber = 0;
 		activeIndex = 0;
 
@@ -168,6 +169,9 @@ public class MainGui extends JComponent {
 
 		fixTable = new JTable(picModel);
 		fixTable.setSelectionModel(listSelectionModel);
+
+		// test row column
+		picTable.setDefaultRenderer(Object.class, new RowRenderer());
 
 		// panels on left side ***************************************
 
@@ -205,6 +209,224 @@ public class MainGui extends JComponent {
 			e.printStackTrace();
 		}
 
+		// leftpanel
+		leftPanel = new JPanel();
+		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+
+		leftPanel.add(labelLeft);
+		leftPanel.add(layeredPane()); // preview area
+		leftPanel.add(sliderPanel());
+		leftPanel.add(treePanel);
+
+		// panels on right side *********************************
+
+		// JTabbedPane-Object
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP,
+				JTabbedPane.SCROLL_TAB_LAYOUT);
+
+		tabbedPane.addTab("Basic workflow", basicWorkflowPanel());
+		tabbedPane.addTab("Deflicker workflow", deflicWorkflowPanel());
+		tabbedPane.addTab("Interpolation", interpolationPanel());
+		tabbedPane.setMaximumSize(tabbedPane.getPreferredSize());
+		tabbedPane.setAlignmentX(Component.LEFT_ALIGNMENT);
+		sharpnessSlider.setVisible(false);
+
+		// table with image information
+		JPanel tablePanel = new JPanel();
+
+		// tablePanel.setLayout(new GridLayout(1, 0)); // extends width of table
+		tablePanel.setLayout(new BorderLayout()); //
+
+		rightPanel = new JPanel();
+		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+
+		rightPanel.add(progressPanel());
+		rightPanel.add(tabbedPane);
+		rightPanel.add(labelDirectory);
+
+		tablePane = new JScrollPane(picTable);
+		rightPanel.add(tablePane);
+		// rightPanel.add(Box.createVerticalGlue()); // decrease hight of
+		// tablepanel
+
+		// splitpane
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitPane.setDividerLocation(601); // set initial size
+		splitPane.setLeftComponent(leftPanel);
+		splitPane.setRightComponent(rightPanel);
+
+		f.add(splitPane);
+
+		f.pack();
+
+		f.setSize(1550, 1000); // initial size of frame
+
+		f.setLocationRelativeTo(null);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f.setVisible(true);
+
+		// load logo
+		picturePanel.loadLogo();
+		picturePanel.repaint();
+
+		// add some abstract listeners for sliders
+		picSlider.addChangeListener(new ChangeListener() { // picSlider
+					@Override
+					public void stateChanged(ChangeEvent e) {
+
+						activeIndex = picSlider.getValue();
+
+						if (activeNumber <= 0) {
+							return;
+						} // no action without pics
+
+						if (!slideShow.isAlive()) {
+							// scroll table whithout slideshow
+							picTable.getSelectionModel().setSelectionInterval(
+									activeIndex, activeIndex);
+							picTable.scrollRectToVisible(new Rectangle(picTable
+									.getCellRect(activeIndex,
+											picTable.getSelectedColumn(), true)));
+						}
+
+						pointerPanel.setCoord(activeIndex, activeNumber);
+						pointerPanel.repaint();
+
+						// changes in picSlider shows selected picture
+						picRefresh();
+					}
+				});
+
+		deflicSlider.addChangeListener(new ChangeListener() { // deflicSlider
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						// TODO update exposure curve
+
+						// calculate smoothing curve
+						// create array with new y-value of luminance
+						double[] x, y;
+						x = new double[activeNumber];
+						y = new double[activeNumber];
+
+						for (int i = 0; i < activeNumber; i++) {
+							x[i] = i;
+							y[i] = (double) picModel.getValueAt(i, 9); // lumi
+
+							// System.out.println (picTable.getValueAt(i, 3));
+							// System.out.println("x= " + x[i] + " y= " + y[i]);
+						}
+
+						// System.out.println ( Arrays.toString(x) );
+						// System.out.println ( Arrays.toString(y) );
+
+						// calculate new smoothing line with moving average
+						int range = deflicSlider.getValue();
+						MovingAverage ma = new MovingAverage(y); // set y-values
+						for (int i = 0; i < activeNumber; i++) {
+							y[i] = ma.calculate(i, range);
+							// y[i] = ma.calculateWeighted( i, range );
+							double lumi = (double) picModel.getValueAt(i, 9);
+							double flicker = lumi - y[i];
+							picModel.setValueAt(y[i], i, 10); // store smooth in
+																// table
+							picModel.setValueAt(flicker, i, 11); // store
+																	// flicker
+																	// in table
+
+							// System.out.println( "x= " + i + " y= " + y[i] +
+							// " aver= " + y[i] );
+						}
+
+						picTable.repaint(); // Repaint all the component (all
+											// Cells).
+						// better use
+						// ((AbstractTableModel)
+						// jTable.getModel()).fireTableCellUpdated(x, 0); //
+						// Repaint one cell.
+
+						// System.out.println("x= " + x[1] + " y= " + y[1]);
+						// System.out.println("x= " + x[15] + " y= " + y[15]);
+
+						meanOptPanel.setCoord(x, y);
+						meanOptPanel.repaint();
+
+						layeredPane.repaint();
+
+					}
+				});
+
+		// extern methods in "DirectoryMethods.java"
+		dm = new DirectoryMethods(this); // implement extern methods
+
+	} // end of constructor
+
+	class RowRenderer extends DefaultTableCellRenderer {
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table,
+				Object value, boolean isSelected, boolean hasFocus, int row,
+				int column) {
+
+			Component c = super.getTableCellRendererComponent(table, value,
+					isSelected, hasFocus, row, column);
+
+			// if (row == 5) {
+			if ((Boolean) picModel.getValueAt(row, 1)) {
+				setBackground(Color.RED);
+			} else {
+				setBackground(new Color(150, 150, 150)); // Nimbus ??
+			}
+
+			if (isSelected) {
+				setBackground(new Color(57, 105, 138)); // Nimbus selected
+				setForeground(Color.BLACK);
+			}
+
+			return this;
+		}
+
+	}
+
+	// public void newDirectory() { //
+	//
+	// dm.newDirectory(); // check new choosen directory
+	// }
+
+	public void picRefresh() {
+		// load and display active picture
+		// picturePanel.loadImage(activePathname + "/preview/"
+		// +picTable.getValueAt(activeIndex, 2)); // old
+		// picturePanel.repaint();
+		// meanPanel.repaint();
+
+		if (activeNumber < 1)
+			return;
+
+		// set extension of filename to "jpg"
+		String fullname = (String) fixTable.getValueAt(activeIndex, 2);
+		String name = fullname.substring(0, fullname.lastIndexOf(".")) + ".jpg";
+
+		// System.out.println("name= " + name);
+
+		picturePanel.loadImage(activePathname + "/preview/" + name);
+
+		if (cbClipping.isSelected()) {
+			// set clipping area
+			clippingPanel.setRectangleCoord(
+					(int) picModel.getValueAt(activeIndex, 15),
+					(int) picModel.getValueAt(activeIndex, 16),
+					(int) picModel.getValueAt(activeIndex, 17),
+					(int) picModel.getValueAt(activeIndex, 18),
+					(double) picModel.getValueAt(activeIndex, 19));
+			clippingPanel.repaint();
+		}
+
+		layeredPane.repaint();
+	}
+
+	// methods to create some parts of the GUI
+
+	public JLayeredPane layeredPane() {
 		// definition of layered panels
 		meanPanel = new PolygonPanel();
 		// meanPanel.setCoord(x, y);
@@ -243,6 +465,7 @@ public class MainGui extends JComponent {
 		filterPanel.setForeground(Color.yellow);
 		filterPanel.setBounds(0, 0, 600, 400); // mandatory to display
 		filterPanel.setOpaque(false);
+		filterPanel.setVisible(false);
 
 		layeredPane = new JLayeredPane(); // shows picture and curves
 		layeredPane.add(picturePanel, JLayeredPane.FRAME_CONTENT_LAYER); // (-3000)
@@ -256,197 +479,9 @@ public class MainGui extends JComponent {
 
 		layeredPane.setPreferredSize(new Dimension(600, 400));
 
-		// leftpanel
-		leftPanel = new JPanel();
-		leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-
-		leftPanel.add(labelLeft);
-		leftPanel.add(layeredPane);
-		leftPanel.add(sliderPanel());
-		leftPanel.add(treePanel);
-
-		// panels on right side *********************************
-
-		// JTabbedPane-Object
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP,
-				JTabbedPane.SCROLL_TAB_LAYOUT);
-
-		tabbedPane.addTab("Basic workflow", basicWorkflowPanel());
-		tabbedPane.addTab("Deflicker workflow", deflicWorkflowPanel());
-		tabbedPane.addTab("Interpolation", interpolationPanel());
-		tabbedPane.setMaximumSize(tabbedPane.getPreferredSize());
-		tabbedPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-		// table with image information
-		JPanel tablePanel = new JPanel();
-
-		// tablePanel.setLayout(new GridLayout(1, 0)); // extends width of table
-		tablePanel.setLayout(new BorderLayout()); //
-
-		rightPanel = new JPanel();
-		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-
-		rightPanel.add(progressPanel());
-		rightPanel.add(tabbedPane);
-		rightPanel.add(labelDirectory);
-		// rightPanel.add(tablePanel); // no use of jlist anymore
-
-		tablePane = new JScrollPane(picTable);
-		rightPanel.add(tablePane);
-		// rightPanel.add(Box.createVerticalGlue()); // decrease hight of
-		// tablepanel
-
-		// splitpane
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		splitPane.setDividerLocation(601); // set initial size
-		splitPane.setLeftComponent(leftPanel);
-		splitPane.setRightComponent(rightPanel);
-
-		f.add(splitPane);
-
-		f.pack();
-
-		f.setSize(1550, 1000); // initial size of frame
-
-		f.setLocationRelativeTo(null);
-		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		f.setVisible(true);
-
-		// load logo
-		picturePanel.loadLogo();
-		picturePanel.repaint();
-
-		// add some abstract listeners for sliders
-		picSlider.addChangeListener(new ChangeListener() { //  picSlider
-			@Override
-			public void stateChanged(ChangeEvent e) {
-
-				activeIndex = picSlider.getValue();
-
-				if (activeNumber <= 0) {
-					return;
-				} // no action without pics
-
-				if (!slideShow.isAlive()) {
-					// scroll table when no slideshow
-					picTable.getSelectionModel().setSelectionInterval(
-							activeIndex, activeIndex);
-					picTable.scrollRectToVisible(new Rectangle(picTable
-							.getCellRect(activeIndex, 0, true)));
-				}
-
-				pointerPanel.setCoord(activeIndex, activeNumber);
-				pointerPanel.repaint();
-
-				// changes in picSlider shows selected picture
-				picRefresh();
-			}
-		});
-
-		
-		deflicSlider.addChangeListener(new ChangeListener() { // deflicSlider			
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				// TODO update exposure curve
-
-				// calculate smoothing curve
-				// create array with new y-value of luminance
-				double[] x, y;
-				x = new double[activeNumber];
-				y = new double[activeNumber];
-
-				for (int i = 0; i < activeNumber; i++) {
-					x[i] = i;
-					y[i] = (double) picModel.getValueAt(i, 9); // lumi
-
-					// System.out.println (picTable.getValueAt(i, 3));
-					// System.out.println("x= " + x[i] + " y= " + y[i]);
-				}
-
-				// System.out.println ( Arrays.toString(x) );
-				// System.out.println ( Arrays.toString(y) );
-
-				// calculate new smoothing line with moving average
-				int range = deflicSlider.getValue();
-				MovingAverage ma = new MovingAverage(y); // set y-values
-				for (int i = 0; i < activeNumber; i++) {
-					y[i] = ma.calculate(i, range);
-					// y[i] = ma.calculateWeighted( i, range );
-					double lumi = (double) picModel.getValueAt(i, 9);
-					double flicker = lumi - y[i];
-					picModel.setValueAt(y[i], i, 10); // store smooth in
-														// table
-					picModel.setValueAt(flicker, i, 11); // store
-															// flicker
-															// in table
-
-					// System.out.println( "x= " + i + " y= " + y[i] +
-					// " aver= " + y[i] );
-				}
-
-				picTable.repaint(); // Repaint all the component (all
-									// Cells).
-				// better use
-				// ((AbstractTableModel)
-				// jTable.getModel()).fireTableCellUpdated(x, 0); //
-				// Repaint one cell.
-
-				// System.out.println("x= " + x[1] + " y= " + y[1]);
-				// System.out.println("x= " + x[15] + " y= " + y[15]);
-
-				meanOptPanel.setCoord(x, y);
-				meanOptPanel.repaint();
-
-				layeredPane.repaint();
-
-			}
-		});
-		
-		
-		// extern methods in "DirectoryMethods.java"
-		dm = new DirectoryMethods(this);  // implement extern methods
-
-	} // end of constructor
-
-	
-//	public void newDirectory() { // 
-//		
-//		dm.newDirectory();    // check new choosen directory
-//	}
-
-	public void picRefresh() {
-		// load and display active picture
-		// picturePanel.loadImage(activePathname + "/preview/"
-		// +picTable.getValueAt(activeIndex, 2)); // old
-		// picturePanel.repaint();
-		// meanPanel.repaint();
-
-		if (activeNumber < 1)
-			return;
-
-		// set extension of filename to "jpg"
-		String fullname = (String) fixTable.getValueAt(activeIndex, 2);
-		String name = fullname.substring(0, fullname.lastIndexOf(".")) + ".jpg";
-
-		// System.out.println("name= " + name);
-
-		picturePanel.loadImage(activePathname + "/preview/" + name);
-
-		if (cbClipping.isSelected()) {
-			// set clipping area
-			clippingPanel.setRectangleCoord(
-					(int) picModel.getValueAt(activeIndex, 15),
-					(int) picModel.getValueAt(activeIndex, 16),
-					(int) picModel.getValueAt(activeIndex, 17),
-					(int) picModel.getValueAt(activeIndex, 18),
-					(double) picModel.getValueAt(activeIndex, 19));
-			clippingPanel.repaint();
-		}
-
-		layeredPane.repaint();
+		return layeredPane;
 	}
 
-	// methods to create some parts of the GUI
 	public JPanel sliderPanel() {
 		// panel with slider, start and stop button
 		picSlider = new JSlider();
@@ -514,7 +549,8 @@ public class MainGui extends JComponent {
 		// Non-editable JComboBox
 		comboFilter = new JComboBox();
 
-		for (String s : filter)	comboFilter.addItem(s);
+		for (String s : filter)
+			comboFilter.addItem(s);
 
 		comboFilter.addActionListener(new ComboListener());
 
@@ -561,7 +597,7 @@ public class MainGui extends JComponent {
 	public JPanel basicWorkflowPanel() {
 		// basic workflow
 		loadButton = new JButton("Load XMP");
-		transButton = new JButton("Interpolation");
+		transButton = new JButton("Auto Interpolation");
 		saveButton = new JButton("Save XMP");
 		exportButton = new JButton("Export Frames");
 		renderButton = new JButton("Render Video");
@@ -587,7 +623,7 @@ public class MainGui extends JComponent {
 	public JPanel deflicWorkflowPanel() {
 		// deflicker workflow
 		dloadButton = new JButton("Load XMP");
-		dtransButton = new JButton("Interpolation");
+		dtransButton = new JButton("Auto Interpolation");
 		dsaveButton = new JButton("Save XMP");
 		dexportButton = new JButton("Export Frames");
 		drenderButton = new JButton("Render Video");
@@ -646,24 +682,66 @@ public class MainGui extends JComponent {
 
 	public JPanel interpolationPanel() {
 		// Interpolation settings
-		JRadioButton radio1 = new JRadioButton("linear");
-		JRadioButton radio2 = new JRadioButton("spline");
-		radio1.setSelected(true);
+		radioLinear = new JRadioButton("linear");
+		radioSpline = new JRadioButton("spline");
+		radioSigmoid = new JRadioButton("s-curve");
+		radioLinear.setSelected(true);
+
+		radioLinear.addActionListener(new RadioListener());
+		radioSpline.addActionListener(new RadioListener());
+		radioSigmoid.addActionListener(new RadioListener());
 
 		ButtonGroup bg = new ButtonGroup();
-		bg.add(radio1);
-		bg.add(radio2);
+		bg.add(radioLinear);
+		bg.add(radioSpline);
+		bg.add(radioSigmoid);
 
 		JPanel interpolationPanel = new JPanel();
 		interpolationPanel.add(new JLabel("Interpolation setting"));
-		interpolationPanel.add(radio1);
-		interpolationPanel.add(radio2);
+		interpolationPanel.add(radioLinear);
+		interpolationPanel.add(radioSpline);
+		interpolationPanel.add(radioSigmoid);
+
+		interpolateButton = new JButton("Interpolate active filter");
+		interpolateButton.setToolTipText("Interpolate active filter only!");
+		interpolateButton.addActionListener(new ButtonListener4());
+		interpolationPanel.add(interpolateButton);
+		interpolateButton.setEnabled(false);
+
+		sharpnessSlider = new JSlider();
+		sharpnessSlider.setMinorTickSpacing(1);
+		sharpnessSlider.setPaintTicks(true);
+		sharpnessSlider.setPaintLabels(true);
+		sharpnessSlider.setMinimum(1);
+		sharpnessSlider.setMaximum(10);
+		sharpnessSlider.setValue(6); // initial value
+		sharpnessSlider.setToolTipText("Sharpness of s-curve");
+		sharpnessSlider.setVisible(true);
+		sharpnessSlider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				// invoke interpolation
+				interpolateButton.doClick();
+			}
+		});
+		interpolationPanel.add(sharpnessSlider);
 
 		return interpolationPanel;
 	}
 
-	
-	class SelectionListener implements ListSelectionListener { //  jtable
+	class RadioListener implements ActionListener {
+		public void actionPerformed(ActionEvent ae) {
+			if (ae.getSource() == radioLinear) {
+				sharpnessSlider.setVisible(false);
+			} else if (ae.getSource() == radioSpline) {
+				sharpnessSlider.setVisible(false);
+			} else if (ae.getSource() == radioSigmoid) {
+				sharpnessSlider.setVisible(true);
+			}
+		}
+	}
+
+	class SelectionListener implements ListSelectionListener { // jtable
 		public void valueChanged(ListSelectionEvent ae) {
 			if (ae.getValueIsAdjusting()) // mouse button not released yet
 				return;
@@ -683,6 +761,7 @@ public class MainGui extends JComponent {
 			// we must check two jtable !
 			if (col < 0)
 				col = picTable.getSelectedColumn();
+
 			if (col < 0)
 				return; // true when clearSelection
 
@@ -695,10 +774,9 @@ public class MainGui extends JComponent {
 			// table.clearSelection();
 		}
 	}
-	
 
-	class ComboListener implements ActionListener { // filter combobox														
-		
+	class ComboListener implements ActionListener { // filter combobox
+
 		public void actionPerformed(ActionEvent e) {
 			// System.out.println( e );
 			JComboBox selectedChoice = (JComboBox) e.getSource();
@@ -706,73 +784,239 @@ public class MainGui extends JComponent {
 			// TODO show filter curve
 
 			double[] x = new double[activeNumber];
-			double[] y = new double[activeNumber];				
-			int col = -1;
+			double[] y = new double[activeNumber];
+			int filtercolumn = -1;
 			double min = 0.0;
 			double max = 0.0;
 
 			if ("none".equals(selectedChoice.getSelectedItem())) {
-				col = -1;
+				filtercolumn = -1;
 			} else if ("Exp-black".equals(selectedChoice.getSelectedItem())) {
-				col = 13;
+				filtercolumn = 13;
 				min = -0.1;
 				max = 0.1;
-			} else if ("Exp-exposure".equals(selectedChoice.getSelectedItem())) {				
-				col = 14;
+			} else if ("Exp-exposure".equals(selectedChoice.getSelectedItem())) {
+				filtercolumn = 14;
 				min = -3.0;
-				max = 3.0;				
+				max = 3.0;
 			} else if ("WB temp".equals(selectedChoice.getSelectedItem())) {
-				col = 20;
+				filtercolumn = 20;
 				min = 2000.0;
-				max = 23000.0;				
+				max = 23000.0;
 			} else if ("WB tint".equals(selectedChoice.getSelectedItem())) {
-				col = 21;
+				filtercolumn = 21;
 				min = 0.1;
-				max = 8.0;				
+				max = 8.0;
 			} else if ("Vibrance".equals(selectedChoice.getSelectedItem())) {
-				col = 22;
+				filtercolumn = 22;
 				min = 0.0;
-				max = 100;				
-			}			
-			
-			
-			if (col == -1) {
+				max = 100;
+			}
+
+			if (filtercolumn == -1) {
 				// set coord zero
 				filterPanel.clear();
 				filterPanel.repaint();
-				
+
 				keyframePanel.resetY();
 				keyframePanel.repaint();
-				
+
 				filterPanel.setVisible(false);
 				keyframePanel.setVisible(false);
 				pointerPanel.setVisible(false);
-				
+				interpolateButton.setEnabled(false);
+
 			} else {
 				// set coordinates for filterpanel
 				for (int i = 0; i < activeNumber; i++) {
 					x[i] = i;
-					y[i] = (double) picModel.getValueAt(i, col);
-		
+					y[i] = (double) picModel.getValueAt(i, filtercolumn);
+
 					// System.out.println (picTable.getValueAt(i, 3));
 					// System.out.println("x= " + x[i] + " y= " + y[i]);
 				}
-				filterPanel.setCoord(x, y, min, max);
+				filterPanel.setMinMax(min, max);
+				filterPanel.setCoord(x, y);
 				filterPanel.repaint();
-				
-				keyframePanel.setY(filterPanel.yScreen); // set y-values of keyframes
+
+				keyframePanel.setY(filterPanel.yScreen); // set y-values of
+															// keyframes
 				keyframePanel.repaint();
 
 				filterPanel.setVisible(true);
 				keyframePanel.setVisible(true);
 				pointerPanel.setVisible(true);
-				
-			}			
+				interpolateButton.setEnabled(true);
+
+				// int numberkeys = keyframePanel.indexKey.length;
+				// orderSlider.setMaximum(numberkeys);
+				// orderSlider.setValue(numberkeys);
+
+			}
 		}
 	}
-	
-	
-	class ButtonListener3 implements ActionListener { // play jogglebutton														
+
+	class ButtonListener4 implements ActionListener { // button Interpolation
+		public void actionPerformed(ActionEvent ae) {
+
+			int filtercolumn = 0;
+			double[] x = new double[activeNumber];
+			double[] y = new double[activeNumber];
+			double min = 0.0;
+			double max = 0.0;
+
+			// get choosen filter
+			String filter = (String) comboFilter.getSelectedItem();
+
+			// get index of keyframes
+			int[] indexKey = keyframePanel.indexKey;
+
+			if (indexKey.length == 0) {
+				System.out.println("No keyframes");
+				return;
+			}
+
+			// get column of active filter
+			if ("none".equals(filter)) {
+				return;
+			} else if ("Exp-black".equals(filter)) {
+				filtercolumn = 13;
+			} else if ("Exp-exposure".equals(filter)) {
+				filtercolumn = 14;
+			} else if ("WB temp".equals(filter)) {
+				filtercolumn = 20;
+			} else if ("WB tint".equals(filter)) {
+				filtercolumn = 21;
+			} else if ("Vibrance".equals(filter)) {
+				filtercolumn = 22;
+			}
+
+			int keyStart, keyEnd;
+			double valueStart, valueEnd;
+
+			// do interpolation
+			if (radioLinear.isSelected()) {
+
+				for (int i = 0; i < indexKey.length - 1; i++) {
+					// loop for all keyframes
+					keyStart = indexKey[i];
+					keyEnd = indexKey[i + 1];
+
+					valueStart = (double) picModel.getValueAt(keyStart,
+							filtercolumn);
+					valueEnd = (double) picModel.getValueAt(keyEnd,
+							filtercolumn);
+
+					double slope = (valueEnd - valueStart)
+							/ (keyEnd - keyStart);
+
+					for (int ii = keyStart + 1; ii < keyEnd; ii++) {
+						// loop for all pics within two keyframes
+
+						double value = valueStart + slope * (ii - keyStart);
+						picModel.setValueAt(value, ii, filtercolumn);
+					}
+				}
+
+				// set new values for curve display
+				for (int i = 0; i < activeNumber; i++) {
+					x[i] = i;
+					y[i] = (double) picModel.getValueAt(i, filtercolumn);
+				}
+				filterPanel.setCoord(x, y);
+				filterPanel.repaint();
+				picTable.repaint();
+
+			} else if (radioSpline.isSelected()) {
+				// TODO spline interpolation
+
+				double[] xvalue = new double[indexKey.length];
+				double[] yvalue = new double[indexKey.length];
+				for (int i = 0; i < indexKey.length; i++) {
+					// loop for all keyframes
+					xvalue[i] = (double) indexKey[i];
+					yvalue[i] = (double) picModel.getValueAt(indexKey[i],
+							filtercolumn);
+
+					// System.out.println("i= " + i + " x= " + xvalue[i] +
+					// " y= " + yvalue[i]);
+				}
+
+				// create polynomal function
+				// check order of polynom !!!
+				Polynomal poly = new Polynomal(xvalue, yvalue, indexKey.length);
+
+				// calculate y-values
+				for (int i = 0; i < indexKey.length - 1; i++) {
+					// loop for all keyframes
+					keyStart = indexKey[i];
+					keyEnd = indexKey[i + 1];
+
+					for (int ii = keyStart + 1; ii < keyEnd; ii++) {
+						// loop for all pics within two keyframes
+
+						double value = poly.calculate(ii);
+						picModel.setValueAt(value, ii, filtercolumn);
+					}
+				}
+
+				// set new values for curve display
+				for (int i = 0; i < activeNumber; i++) {
+					x[i] = i;
+					y[i] = (double) picModel.getValueAt(i, filtercolumn);
+				}
+				filterPanel.setCoord(x, y);
+				filterPanel.repaint();
+				picTable.repaint();
+
+			} else if (radioSigmoid.isSelected()) {
+
+				for (int i = 0; i < indexKey.length - 1; i++) {
+					// loop for all keyframes
+					keyStart = indexKey[i];
+					keyEnd = indexKey[i + 1];
+
+					valueStart = (double) picModel.getValueAt(keyStart,
+							filtercolumn);
+					valueEnd = (double) picModel.getValueAt(keyEnd,
+							filtercolumn);
+
+					double deltax = keyEnd - keyStart;
+					double deltay = valueEnd - valueStart;
+
+					// System.out.println("deltax= " + deltax + " deltay= " +
+					// deltay);
+
+					double sharpness = sharpnessSlider.getValue() / 10.0;
+
+					for (int ii = keyStart + 1; ii < keyEnd; ii++) {
+						// loop for all pics within two keyframes
+
+						// double t = 12 / deltax * (ii - keyStart+1) - 6;
+						double t = 20 / deltax * (ii - keyStart + 1) - 10;
+
+						// System.out.println("i= " + i + " t= " + t);
+
+						double value = 1.0 / (1.0 + Math.exp(-t * sharpness))
+								* deltay + valueStart;
+						picModel.setValueAt(value, ii, filtercolumn);
+					}
+				}
+
+				// set new values for curve display
+				for (int i = 0; i < activeNumber; i++) {
+					x[i] = i;
+					y[i] = (double) picModel.getValueAt(i, filtercolumn);
+				}
+				filterPanel.setCoord(x, y);
+				filterPanel.repaint();
+				picTable.repaint();
+			}
+
+		}
+	}
+
+	class ButtonListener3 implements ActionListener { // play jogglebutton
 		public void actionPerformed(ActionEvent ae) {
 
 			AbstractButton abstractButton = (AbstractButton) ae.getSource();
@@ -798,8 +1042,7 @@ public class MainGui extends JComponent {
 		}
 	}
 
-	
-	class ButtonListener2 implements ActionListener { //deflicker jogglebutton
+	class ButtonListener2 implements ActionListener { // deflicker jogglebutton
 		public void actionPerformed(ActionEvent ae) {
 			// this is used for deflicker jogglebutton
 			AbstractButton abstractButton = (AbstractButton) ae.getSource();
@@ -855,11 +1098,10 @@ public class MainGui extends JComponent {
 		}
 	}
 
-	
 	// Action of main buttons
 	class ButtonListener implements ActionListener {
 		public void actionPerformed(ActionEvent ae) {
-			
+
 			if (ae.getSource() == dlumiButton) {
 				// recalculate luminance with rectangle
 				try {
@@ -872,37 +1114,33 @@ public class MainGui extends JComponent {
 				// deflicSlider.setValue(9); // hack to force calculation !?
 				// deflicSlider.setValue(10); // initial value
 
-			} else if (ae.getSource() == loadButton |
-					ae.getSource() == dloadButton) {
+			} else if (ae.getSource() == loadButton
+					| ae.getSource() == dloadButton) {
 				System.out.println("Button load XMP");
-				
-				
+
 				// find and store keyframes index in keyframePanel
 				keyframePanel.setCoord(picModel, activeNumber);
 			} else if (ae.getSource() == transButton
 					| ae.getSource() == dtransButton) {
-				System.out.println("Button Interpolation"); 
-				
+				System.out.println("Button Interpolation");
 
 			} else if (ae.getSource() == saveButton
 					| ae.getSource() == dsaveButton) {
 				System.out.println("Button save XMP");
-				
 
 			} else if (ae.getSource() == exportButton
 					| ae.getSource() == dexportButton) {
 				System.out.println("Button export frames");
-				
 
 				// some testing ****************************
 				// clipping test settings
 				picModel.setValueAt(0.10, activeIndex, 13);
-				picModel.setValueAt(-3.00, activeIndex, 14);				
+				picModel.setValueAt(-3.00, activeIndex, 14);
 				picModel.setValueAt(100, activeIndex, 15);
 				picModel.setValueAt(100, activeIndex, 16);
 				picModel.setValueAt(1400, activeIndex, 17);
 				picModel.setValueAt(1000, activeIndex, 18);
-				picModel.setValueAt(0.00, activeIndex, 19);				
+				picModel.setValueAt(0.00, activeIndex, 19);
 				picModel.setValueAt(20000.0, activeIndex, 20);
 				picModel.setValueAt(4.00, activeIndex, 21);
 				picModel.setValueAt(40.0, activeIndex, 22);
@@ -919,10 +1157,9 @@ public class MainGui extends JComponent {
 			} else if (ae.getSource() == renderButton
 					| ae.getSource() == drenderButton) {
 				System.out.println("Button render video");
-				
 
-			} 
-			
+			}
+
 		}
 	}
 }
