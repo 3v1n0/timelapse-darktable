@@ -194,6 +194,39 @@ class ColorColumnRenderer extends DefaultTableCellRenderer {
 	}
 }
 
+
+
+class SmoothColumnRenderer extends DefaultTableCellRenderer {
+
+	
+	private static final long serialVersionUID = 1L;
+	
+	private static final DecimalFormat formatter = new DecimalFormat( "0.000" );
+
+	public Component getTableCellRendererComponent(JTable table, Object value,
+			boolean isSelected, boolean hasFocus, int row, int column) {
+		
+		Component cellComponent = super.getTableCellRendererComponent(table, value,
+				isSelected, hasFocus, row, column);
+		
+		cellComponent.setBackground(new Color(150, 150, 150));
+		cellComponent.setForeground(Color.BLACK);
+		
+		if (value instanceof Number) {
+			JLabel label = (JLabel) cellComponent;
+			label.setHorizontalAlignment(JLabel.RIGHT);
+			Number num = (Number) value;
+			String text = formatter.format(num);
+			label.setText(text);
+		}        
+        
+        //value = formatter.format( (Number) value );
+        
+		return cellComponent;
+	}
+}
+
+
 class MeanColorColumnRenderer extends DefaultTableCellRenderer {
 
 	// show different gray background according to luminance

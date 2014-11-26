@@ -84,7 +84,7 @@ public class ClippingPanel extends JPanel {
 		this.width = w;
 		this.height = h;	
 		
-		//System.out.println("w= " + w  + " h= " + h);
+		System.out.println("w= " + w  + " h= " + h);
 	}
 
 }

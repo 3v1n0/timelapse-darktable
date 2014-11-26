@@ -77,7 +77,7 @@ public class DrawingPanel extends JPanel {
 
 		Graphics2D g2 = (Graphics2D) g;
 
-		g2.setStroke(new BasicStroke(2));
+		g2.setStroke(new BasicStroke(4));
 		//g2.setPaint(Color.orange);
 
 		g2.drawRect(x1, y1, x2 - x1, y2 - y1);

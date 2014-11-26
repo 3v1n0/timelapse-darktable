@@ -17,7 +17,7 @@ package org.dttimelapse.gui;
 
  You should have received a copy of the GNU General Public License
  along with DTTimelapse.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -170,8 +170,9 @@ public class MainGui extends JComponent {
 		fixTable = new JTable(picModel);
 		fixTable.setSelectionModel(listSelectionModel);
 
-		// test row column
+		// background of rows
 		picTable.setDefaultRenderer(Object.class, new RowRenderer());
+		fixTable.setDefaultRenderer(Object.class, new RowRenderer());
 
 		// panels on left side ***************************************
 
@@ -361,6 +362,7 @@ public class MainGui extends JComponent {
 	} // end of constructor
 
 	class RowRenderer extends DefaultTableCellRenderer {
+		// change backgroundcolor of rows
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table,
@@ -370,9 +372,9 @@ public class MainGui extends JComponent {
 			Component c = super.getTableCellRendererComponent(table, value,
 					isSelected, hasFocus, row, column);
 
-			// if (row == 5) {
 			if ((Boolean) picModel.getValueAt(row, 1)) {
-				setBackground(Color.RED);
+				// row with keyframe
+				setBackground(new Color(169, 46, 34)); // nimbusRed
 			} else {
 				setBackground(new Color(150, 150, 150)); // Nimbus ??
 			}
@@ -427,9 +429,9 @@ public class MainGui extends JComponent {
 	// methods to create some parts of the GUI
 
 	public JLayeredPane layeredPane() {
-		// definition of layered panels
+		// definition of layered panels for preview area
+
 		meanPanel = new PolygonPanel();
-		// meanPanel.setCoord(x, y);
 		meanPanel.setForeground(Color.blue);
 		// meanPanel.setPreferredSize(new Dimension(450, 300));
 		// meanPanel.setMinimumSize(new Dimension(450, 300));
@@ -447,17 +449,18 @@ public class MainGui extends JComponent {
 		pointerPanel.setOpaque(false);
 
 		drawingPanel = new DrawingPanel();
-		drawingPanel.setForeground(Color.orange);
+		drawingPanel.setForeground(new Color(176, 179, 50)); // nimbusGreen ;
 		drawingPanel.setBounds(0, 0, 600, 400); // mandatory to display
 		drawingPanel.setOpaque(false);
 		drawingPanel.setVisible(false);
 
 		keyframePanel = new KeyframePanel();
+		keyframePanel.setForeground(new Color(169, 46, 34)); // nimbusRed ;
 		keyframePanel.setBounds(0, 0, 600, 400); // mandatory to display
 		keyframePanel.setOpaque(false);
 
 		clippingPanel = new ClippingPanel();
-		clippingPanel.setForeground(Color.MAGENTA);
+		clippingPanel.setForeground(new Color(191, 98, 4)); // nimbusOrange ;
 		clippingPanel.setBounds(0, 0, 600, 400); // mandatory to display
 		clippingPanel.setOpaque(false);
 
@@ -472,8 +475,8 @@ public class MainGui extends JComponent {
 		layeredPane.add(meanOptPanel, 0); // optimized mean of luminance
 		layeredPane.add(meanPanel, 1); // original mean of luminance
 		layeredPane.add(pointerPanel, 2); // pointer of activeindex
-		layeredPane.add(drawingPanel, 3); // area for luminance calculation
-		layeredPane.add(keyframePanel, 4); // area for keyframe icons
+		layeredPane.add(drawingPanel, 3); // rectangle for luminance calculation
+		layeredPane.add(keyframePanel, 4); // keyframe icons
 		layeredPane.add(clippingPanel, 5); // rectangle with clipping
 		layeredPane.add(filterPanel, 6); // filter curve
 
@@ -522,6 +525,7 @@ public class MainGui extends JComponent {
 					// clipping checkbox
 					clippingPanel.setVisible(isSelected);
 					pointerPanel.setVisible(isSelected);
+					keyframePanel.setVisible(isSelected);
 
 					picRefresh(); // show rect of activeindex
 				}
@@ -1063,12 +1067,16 @@ public class MainGui extends JComponent {
 					TableColumn colLum = picTable.getColumnModel().getColumn(6);
 					colLum.setCellRenderer(new MeanColorColumnRenderer());
 
-					// set gradient background for flicker with differnt red
-					TableColumn colFlicker = picTable.getColumnModel()
-							.getColumn(8);
-					colFlicker
-							.setCellRenderer(new FlickerColorColumnRenderer());
+					// set decimal format for smooth
+					TableColumn colSmooth = picTable.getColumnModel().getColumn(7);
+					colSmooth.setCellRenderer(new SmoothColumnRenderer());
 
+					// set gradient background for flicker with differnt red
+					TableColumn colFlicker = picTable.getColumnModel().getColumn(8);
+					colFlicker.setCellRenderer(new FlickerColorColumnRenderer());
+
+					
+					
 					if (!cbLumi.isSelected())
 						cbLumi.doClick();
 					cbLumi.setEnabled(false);

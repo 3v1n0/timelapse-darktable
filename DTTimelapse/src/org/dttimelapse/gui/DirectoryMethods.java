@@ -1,25 +1,32 @@
 package org.dttimelapse.gui;
 
 /*
-Copyright 2014 Rudolf Martin
+ Copyright 2014 Rudolf Martin
 
-This file is part of DTTimelapse.
+ This file is part of DTTimelapse.
 
-DTTimelapse is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ DTTimelapse is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-DTTimelapse is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ DTTimelapse is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with DTTimelapse.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with DTTimelapse.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.Roi;
+import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
 
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
+import javax.imageio.ImageIO;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JViewport;
@@ -39,27 +47,23 @@ import javax.swing.table.TableColumnModel;
 
 import org.dttimelapse.math.MovingAverage;
 
-
-
+// new version with imagej
 
 public class DirectoryMethods {
 	// some larger methods, shifted from mainGui
-	//  for better maintaining
+	// for better maintaining
 
 	private static final long serialVersionUID = 1L;
 
-	
 	private MainGui mg;
-	
+
 	public DirectoryMethods(MainGui gui) {
-		
+
 		mg = gui;
-		
+
 	}
-	
-	
-	
-	//*******************************************************************************
+
+	// *******************************************************************************
 
 	public void newDirectory() { // check new choosen directory
 		// System.out.println("File " + pathname + " has been "
@@ -76,7 +80,7 @@ public class DirectoryMethods {
 		mg.drawingPanel.y1 = 0;
 		mg.drawingPanel.x2 = 600;
 		mg.drawingPanel.y2 = 400;
-		
+
 		mg.cbClipping.setSelected(false);
 		mg.cbLumi.setSelected(false);
 
@@ -217,8 +221,8 @@ public class DirectoryMethods {
 	protected int[] widths = { 60, 60, 60, 60, 60, 150, 60, 60, 60, 60, 60, 60,
 			60, 60, 60, 60, 60, 60, 60, 60 };
 
-	//*******************************************************************************
-	
+	// *******************************************************************************
+
 	public int scanDirectory() throws Exception {
 		// extract exif infos
 		// sort all pictures by name
@@ -232,10 +236,10 @@ public class DirectoryMethods {
 		// String[] cmdArrayEx = {"D:\\Programme\\exiftool\\exiftool.exe",
 		// "-csv",
 
-		String[] cmdArrayEx = { "exiftool", "-csv", "-ext", "JPG", "-ext",
-				"NEF", "-ext", "CR2", "-ext", "DNG", "-aperture",
-				"-shutterspeed", "-iso", "-ExifImageWidth", "-ExifImageHeight",
-				"-createdate", "directory" };
+		String[] cmdArrayEx = { "exiftool",
+				"-csv", "-ext", "JPG", "-ext", "NEF", "-ext", "CR2", "-ext",
+				"DNG", "-aperture", "-shutterspeed", "-iso", "-ExifImageWidth",
+				"-ExifImageHeight", "-createdate", "directory" };
 
 		cmdArrayEx[16] = mg.activePathname;
 
@@ -281,21 +285,21 @@ public class DirectoryMethods {
 		for (Object object : listA) {
 			String element = (String) object;
 
-			//System.out.println(i + element);
-			
+			// System.out.println(i + element);
+
 			String[] splittedLine = element.split(",");
 			String pathname = splittedLine[0];
 
 			String name = pathname.substring(pathname.lastIndexOf("/") + 1,
 					pathname.length());
 
-			//System.out.println(i + name);
+			// System.out.println(i + name);
 
 			Vector<Comparable> vec = new Vector<Comparable>(); // data to add to
 																// table
 
-			//TODO check datatype of exifdata 
-			
+			// TODO check datatype of exifdata
+
 			if (splittedLine.length == 7) {
 				// create vector and add to table
 				// create vector with data
@@ -314,12 +318,12 @@ public class DirectoryMethods {
 					width = 0;
 				}
 				if (isInteger(splittedLine[5])) {
-					height = Integer.parseInt(splittedLine[4]);
+					height = Integer.parseInt(splittedLine[5]);
 				} else {
 					height = 0;
 				}
-				
-				//System.out.println("w= " + width + " h= " + height);
+
+				// System.out.println("w= " + width + " h= " + height);
 
 				// vec.add(iso);
 				vec.add(width);
@@ -375,9 +379,9 @@ public class DirectoryMethods {
 		}
 		return true;
 	}
-	
-	//*******************************************************************************
-	
+
+	// *******************************************************************************
+
 	public void scanPreview() throws Exception, IOException,
 			InterruptedException { // create previews
 
@@ -386,19 +390,11 @@ public class DirectoryMethods {
 		boolean successful = dir.mkdir();
 		if (successful) {
 			// System.out.println("directory was created successfully");
-		}
-
-		// imagemagick convert overwrites existing files without warning
-		// command= convert path+fname -resize 750x500 path+/preview/+fname
-
-		final String[] cmdArrayJpg = { "convert", "input", "-resize",
-				"750x500", "output" };
+		}		
 
 		final String[] cmdArrayExif = { "exiftool", "input", "-b",
 				"-previewimage" };
 
-		final String[] cmdArrayConvert = { "convert", "-", "-resize",
-				"750x500", "output" };
 
 		// set progressbar
 		mg.progressBar.setMaximum(mg.activeNumber);
@@ -416,122 +412,109 @@ public class DirectoryMethods {
 					// uses jtable, index can change
 
 					String fullname = (String) mg.fixTable.getValueAt(ii, 2); // uses
-																			// tablemodell
+																				// tablemodell
 
 					int dot = fullname.lastIndexOf(".");
 					String name = fullname.substring(0, dot);
 					String extension = fullname.substring(dot + 1);
 
-					String output = mg.activePathname + "/preview/" + name
-							+ ".jpg";
-					if (new File(output).isFile()) {
+					String pathToOutput = mg.activePathname + "/preview/"
+							+ name + ".jpg";
+					if (new File(pathToOutput).isFile()) {
 						// if target file exists, then jump to next loop
 						continue;
 					}
 
+					ImagePlus imp = null;
+					
 					if (extension.equalsIgnoreCase("jpg")) {
 						// set command for JPG
+
 						// set input
-						cmdArrayJpg[1] = mg.activePathname + "/" + fullname;
-						// set output
-						cmdArrayJpg[4] = output;
+						String pathToImage = mg.activePathname + "/" + fullname;
 
-						// System.out.println(Arrays.toString(cmdArrayJpg));
+						// create "imagePlus" with "imagej"
+						imp = IJ.openImage(pathToImage);
+						
+					} else {
+						// rawfile needs exiftool to extract preview
+						
+						
+						// set command for raw
+						// set input
+						cmdArrayExif[1] = mg.activePathname + "/" + fullname;
+						
 
-						// A Runtime object has methods for dealing with the OS
-						Runtime r = Runtime.getRuntime();
-						Process p = null; // Process tracks one external native
-											// process
-						BufferedReader is; // reader for output of process
-						String line;
 
-						// Our argv[0] contains the program to run; remaining
-						// elements
-						// of argv contain args for the target program. This is
-						// just
-						// what is needed for the String[] form of exec.
+                        // A Runtime object has methods for dealing with the OS
+                        Runtime r = Runtime.getRuntime();
+                        Process p = null; // Process tracks one external native
+                                                                // process
+                        BufferedReader is; // reader for output of process
+                        String line;
+
+                        // Our argv[0] contains the program to run; remaining
+                        // elements
+                        // of argv contain args for the target program. This is
+                        // just
+                        // what is needed for the String[] form of exec.
+                        try {
+                                p = r.exec(cmdArrayExif);
+                        } catch (IOException e1) {
+                                // TODO Auto-generated catch block
+                                e1.printStackTrace();
+                        }
+                        // getInputStream gives an Input stream connected to
+                        // the process p's standard output. Just use it to make
+                        // a BufferedReader to readLine() what the program
+                        // writes out.
+                        // is = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+                        // try {
+                        // while ((line = is.readLine()) != null)
+                        // System.out.println(line);
+                        // } catch (IOException e1) {
+                        // // TODO Auto-generated catch block
+                        // e1.printStackTrace();
+                        // }
+
+                        // read outputstream of process to bufferedimage
+                        BufferedImage bi = null;
 						try {
-							p = r.exec(cmdArrayJpg);
+							bi = ImageIO.read(p.getInputStream());
 						} catch (IOException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-						// getInputStream gives an Input stream connected to
-						// the process p's standard output. Just use it to make
-						// a BufferedReader to readLine() what the program
-						// writes out.
-						// is = new BufferedReader(new
-						// InputStreamReader(p.getInputStream()));
-
-						// try {
-						// while ((line = is.readLine()) != null)
-						// System.out.println(line);
-						// } catch (IOException e1) {
-						// // TODO Auto-generated catch block
-						// e1.printStackTrace();
-						// }
-
-						try {
-							p.waitFor(); // wait for process to complete
-						} catch (InterruptedException e) {
-							System.err.println(e); // "Can'tHappen"
-							return;
-						}
-						// System.err.println("Process done, exit status was " +
-						// p.exitValue());
-
-					} else {
-						// rawfile needs two exiftool and convert
-						// set command for raw
-						// set input
-						cmdArrayExif[1] = mg.activePathname + "/" + fullname;
-						// set output
-						cmdArrayConvert[4] = output;
-
-						// System.out.println(Arrays.toString(cmdArrayExif));
-						// System.out.println(Arrays.toString(cmdArrayConvert));
-
-						Runtime r = Runtime.getRuntime();
-						// Start two processes: exiftool .. | convert ...
-						Process p1 = null;
-						try {
-							p1 = r.exec(cmdArrayExif);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						// convert will wait for input on stdin
-						Process p2 = null;
-						try {
-							p2 = r.exec(cmdArrayConvert);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						// Create and start Piper
-						Piper pipe = new Piper(p1.getInputStream(),
-								p2.getOutputStream());
-						new Thread(pipe).start();
-						// Wait for second process to finish
-						try {
-							p2.waitFor();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						// Show output of second process
-						// java.io.BufferedReader r = new
-						// java.io.BufferedReader(new
-						// java.io.InputStreamReader(p2.getInputStream()));
-						// String s = null;
-						// while ((s = r.readLine()) != null) {
-						// System.out.println(s);
-						// }
+                         
+                        try {
+                                p.waitFor(); // wait for process to complete
+                        } catch (InterruptedException e) {
+                                System.err.println(e); // "Can'tHappen"
+                                return;
+                        }                        
+						
+                        //Constructs an ImagePlus from an awt Image or BufferedImage.
+                        imp = new ImagePlus("input", bi);
+                        
 					}
 
+					// resize the "imageplus" 
+					ImageProcessor ip = imp.getProcessor();
+					ip.setInterpolationMethod(ij.process.ImageProcessor.NONE);
+					
+					// Creates a new ImageProcessor containing a scaled copy
+					// of this image or ROI.
+					ImageProcessor ipsmall = ip.resize(750); // same aspect ratio
+					ImagePlus impOut = new ImagePlus("preview", ipsmall);
+					IJ.save(impOut, pathToOutput);
+
+					
+					
 					mg.progressBar.setValue(ii);
-					mg.progressBar.paint(mg.progressBar.getGraphics()); // not very
-																	// good
+					mg.progressBar.paint(mg.progressBar.getGraphics()); // not
+																		// very
+																		// good
 
 				} // end for-loop
 
@@ -546,14 +529,12 @@ public class DirectoryMethods {
 		// wait some time to extract first preview, otherwise the GUI is faster
 		// than the previews and shows "picture not found"
 		Thread wait = new Thread();
-		wait.sleep(500);
+		wait.sleep(2000);
 
 	} // end scanPreview
 
-	
-	//*******************************************************************************
+	// *******************************************************************************
 
-	
 	public void calcLuminance() throws Exception { // calculate luminance of
 													// preview images
 		// TODO define picture area for calculation
@@ -564,29 +545,21 @@ public class DirectoryMethods {
 		//
 		// panelarea is 600x400, imagepreview has 750x500
 		//
-		int width = (int) ((mg.drawingPanel.x2 - mg.drawingPanel.x1) * 1.25);
-		int height = (int) ((mg.drawingPanel.y2 - mg.drawingPanel.y1) * 1.25);
-		int offX = (int) (mg.drawingPanel.x1 * 1.25);
-		int offY = (int) (mg.drawingPanel.y1 * 1.25);
+		final int width = (int) ((mg.drawingPanel.x2 - mg.drawingPanel.x1) * 1.25);
+		final int height = (int) ((mg.drawingPanel.y2 - mg.drawingPanel.y1) * 1.25);
+		final int offX = (int) (mg.drawingPanel.x1 * 1.25);
+		final int offY = (int) (mg.drawingPanel.y1 * 1.25);
 
-		final String parameter = String.valueOf(width) + "x"
-				+ String.valueOf(height) + "+" + String.valueOf(offX) + "+"
-				+ String.valueOf(offY);
 
-		//System.out.println(parameter);
-
-		final String[] cmdArrayCrop = { "convert", "inputfile", "-crop",
-				"parameter", "-" };
-		cmdArrayCrop[3] = parameter;
-
-		final String[] cmdArrayLum = { "convert", "-", "-scale", "1x1!",
-				"-format", "%[fx:luminance]", "info:" };
-		// cmdArrayLum[3] = parameter;
+		// System.out.println(parameter);
 
 		Thread threadCalc = new Thread() { // define new Thread as inline class
 			public void run() {
 
-				Double luminance = 0.0;
+				// create array with new y-value
+				double[] x, y;
+				x = new double[mg.activeNumber];
+				y = new double[mg.activeNumber];
 
 				for (int i = 0; i < mg.activeNumber; i++) {
 
@@ -596,9 +569,9 @@ public class DirectoryMethods {
 							+ ".jpg";
 
 					// set preview image as input
-					cmdArrayCrop[1] = mg.activePathname + "/preview/" + name;
+					String pathToImage = mg.activePathname + "/preview/" + name;
 
-					// System.out.println(Arrays.toString(cmdArrayLum));
+					//System.out.println("i= " + i);
 
 					// wait if preview is not yet created
 					// TODO beware of endless loops
@@ -616,81 +589,38 @@ public class DirectoryMethods {
 					}
 					;
 
-					// System.out.println(Arrays.toString(cmdArrayCrop));
-					// System.out.println(Arrays.toString(cmdArrayLum));
+					// open and calculate with "imagej"
+					ImagePlus imp = IJ.openImage(pathToImage);
+					ImageProcessor ip = imp.getProcessor();
 
-					BufferedReader is; // reader for output of process
-					String line;
+					// range of interest
+					// x, y, width, height of the rectangle
+					Roi roi = new Roi(offX, offY, width, height);
+					ip.setRoi(roi);
 
-					Runtime r = Runtime.getRuntime();
-					// Start two processes: convert crop .. | convert fx ...
-					Process p1 = null;
-					try {
-						p1 = r.exec(cmdArrayCrop);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					// convert will wait for input on stdin
-					Process p2 = null;
-					try {
-						p2 = r.exec(cmdArrayLum);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					// Create and start Piper
-					Piper pipe = new Piper(p1.getInputStream(),
-							p2.getOutputStream());
-					new Thread(pipe).start();
-					// Wait for second process to finish
-					try {
-						p2.waitFor();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					ImageStatistics stat = ip.getStatistics();
+					//IJ.log("Mean: " + stat.mean); // number from 0(black) to
+													// 255(white)
 
-					// get output of second process
-					is = new BufferedReader(new InputStreamReader(
-							p2.getInputStream()));
+					// set value in table
+					// luminance mean is in column 9
+					mg.picModel.setValueAt((stat.mean / 255), i, 9);
 
-					try {
-						while ((line = is.readLine()) != null) {
-							// System.out.println(line);
+					mg.picTable.repaint(); // Repaint all the component
+											// (all Cells).
+					// better use
+					// ((AbstractTableModel)
+					// jTable.getModel()).fireTableCellUpdated(x, 0); //
+					// Repaint one cell.
 
-							luminance = Double.valueOf(line);
+					// fill array for curve
+					x[i] = i;
+					y[i] = (stat.mean / 255);
 
-							// set value in table
-							// luminance mean is in column 9
-							mg.picModel.setValueAt(luminance, i, 9);
-
-							mg.picTable.repaint(); // Repaint all the component
-												// (all Cells).
-							// better use
-							// ((AbstractTableModel)
-							// jTable.getModel()).fireTableCellUpdated(x, 0); //
-							// Repaint one cell.
-						}
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
 				} // end for-loop
 
-				// save luminance curve ----------------------------------------
-				// create array with new y-value
-				double[] x, y;
-				x = new double[mg.activeNumber];
-				y = new double[mg.activeNumber];
-
-				for (int i = 0; i < mg.activeNumber; i++) {
-					x[i] = i;
-					y[i] = (double) mg.picModel.getValueAt(i, 9);
-
-					// System.out.println (picTable.getValueAt(i, 3));
-					// System.out.println("x= " + x[i] + " y= " + y[i]);
-				}
+				// display luminance curve
+				// ----------------------------------------
 				mg.meanPanel.setCoord(x, y);
 
 				// double[] yy = { 2, 2, 3, 3, 5, 3, 3, 1 }; // testing
@@ -707,7 +637,8 @@ public class DirectoryMethods {
 					// y[i] = ma.calculateWeighted( i, 2 );
 					double lumi = (double) mg.picModel.getValueAt(i, 9);
 					double flicker = lumi - y[i];
-					mg.picModel.setValueAt(y[i], i, 10); // store smooth in table
+					mg.picModel.setValueAt(y[i], i, 10); // store smooth in
+															// table
 					mg.picModel.setValueAt(flicker, i, 11); // store flicker in
 															// table
 
