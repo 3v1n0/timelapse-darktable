@@ -14,14 +14,14 @@ import javax.swing.JPanel;
 public class PolygonPanel extends JPanel { 
 	private static final long serialVersionUID = 1L;
 
-	   private int x[], y[];
+	   private int xScreen[], yScreen[];
 	   private int n;
 	
 	
 	   public PolygonPanel() {   //constructor
 
-		   x = new int[0];
-		   y = new int[0];
+		   xScreen = new int[0];
+		   yScreen = new int[0];
 		   
 		   
 	   } // end const
@@ -31,7 +31,7 @@ public class PolygonPanel extends JPanel {
 		    super.paintComponent(g);
 
 			       
-		       g.drawPolyline( x, y, n );     
+		       g.drawPolyline( xScreen, yScreen, n );     
 		       
 		       // Swing graphics with more functions
 //		       
@@ -44,7 +44,7 @@ public class PolygonPanel extends JPanel {
 //		       
 //		       g2.scale( 0.2500, 0.2500 );
 //		       
-		       g2.drawPolyline( x, y, n );
+		       g2.drawPolyline( xScreen, yScreen, n );
 		       
 	  }
 
@@ -61,8 +61,8 @@ public class PolygonPanel extends JPanel {
 			   if (n <= 1) return;
 			   
 			   
-			   x = new int[n];
-			   y = new int[n];
+			   xScreen = new int[n];
+			   yScreen = new int[n];
 			   
 			   // change the scaling of the Values to fit the panel
 			   // we need global variables for dimensions
@@ -74,8 +74,8 @@ public class PolygonPanel extends JPanel {
 			   
 			   for (int i = 0; i < n; i++) {				      
 				   
-			       x[i] = (int) (xValues[i] * factorX);
-			       y[i] = (int) (400-400 * yValues[i]);
+			       xScreen[i] = (int) (xValues[i] * factorX);
+			       yScreen[i] = (int) (400-400 * yValues[i]);
 			       
 			       //y[i] = (int) (200-200 * yValues[i]);
 			   
@@ -88,7 +88,16 @@ public class PolygonPanel extends JPanel {
 		}
 
 	  
-	  
+		public void clear() {
+
+			this.n = 0;
+
+			   this.xScreen = new int[0];
+			   this.yScreen = new int[0];
+
+			return;
+
+		}
 	  
 	  
 	  

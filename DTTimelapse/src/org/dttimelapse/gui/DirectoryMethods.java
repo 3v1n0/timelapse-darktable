@@ -26,9 +26,13 @@ import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -37,6 +41,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JViewport;
@@ -44,6 +49,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.name.Rename;
 
 import org.dttimelapse.math.MovingAverage;
 
@@ -80,9 +88,14 @@ public class DirectoryMethods {
 		mg.drawingPanel.y1 = 0;
 		mg.drawingPanel.x2 = 600;
 		mg.drawingPanel.y2 = 400;
+		
+		// clear luminance
+		mg.meanPanel.clear();
+		mg.meanOptPanel.clear();
 
 		mg.cbClipping.setSelected(false);
-		mg.cbLumi.setSelected(false);
+		mg.cbLumi.setSelected(false);		
+		mg.cbLumi.setEnabled(false);
 
 		mg.picModel = new PictureModel(); // empty modell
 
@@ -161,36 +174,25 @@ public class DirectoryMethods {
 			mg.tablePane.setRowHeaderView(viewport);
 
 			// Set appropriate column widths of picTable
-			for (int i = 0; i < widths.length; i++) {
+			for (int i = 0; i < mg.picModel.widths.length; i++) {
 				col = tcm.getColumn(i);
-				col.setMinWidth(widths[i]);
-				col.setPreferredWidth(widths[i]);
+				col.setMinWidth(mg.picModel.widths[i]);
+				col.setPreferredWidth(mg.picModel.widths[i]);
 			}
 
-			// picTable.getColumn( "Index" ).setPreferredWidth( 40 );
-			// picTable.getColumn( "Key" ).setPreferredWidth( 15 );
-			// picTable.getColumn( "Filename" ).setPreferredWidth( 200 );
-			// picTable.getColumn( "Aperture" ).setPreferredWidth( 60 );
-			// picTable.getColumn( "ExposureTime" ).setPreferredWidth( 60 );
-			// picTable.getColumn( "ISO" ).setPreferredWidth( 40 );
-			// picTable.getColumn( "Width" ).setPreferredWidth( 50 );
-			// picTable.getColumn( "Height" ).setPreferredWidth( 50 );
-			// picTable.getColumn( "DateTaken" ).setPreferredWidth( 150 );
-			// picTable.getColumn( "Mean" ).setPreferredWidth( 50 );
-
 			try {
-				scanPreview(); // extract previews
+				extractPreview(); // extract previews
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
-			try {
-				calcLuminance(); // calculate luminance + smooth
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				calcLuminance(); // calculate luminance + smooth
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 
 			// initial settings
 			mg.meanPanel.setVisible(false);
@@ -205,21 +207,21 @@ public class DirectoryMethods {
 			mg.activeIndex = 0;
 			mg.picSlider.setValue(mg.activeIndex); // picslider refresh
 			mg.picSlider.setMaximum(mg.activeNumber - 1); // picSlider refresh
+			mg.progressBar.setMaximum(mg.activeNumber);
 
 		} else {
 
 			// no images found
 			mg.picSlider.setMaximum(0);
+			mg.progressBar.setMaximum(0);
 
 			mg.picturePanel.loadLogo();
 			mg.picturePanel.repaint();
+			
 		}
 
 	} // end of newDirectory
 
-	// Column widths
-	protected int[] widths = { 60, 60, 60, 60, 60, 150, 60, 60, 60, 60, 60, 60,
-			60, 60, 60, 60, 60, 60, 60, 60 };
 
 	// *******************************************************************************
 
@@ -228,6 +230,7 @@ public class DirectoryMethods {
 		// sort all pictures by name
 
 		mg.progressBar.setIndeterminate(true);
+		mg.progressBar.setString("Scanning directory");
 		mg.progressBar.paint(mg.progressBar.getGraphics()); // not very good
 
 		// extract info of all files in directory
@@ -351,6 +354,7 @@ public class DirectoryMethods {
 		process.waitFor();
 
 		mg.progressBar.setIndeterminate(false);
+		mg.progressBar.setString("");
 
 		return i; // activeNumber
 	} // end of exiftool
@@ -382,7 +386,7 @@ public class DirectoryMethods {
 
 	// *******************************************************************************
 
-	public void scanPreview() throws Exception, IOException,
+	public void extractPreview() throws Exception, IOException,
 			InterruptedException { // create previews
 
 		File dir = new File(mg.activePathname + "/preview");
@@ -397,8 +401,12 @@ public class DirectoryMethods {
 
 
 		// set progressbar
-		mg.progressBar.setMaximum(mg.activeNumber);
-		mg.progressBar.setString("Extract previews");
+		mg.progressBar.setString("Extracting previews");
+		
+		
+		
+
+		
 
 		// define new Thread as inline class
 		Thread threadConvert = new Thread() {
@@ -425,6 +433,9 @@ public class DirectoryMethods {
 						continue;
 					}
 
+					
+					
+					// converting with ImageJ
 					ImagePlus imp = null;
 					
 					if (extension.equalsIgnoreCase("jpg")) {
@@ -433,8 +444,90 @@ public class DirectoryMethods {
 						// set input
 						String pathToImage = mg.activePathname + "/" + fullname;
 
-						// create "imagePlus" with "imagej"
-						imp = IJ.openImage(pathToImage);
+						
+//						// converting with ImageJ, very slow !!
+//						// create "imagePlus" with "imagej"
+//						imp = IJ.openImage(pathToImage);
+//						// resize and save the "imageplus" 
+//    					ImageProcessor ip = imp.getProcessor();
+//    					ip.setInterpolationMethod(ij.process.ImageProcessor.NONE);					
+//    					// Creates a new ImageProcessor containing a scaled copy
+//    					// of this image or ROI.
+//    					ImageProcessor ipsmall = ip.resize(750); // same aspect ratio
+//    					ImagePlus impOut = new ImagePlus("preview", ipsmall);
+//    					IJ.save(impOut, pathToOutput);
+
+						
+						
+						
+						
+	
+						
+						
+						
+//						//test 1      ALL BLACK!!!
+						//						
+//						BufferedImage sourceImage = null;
+//						try {
+//							sourceImage = ImageIO.read(new File(pathToImage));
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//						Image thumbnail = sourceImage.getScaledInstance(750, 500, Image.SCALE_SMOOTH);
+//						BufferedImage bufferedThumbnail = new BufferedImage(thumbnail.getWidth(null),
+//						                                                    thumbnail.getHeight(null),
+//						                                                    BufferedImage.TYPE_INT_RGB);
+//						//bufferedThumbnail.getGraphics().drawImage(thumbnail, 0, 0, null);
+//						try {
+//							ImageIO.write(bufferedThumbnail, "jpeg", new File(pathToOutput));
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+
+
+						
+//						// test 2   ALL BLACK!!!
+//			            Image img=null;
+//						try {
+//							img = new ImageIcon(ImageIO.read(new File(pathToImage))).getImage();
+//					         System.out.println(img.getWidth(null));
+//					         System.out.println(img.getHeight(null));
+//					 
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//							}
+//	 	 
+//			            Image scaledImage = img.getScaledInstance(750, 500,Image.SCALE_SMOOTH);
+//	 
+//			            BufferedImage outImg = new BufferedImage(750, 500, BufferedImage.TYPE_INT_RGB);
+//	 
+//			            try {
+//							ImageIO.write(outImg, "jpeg", new File(pathToOutput));
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+
+						
+						// test3 thumbnailator	- average speed	
+						try {
+							Thumbnails.of(new File(pathToImage))
+							.size(750, 500)
+							.outputFormat("jpg")
+							.toFile(new File(pathToOutput));
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+						
+						
+						
+						
+						
 						
 					} else {
 						// rawfile needs exiftool to extract preview
@@ -481,7 +574,19 @@ public class DirectoryMethods {
                         // read outputstream of process to bufferedimage
                         BufferedImage bi = null;
 						try {
-							bi = ImageIO.read(p.getInputStream());
+							//bi = ImageIO.read(p.getInputStream());
+							
+							
+							// thumbnailator
+							Thumbnails.of( p.getInputStream() )
+							.size(750, 500)
+							.outputFormat("jpg")
+							.toFile(new File(pathToOutput));
+
+							
+							
+							
+							
 						} catch (IOException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -493,33 +598,34 @@ public class DirectoryMethods {
                                 System.err.println(e); // "Can'tHappen"
                                 return;
                         }                        
-						
-                        //Constructs an ImagePlus from an awt Image or BufferedImage.
-                        imp = new ImagePlus("input", bi);
+                        
+//                        //Constructs an ImagePlus from an awt Image or BufferedImage.
+//                        imp = new ImagePlus("input", bi);
+//                        
+//       					// resize and save the "imageplus" 
+//    					ImageProcessor ip = imp.getProcessor();
+//    					ip.setInterpolationMethod(ij.process.ImageProcessor.NONE);					
+//    					// Creates a new ImageProcessor containing a scaled copy
+//    					// of this image or ROI.
+//    					ImageProcessor ipsmall = ip.resize(750); // same aspect ratio
+//    					ImagePlus impOut = new ImagePlus("preview", ipsmall);
+//    					IJ.save(impOut, pathToOutput);
+
                         
 					}
 
-					// resize the "imageplus" 
-					ImageProcessor ip = imp.getProcessor();
-					ip.setInterpolationMethod(ij.process.ImageProcessor.NONE);
 					
-					// Creates a new ImageProcessor containing a scaled copy
-					// of this image or ROI.
-					ImageProcessor ipsmall = ip.resize(750); // same aspect ratio
-					ImagePlus impOut = new ImagePlus("preview", ipsmall);
-					IJ.save(impOut, pathToOutput);
+
+					
 
 					
 					
 					mg.progressBar.setValue(ii);
-					mg.progressBar.paint(mg.progressBar.getGraphics()); // not
-																		// very
-																		// good
 
 				} // end for-loop
 
 				// all previews created - reset progressbar
-				mg.progressBar.setMaximum(0);
+				mg.progressBar.setValue(0);
 				mg.progressBar.setString("");
 
 			} // end of run()
@@ -531,7 +637,7 @@ public class DirectoryMethods {
 		Thread wait = new Thread();
 		wait.sleep(2000);
 
-	} // end scanPreview
+	} // end extractPreview
 
 	// *******************************************************************************
 
@@ -543,13 +649,26 @@ public class DirectoryMethods {
 
 		// -region 600x400+10+20 = width x height + offsetx + offsety
 		//
-		// panelarea is 600x400, imagepreview has 750x500
+		// panelarea is 600x400, imagepreview has 750x500		
 		//
+		
+		
+		if (mg.progressBar.getString() == "") {			
+			// set only if progressbar is not used for previews
+			mg.progressBar.setString("Calculating luminance");
+		}
+
+		
+		
+		
 		final int width = (int) ((mg.drawingPanel.x2 - mg.drawingPanel.x1) * 1.25);
 		final int height = (int) ((mg.drawingPanel.y2 - mg.drawingPanel.y1) * 1.25);
 		final int offX = (int) (mg.drawingPanel.x1 * 1.25);
 		final int offY = (int) (mg.drawingPanel.y1 * 1.25);
 
+		final String parameter = String.valueOf(width) + "x"
+				+ String.valueOf(height) + "+" + String.valueOf(offX) + "+"
+				+ String.valueOf(offY);
 
 		// System.out.println(parameter);
 
@@ -616,6 +735,13 @@ public class DirectoryMethods {
 					// fill array for curve
 					x[i] = i;
 					y[i] = (stat.mean / 255);
+					
+					if (mg.progressBar.getString() == "Calculating luminance") {			
+						// set only if progressbar is used for luminance
+						mg.progressBar.setValue(i);
+					}
+					
+
 
 				} // end for-loop
 
@@ -649,8 +775,15 @@ public class DirectoryMethods {
 				mg.meanOptPanel.setCoord(x, y);
 
 				mg.layeredPane.repaint(); // after recalculating
+				
+				
+				mg.progressBar.setValue(0);
+				mg.progressBar.setString(""); 
+
 
 			} // end of run()
+			
+			
 
 		};
 		threadCalc.start();

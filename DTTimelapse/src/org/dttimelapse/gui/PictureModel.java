@@ -42,32 +42,38 @@ public class PictureModel extends AbstractTableModel {
 	String[] columnNames = {
 			"Index", // 0
 			"Key", // 1
-			"Filename",
-			"Aperture",
-			"ExposureTime",
-			"ISO",
-			"Width",
-			"Height",
-			"DateTaken", 	// 8
-			"Mean", 		// 9
-			"Smooth", 		// 10
-			"Flicker", 		// 11
-			"D-Exposure", 	// 12
-			"Black", 		// 13
-			"Exposure", 	// 14
-			"Clip x", 		// 15
-			"Clip y", 		// 16
-			"Clip w", 		// 17
-			"Clip h", 		// 18
-			"Angle", 		// 19
-			"WB temp", 		// 20
-			"WB tint", 		// 21
-			"Vibrance", 	// 22
+			"Filename", // 2
+			"Aperture", // 3
+			"ExposureTime", // 4
+			"ISO",  // 5
+			"Width", // 6
+			"Height", //7
+			"DateTaken", // 8
+			"Mean", // 9
+			"Smooth", // 10
+			"Flicker", // 11
+			"D-Exposure", // 12
+			"Black", // 13
+			"Exposure", // 14
+			"Clip x", // 15
+			"Clip y", // 16
+			"Clip w", // 17
+			"Clip h", // 18
+			"Angle", // 19
+			"WB temp", // 20
+			"WB tint", // 21
+			"Vibrance", // 22
 	};
 
 	// public final Object[] longValues = {"", new Integer(20), new Float(20),
 	// new Float(20), Boolean.TRUE};
 
+	// Column widths of picTable, starting at "Aperture"
+	protected int[] widths = { 60, 60, 60, 60, 60, 150, 60, 60, 60, 60, 60, 60,
+			60, 60, 60, 60, 60, 60, 60, 60 };
+
+	
+	
 	// methods
 
 	// Number Columns
@@ -86,26 +92,26 @@ public class PictureModel extends AbstractTableModel {
 	}
 
 	public Object getValueAt(int row, int col) {
-		
-		if (data.size() == 0) return null; 
-		
+
+		if (data.size() == 0) {
+			return null;
+		}
 		return ((Vector) data.get(row)).get(col);
 	}
 
 	public Class getColumnClass(int col) {
-		
-		if (data.size() == 0) return String.class;
-				
-		return getValueAt(0, col).getClass();		
+
+		if (data.size() == 0) {
+			return String.class;
+		}
+		return getValueAt(0, col).getClass();
 	}
 
 	public boolean isCellEditable(int row, int col) {
 		if (col == 1) { // isKeyframe
 			return false;
 		} else {
-			return true; // test
-			//return false; // no editing
-			
+			return true; // no editing
 		}
 	}
 
@@ -126,22 +132,21 @@ public class PictureModel extends AbstractTableModel {
 	public void addData(Vector vec) { // add data vector
 
 		// if the vector is to short fill zero
-		// default table modell uses 'null' to fill
+		// default table modell uses zero to fill
 		while (vec.size() < columnNames.length) {
 			vec.add(0.0);
 		}
-		
-        // remove clipping elements (format double)
-        vec.remove(15);
-        vec.remove(15);
-        vec.remove(15);
-        vec.remove(15);
-        // add integer elements instead
-        vec.add(15, 0);
-        vec.add(15, 0);
-        vec.add(15, 0);
-        vec.add(15, 0);
-		
+
+		// remove clipping elements (format double)
+		vec.remove(15);
+		vec.remove(15);
+		vec.remove(15);
+		vec.remove(15);
+		// add integer elements instead
+		vec.add(15, 0);
+		vec.add(15, 0);
+		vec.add(15, 0);
+		vec.add(15, 0);
 
 		int index = data.size(); // index of new row
 
@@ -167,9 +172,8 @@ public class PictureModel extends AbstractTableModel {
 }
 
 /**
- *  EXAMPLE (not used)
- * Applied background and foreground color to single column of a JTable in order
- * to distinguish it apart from other columns.
+ * EXAMPLE (not used) Applied background and foreground color to single column
+ * of a JTable in order to distinguish it apart from other columns.
  */
 class ColorColumnRenderer extends DefaultTableCellRenderer {
 	private static final long serialVersionUID = 1L;
@@ -194,112 +198,107 @@ class ColorColumnRenderer extends DefaultTableCellRenderer {
 	}
 }
 
-
-
 class SmoothColumnRenderer extends DefaultTableCellRenderer {
 
-	
 	private static final long serialVersionUID = 1L;
-	
-	private static final DecimalFormat formatter = new DecimalFormat( "0.000" );
+
+	private static final DecimalFormat formatter = new DecimalFormat("0.000");
 
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
-		
-		Component cellComponent = super.getTableCellRendererComponent(table, value,
-				isSelected, hasFocus, row, column);
-		
+
+		Component cellComponent = super.getTableCellRendererComponent(table,
+				value, isSelected, hasFocus, row, column);
+
 		cellComponent.setBackground(new Color(150, 150, 150));
 		cellComponent.setForeground(Color.BLACK);
-		
+
 		if (value instanceof Number) {
 			JLabel label = (JLabel) cellComponent;
 			label.setHorizontalAlignment(JLabel.RIGHT);
 			Number num = (Number) value;
 			String text = formatter.format(num);
 			label.setText(text);
-		}        
-        
-        //value = formatter.format( (Number) value );
-        
+		}
+
+		// value = formatter.format( (Number) value );
+
 		return cellComponent;
 	}
 }
-
 
 class MeanColorColumnRenderer extends DefaultTableCellRenderer {
 
 	// show different gray background according to luminance
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final DecimalFormat formatter = new DecimalFormat( "0.000" );
+
+	private static final DecimalFormat formatter = new DecimalFormat("0.000");
 
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
-		
-		Component cellComponent = super.getTableCellRendererComponent(table, value,
-				isSelected, hasFocus, row, column);
-		
-        if( (double) table.getValueAt(row, column) < 0.40 ) {
-            cellComponent.setBackground(Color.DARK_GRAY);
-        } else if( (double) table.getValueAt(row, column) < 0.50 ){
-            cellComponent.setBackground(Color.GRAY);
-        } else if( (double) table.getValueAt(row, column) < 0.60 ){
-            cellComponent.setBackground(Color.LIGHT_GRAY);
-        } else {
-            cellComponent.setBackground(Color.WHITE);
-        }
-        
+
+		Component cellComponent = super.getTableCellRendererComponent(table,
+				value, isSelected, hasFocus, row, column);
+
+		if ((double) table.getValueAt(row, column) < 0.40) {
+			cellComponent.setBackground(Color.DARK_GRAY);
+		} else if ((double) table.getValueAt(row, column) < 0.50) {
+			cellComponent.setBackground(Color.GRAY);
+		} else if ((double) table.getValueAt(row, column) < 0.60) {
+			cellComponent.setBackground(Color.LIGHT_GRAY);
+		} else {
+			cellComponent.setBackground(Color.WHITE);
+		}
+
 		if (value instanceof Number) {
 			JLabel label = (JLabel) cellComponent;
 			label.setHorizontalAlignment(JLabel.RIGHT);
 			Number num = (Number) value;
 			String text = formatter.format(num);
 			label.setText(text);
-		}        
-        
-        //value = formatter.format( (Number) value );
-        
+		}
+
+		// value = formatter.format( (Number) value );
+
 		return cellComponent;
 	}
 }
-
 
 class FlickerColorColumnRenderer extends DefaultTableCellRenderer {
 	// show different red background according to flicker value
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final DecimalFormat formatter = new DecimalFormat( "0.000" );
-		
-	Color mistyrose = new Color(255,228,225);
-	Color pink = new Color(255,192,203);
-	Color lightpink = new Color(255,182,193);
-	Color tomato = new Color(	255,99,71);
-	Color orangered = new Color(255,69,0);
-	Color red = new Color(255,0,0);
+
+	private static final DecimalFormat formatter = new DecimalFormat("0.000");
+
+	Color mistyrose = new Color(255, 228, 225);
+	Color pink = new Color(255, 192, 203);
+	Color lightpink = new Color(255, 182, 193);
+	Color tomato = new Color(255, 99, 71);
+	Color orangered = new Color(255, 69, 0);
+	Color red = new Color(255, 0, 0);
 
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
-		Component cellComponent = super.getTableCellRendererComponent(table, value,
-				isSelected, hasFocus, row, column);
-		
-        if( (double) table.getValueAt(row, column) < 0.00 ) {
-	            cellComponent.setBackground( Color.LIGHT_GRAY );
-	    } else if( (double) table.getValueAt(row, column) < 0.01 ) {
-            cellComponent.setBackground( mistyrose );
-        } else if( (double) table.getValueAt(row, column) < 0.02 ){
-            cellComponent.setBackground( pink );
-        } else if( (double) table.getValueAt(row, column) < 0.03 ){
-            cellComponent.setBackground( lightpink );
-        } else if( (double) table.getValueAt(row, column) < 0.04 ){
-            cellComponent.setBackground(tomato );
-        } else if( (double) table.getValueAt(row, column) < 0.05 ){
-            cellComponent.setBackground( orangered );
-        } else {
-            cellComponent.setBackground( red );
-        }
+		Component cellComponent = super.getTableCellRendererComponent(table,
+				value, isSelected, hasFocus, row, column);
+
+		if ((double) table.getValueAt(row, column) < 0.00) {
+			cellComponent.setBackground(Color.LIGHT_GRAY);
+		} else if ((double) table.getValueAt(row, column) < 0.01) {
+			cellComponent.setBackground(mistyrose);
+		} else if ((double) table.getValueAt(row, column) < 0.02) {
+			cellComponent.setBackground(pink);
+		} else if ((double) table.getValueAt(row, column) < 0.03) {
+			cellComponent.setBackground(lightpink);
+		} else if ((double) table.getValueAt(row, column) < 0.04) {
+			cellComponent.setBackground(tomato);
+		} else if ((double) table.getValueAt(row, column) < 0.05) {
+			cellComponent.setBackground(orangered);
+		} else {
+			cellComponent.setBackground(red);
+		}
 
 		if (value instanceof Number) {
 			JLabel label = (JLabel) cellComponent;
@@ -307,11 +306,9 @@ class FlickerColorColumnRenderer extends DefaultTableCellRenderer {
 			Number num = (Number) value;
 			String text = formatter.format(num);
 			label.setText(text);
-		}        
-        
+		}
+
 		return cellComponent;
 	}
-	
 
-	
 }
