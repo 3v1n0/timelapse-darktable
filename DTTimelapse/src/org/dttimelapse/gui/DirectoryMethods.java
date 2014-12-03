@@ -25,8 +25,11 @@ import ij.gui.Roi;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 
+import java.awt.AlphaComposite;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.BufferedReader;
@@ -88,10 +91,6 @@ public class DirectoryMethods {
 		mg.drawingPanel.y1 = 0;
 		mg.drawingPanel.x2 = 600;
 		mg.drawingPanel.y2 = 400;
-		
-		// clear luminance
-		mg.meanPanel.clear();
-		mg.meanOptPanel.clear();
 
 		mg.cbClipping.setSelected(false);
 		mg.cbLumi.setSelected(false);		
@@ -434,97 +433,60 @@ public class DirectoryMethods {
 					}
 
 					
-					
-					// converting with ImageJ
-					ImagePlus imp = null;
-					
 					if (extension.equalsIgnoreCase("jpg")) {
 						// set command for JPG
 
 						// set input
 						String pathToImage = mg.activePathname + "/" + fullname;
+						
+						
+						if ("slow".equals(mg.prefPreview))  {							
+							// preview slow and fine
+						
+							// test3 thumbnailator	- average speed	good quality
+							try {
+								Thumbnails.of(new File(pathToImage))
+								.size(750, 500)
+								.outputFormat("jpg")
+								.toFile(new File(pathToOutput));
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+//							// converting with ImageJ, very slow + quality??
+//							ImagePlus imp = null;
+//							imp = IJ.openImage(pathToImage);
+//							// resize and save the "imageplus" 
+//	    					ImageProcessor ip = imp.getProcessor();
+//	    					ip.setInterpolationMethod(ij.process.ImageProcessor.BICUBIC);					
+//	    					// Creates a new ImageProcessor containing a scaled copy
+//	    					// of this image or ROI.
+//	    					ImageProcessor ipsmall = ip.resize(750); // same aspect ratio
+//	    					ImagePlus impOut = new ImagePlus("preview", ipsmall);
+//	    					IJ.save(impOut, pathToOutput);
+//							
+//						    System.out.println("imagej");
+							
 
+						} else {
+							// preview fast and lousy						
 						
-//						// converting with ImageJ, very slow !!
-//						// create "imagePlus" with "imagej"
-//						imp = IJ.openImage(pathToImage);
-//						// resize and save the "imageplus" 
-//    					ImageProcessor ip = imp.getProcessor();
-//    					ip.setInterpolationMethod(ij.process.ImageProcessor.NONE);					
-//    					// Creates a new ImageProcessor containing a scaled copy
-//    					// of this image or ROI.
-//    					ImageProcessor ipsmall = ip.resize(750); // same aspect ratio
-//    					ImagePlus impOut = new ImagePlus("preview", ipsmall);
-//    					IJ.save(impOut, pathToOutput);
-
-						
-						
-						
-						
-	
-						
-						
-						
-//						//test 1      ALL BLACK!!!
-						//						
-//						BufferedImage sourceImage = null;
-//						try {
-//							sourceImage = ImageIO.read(new File(pathToImage));
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-//						Image thumbnail = sourceImage.getScaledInstance(750, 500, Image.SCALE_SMOOTH);
-//						BufferedImage bufferedThumbnail = new BufferedImage(thumbnail.getWidth(null),
-//						                                                    thumbnail.getHeight(null),
-//						                                                    BufferedImage.TYPE_INT_RGB);
-//						//bufferedThumbnail.getGraphics().drawImage(thumbnail, 0, 0, null);
-//						try {
-//							ImageIO.write(bufferedThumbnail, "jpeg", new File(pathToOutput));
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-
-
-						
-//						// test 2   ALL BLACK!!!
-//			            Image img=null;
-//						try {
-//							img = new ImageIcon(ImageIO.read(new File(pathToImage))).getImage();
-//					         System.out.println(img.getWidth(null));
-//					         System.out.println(img.getHeight(null));
-//					 
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//							}
-//	 	 
-//			            Image scaledImage = img.getScaledInstance(750, 500,Image.SCALE_SMOOTH);
-//	 
-//			            BufferedImage outImg = new BufferedImage(750, 500, BufferedImage.TYPE_INT_RGB);
-//	 
-//			            try {
-//							ImageIO.write(outImg, "jpeg", new File(pathToOutput));
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-
-						
-						// test3 thumbnailator	- average speed	
-						try {
-							Thumbnails.of(new File(pathToImage))
-							.size(750, 500)
-							.outputFormat("jpg")
-							.toFile(new File(pathToOutput));
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							// test4 graphics2D     poor quality  (LRTimelapse?)
+							Image img = null;
+							BufferedImage tempJPG = null;
+							//File newFileJPG = null;
+			                try {
+								img = ImageIO.read(new File(pathToImage));
+								double aspectRatio = (double) img.getWidth(null)/(double) img.getHeight(null);							
+								tempJPG = resizeImage(img, 750, (int) (750/aspectRatio));		                
+								//newFileJPG = new File(pathToOutput);
+								ImageIO.write(tempJPG, "jpg", new File(pathToOutput));
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						}
-
-						
-						
 						
 						
 						
@@ -571,53 +533,71 @@ public class DirectoryMethods {
                         // e1.printStackTrace();
                         // }
 
-                        // read outputstream of process to bufferedimage
-                        BufferedImage bi = null;
-						try {
-							//bi = ImageIO.read(p.getInputStream());
-							
-							
-							// thumbnailator
-							Thumbnails.of( p.getInputStream() )
-							.size(750, 500)
-							.outputFormat("jpg")
-							.toFile(new File(pathToOutput));
-
-							
-							
-							
-							
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
                          
-                        try {
-                                p.waitFor(); // wait for process to complete
-                        } catch (InterruptedException e) {
-                                System.err.println(e); // "Can'tHappen"
-                                return;
-                        }                        
-                        
-//                        //Constructs an ImagePlus from an awt Image or BufferedImage.
-//                        imp = new ImagePlus("input", bi);
-//                        
-//       					// resize and save the "imageplus" 
-//    					ImageProcessor ip = imp.getProcessor();
-//    					ip.setInterpolationMethod(ij.process.ImageProcessor.NONE);					
-//    					// Creates a new ImageProcessor containing a scaled copy
-//    					// of this image or ROI.
-//    					ImageProcessor ipsmall = ip.resize(750); // same aspect ratio
-//    					ImagePlus impOut = new ImagePlus("preview", ipsmall);
-//    					IJ.save(impOut, pathToOutput);
+						
+						if ("slow".equals(mg.prefPreview))  {	
+							
+							// preview slow and fine
+
+							try {							
+								// thumbnailator
+								Thumbnails.of( p.getInputStream() )
+								.size(750, 500)
+								.outputFormat("jpg")
+								.toFile(new File(pathToOutput));
+								
+							} catch (IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+	                         
+	                        try {
+	                                p.waitFor(); // wait for process to complete
+	                        } catch (InterruptedException e) {
+	                                System.err.println(e); // "Can'tHappen"
+	                                return;
+	                        }  
+	                        
+	                        // alternative
+//			                   // read outputstream of process to bufferedimage
+//		                       BufferedImage bi = null;
+//		                       // alternative:
+//		                        //Constructs an ImagePlus from an awt Image or BufferedImage.
+//		                       ImagePlus imp = new ImagePlus("input", bi);
+//		                        
+//		       					// resize and save the "imageplus" 
+//		    					ImageProcessor ip = imp.getProcessor();
+//		    					ip.setInterpolationMethod(ij.process.ImageProcessor.NONE);					
+//		    					// Creates a new ImageProcessor containing a scaled copy
+//		    					// of this image or ROI.
+//		    					ImageProcessor ipsmall = ip.resize(750); // same aspect ratio
+//		    					ImagePlus impOut = new ImagePlus("preview", ipsmall);
+//		    					IJ.save(impOut, pathToOutput);                        
 
                         
+						} else {							
+							
+							// preview fast and lousy						
+							
+							// test4 graphics2D     poor quality  (LRTimelapse?)
+							Image img = null;
+							BufferedImage tempJPG = null;
+							//File newFileJPG = null;
+			                try {
+								img = ImageIO.read(p.getInputStream());
+								double aspectRatio = (double) img.getWidth(null)/(double) img.getHeight(null);							
+								tempJPG = resizeImage(img, 750, (int) (750/aspectRatio));		                
+								//newFileJPG = new File(pathToOutput);
+								ImageIO.write(tempJPG, "jpg", new File(pathToOutput));
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+							
+						}
+
 					}
-
-					
-
-					
-
 					
 					
 					mg.progressBar.setValue(ii);
@@ -639,6 +619,23 @@ public class DirectoryMethods {
 
 	} // end extractPreview
 
+	
+    public static BufferedImage resizeImage(final Image image, int width, int height) {
+        final BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        final Graphics2D graphics2D = bufferedImage.createGraphics();
+        graphics2D.setComposite(AlphaComposite.Src);
+        //below three lines are for RenderingHints for better image quality at cost of higher processing time
+        //graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BILINEAR); //good
+        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BICUBIC); //best
+        graphics2D.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics2D.drawImage(image, 0, 0, width, height, null);
+        graphics2D.dispose();
+        return bufferedImage;
+    }
+
+	
+	
 	// *******************************************************************************
 
 	public void calcLuminance() throws Exception { // calculate luminance of

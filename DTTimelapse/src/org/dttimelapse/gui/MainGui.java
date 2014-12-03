@@ -65,6 +65,14 @@ public class MainGui extends JComponent {
         public static Integer activeIndex;
         public static Integer activeNumber;
 
+       	// preference values of DTT - use these as global variables
+    	public static String prefLastDirectory, prefTreeDirectory, prefPreview;
+    	public static int prefVideoHeight, prefVideoWidth, prefVideoFramerate, prefVideoQuality;
+
+        
+        
+         // declarations
+         
         JLabel labelDirectory;
        
         JSlider picSlider, deflicSlider, sharpnessSlider, orderSlider;
@@ -145,7 +153,7 @@ public class MainGui extends JComponent {
                 activeIndex = 0;
 
                 // create Preference Object and load
-                dttPref = new DTTPreferences();
+                dttPref = new DTTPreferences(this);
                 dttPref.loadPreferences();
 
                 // create component for slideshow
@@ -190,7 +198,7 @@ public class MainGui extends JComponent {
                 JPanel treePanel = new JPanel();
 
                 try {
-                        final FileTree ft = new FileTree(dttPref.prefTreeDirectory);
+                        final FileTree ft = new FileTree(prefTreeDirectory);
 
                         ft.addTreeSelectionListener(new TreeSelectionListener() {
                                 public void valueChanged(TreeSelectionEvent evt) {
