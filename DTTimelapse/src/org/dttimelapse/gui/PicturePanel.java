@@ -66,26 +66,13 @@ public class PicturePanel extends JPanel {
 	 
 	 public void loadLogo(){
 		 // read logo image from resource
-	     try {
-	    	 //ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-	    	 //InputStream is = classLoader.getResourceAsStream("label_dttimelapse.jpg");
-	    	 
-	    	 InputStream is = getClass().getResourceAsStream("/icon/label_dttimelapse.png");
-	    		
-	    	//image = new ImageIcon(getClass().getClassLoader().getResource("/label_dttimelapse.png")).getImage();  
-	    	 
-	    	// JLabel label = new JLabel(new ImageIcon(getClass().getResource("icon/label_dttimelapse.png")));
-	    	 
-	    	 image = ImageIO.read(is);
-    	 
+		// read logo from resource
 
-	     }
-	     catch(IllegalArgumentException iae) {
-	          JOptionPane.showMessageDialog(this, "Grafiklogo nicht gefunden!\n"+iae.getMessage());
-	     }
-	     catch(IOException ioe) {
-	          JOptionPane.showMessageDialog(this, "Fehler beim Einlesen des Grafiklogo!\n"+ioe.getMessage());
-	     }
+		//InputStream is = getClass().getResourceAsStream("/icon/label_dttimelapse.png");
+
+		//image = ImageIO.read(is);
+
+		image = (new ImageIcon( getClass().getResource("/icon/dtt_logo_600.png"))).getImage();
 	 }
 
 

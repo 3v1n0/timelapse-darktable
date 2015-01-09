@@ -77,6 +77,7 @@ public class DTTPreferences implements PropertyChangeListener {
 		prevFrame.setSize(400, 400);
 		// prevFrame.setLocationByPlatform(true);
 		prevFrame.setLocationRelativeTo(null);
+		prevFrame.setIconImage( mg.icon16.getImage() );
 
 		// Create the labels.
 

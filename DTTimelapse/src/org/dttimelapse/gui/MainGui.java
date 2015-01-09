@@ -58,7 +58,7 @@ public class MainGui extends JComponent {
 
         private static final long serialVersionUID = 1L;
 
-        public static String version = "0.1beta";
+        public static String version = "0.4beta";
 
         // global variables
         public static String activePathname;
@@ -107,6 +107,8 @@ public class MainGui extends JComponent {
         JComboBox comboFilter;
 
         ListSelectionModel listSelectionModel;
+        
+        ImageIcon icon16, iconLogo;
 
         // specific classes of DTTimelapse GUI
         SlideShow slideShow;
@@ -143,11 +145,23 @@ public class MainGui extends JComponent {
                 UIManager.put("List.background", new Color(150, 150, 150));
                 UIManager.put("Table.background", new Color(150, 150, 150));
                 // UIManager.put("List.foreground", new Color( 255,255,255));
-                UIManager.put("Tree.background", new Color(150, 150, 150));
+                UIManager.put("Tree.background", new Color(150, 150, 150));  // no changes??
                 // UIManager.put("Tree.foreground", new Color( 255,255,255));
 
                 UIManager.put("nimbusLightBackground", new Color(150, 150, 150)); // jlist
+                
+                
+                
+                UIManager.put("background", new Color(150, 150, 150));
+                
+                UIManager.put("text", new Color(255, 255, 255)); // text white, instead of black
+                //UIManager.put("Menu.foreground", new Color(255, 255, 255)); // text white, instead of black
 
+                
+                // load icons
+                iconLogo = new ImageIcon( getClass().getResource("/icon/dtt_logo_40_alpha.png") );
+                icon16 = new ImageIcon( getClass().getResource("/icon/dtt_icon16.png") );
+                
                 // -------------------- Global settings ---------------------------------
                 activeNumber = 0;
                 activeIndex = 0;
@@ -162,6 +176,7 @@ public class MainGui extends JComponent {
                 // create frame with menubar
                 // herein we start preferences and choose dirs
                 FrameWithMenu f = new FrameWithMenu(this, dttPref);
+                f.setIconImage( icon16.getImage() );
 
                 labelDirectory = new JLabel("");
 
@@ -213,6 +228,9 @@ public class MainGui extends JComponent {
                         ft.setPreferredSize(null);
                         ft.setMinimumSize(new Dimension(450, 0));
 
+                        
+                        ft.setBackground(new Color(80, 80, 80));  // backgroundcolor
+                        
                         treePanel.setLayout(new GridLayout(0, 1)); // extends width of jtree
                         treePanel.add(new JScrollPane(ft));
 
@@ -606,10 +624,13 @@ public class MainGui extends JComponent {
 
                 progressPanel = new JPanel();
                 // progressPanel.setLayout(new BorderLayout());
-
-                JLabel labelSoftware = new JLabel("DTTimelapse");
-
-                progressPanel.add(labelSoftware);
+                
+                JLabel labelIcon = new JLabel();  
+                labelIcon.setIcon(iconLogo);
+                progressPanel.add(labelIcon);
+                
+                //JLabel labelSoftware = new JLabel("DTTimelapse");
+                //progressPanel.add(labelSoftware);
 
                 progressBar = new JProgressBar();
                 progressBar.setMaximum(0);

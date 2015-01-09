@@ -41,15 +41,15 @@ public class FrameWithMenu extends JFrame implements ActionListener{
 	private JMenuItem prevItem, prefItem, exitItem,
 	infoItem, licenseItem, aboutItem,  logItem;
 	
-	private MainGui gui;
+	private MainGui mg;
 	private DTTPreferences dttPref;
 	
-	public FrameWithMenu(MainGui guii, DTTPreferences dttprefi) {   // contructor
+	public FrameWithMenu(MainGui gui, DTTPreferences dttprefi) {   // constructor
 		
-			gui = guii;
+			mg = gui;
 			dttPref = dttprefi;
 			
-		    this.setTitle("DTTimelapse " + gui.version);
+		    this.setTitle("dtTimelapse " + mg.version);
 			
 		    JMenu fileMenu = new JMenu("File"); // Create File menu
 		    JMenu helpMenu = new JMenu("Help"); // Create Elements menu
@@ -120,6 +120,7 @@ public class FrameWithMenu extends JFrame implements ActionListener{
         	JFrame frame = new JFrame ("Info");
         	frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         	frame.setLocation(100, 100);
+        	frame.setIconImage( mg.icon16.getImage() );
         	
         	JTextArea textArea;
         	JScrollPane scrollPane;
@@ -151,6 +152,7 @@ public class FrameWithMenu extends JFrame implements ActionListener{
         	JFrame frame = new JFrame ("License");
         	frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         	frame.setLocation(100, 100);
+        	frame.setIconImage( mg.icon16.getImage() );
         	
         	JTextArea textArea;
         	JScrollPane scrollPane;
@@ -180,6 +182,7 @@ public class FrameWithMenu extends JFrame implements ActionListener{
         	JFrame frame = new JFrame ("About");
         	frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         	frame.setLocation(100, 100);
+        	frame.setIconImage( mg.icon16.getImage() );
         	
         	JTextArea textArea;
         	JScrollPane scrollPane;
